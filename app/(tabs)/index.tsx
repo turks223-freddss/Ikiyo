@@ -73,7 +73,10 @@ export default function Home() {
 
             {/* Options */}
             
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+              setSettingsVisible(false);
+              router.replace("/login"); // ✅ Replaces current screen with login screen
+            }}>
               <Text style={{ fontSize: 16, color: "red" }}>Logout</Text>
             </TouchableOpacity>
 
