@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet, TextInput } from "react-native";
+import { View, Text, Button, StyleSheet, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 
@@ -8,7 +8,44 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const handleSignup = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+    
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://192.168.1.8:8081/api/users/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Success", "Account created successfully!", [
+          { text: "OK", onPress: () => router.push("/login") },
+        ]);
+      } else {
+        Alert.alert("Signup Failed", data.error || "Something went wrong");
+      }
+    } catch (error) {
+      Alert.alert("Network Error", "Could not connect to the server");
+    } finally {
+      setLoading(false);
+    }
+
+
+
+
+  };
   return (
     <View style={styles.container}>
       {/* Title & Subtext */}
@@ -48,9 +85,9 @@ export default function SignupScreen() {
 
       {/* Buttons */}
       <View style={styles.buttonRow}>
-        <Button title="Sign Up" onPress={() => console.log("Signing Up...")} />
+        <Button title={loading ? "Signing Up..." : "Sign Up"} onPress={handleSignup} disabled={loading} />
         <View style={styles.space} />
-        <Button title="Login" onPress={() => router.back()} />
+        <Button title="Login" onPress={() => router.push("/login")} />
       </View>
     </View>
   );

@@ -3,7 +3,7 @@
     "name": "Ikiyo",
     "slug": "Ikiyo",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",

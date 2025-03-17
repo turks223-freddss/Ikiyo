@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet, TextInput } from "react-native";
+import { View, Text, Button, StyleSheet, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 
@@ -7,11 +7,31 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://192.168.1.8:8081/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Success", "Login successful");
+        router.replace("/"); // Navigate to home
+      } else {
+        Alert.alert("Error", data.error || "Invalid credentials");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Could not connect to server");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to iKiyo</Text>
-      
-      {/* Email Input */}
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -21,7 +41,6 @@ export default function LoginScreen() {
         autoCapitalize="none"
       />
 
-      {/* Password Input */}
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -30,9 +49,8 @@ export default function LoginScreen() {
         secureTextEntry
       />
 
-      {/* Buttons in a row */}
       <View style={styles.buttonRow}>
-        <Button title="Log In" onPress={() => router.replace("/")} />
+        <Button title="Log In" onPress={handleLogin} />
         <View style={styles.space} />
         <Button title="Sign Up" onPress={() => router.push("/signup")} />
       </View>
@@ -54,7 +72,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: "80%",
+    width: "35%",
     height: 40,
     borderColor: "#ccc",
     borderWidth: 1,
@@ -69,6 +87,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   space: {
-    width: 10, // Horizontal spacing between buttons
+    width: 25, // Horizontal spacing between buttons
   },
 });

@@ -48,7 +48,7 @@ export default function Home() {
 
         {/* User Info */}
         <View>
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>John HEEH Doe</Text>
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>John school Doe</Text>
           <Text style={{ fontSize: 14, color: "gray" }}>ID: 123456</Text>
         </View>
       </View>
@@ -222,7 +222,7 @@ export default function Home() {
   {/* User Info Section */}
   <View style={{ marginTop: 60 }}> {/* Space below back button */}
     <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
-      John Doe
+      John Doe hahahaha
     </Text>
     <Text style={{ color: "gray", fontSize: 14 }}>ID: 123456</Text>
   </View>
