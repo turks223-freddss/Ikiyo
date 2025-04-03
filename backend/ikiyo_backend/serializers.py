@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Item
 from django.contrib.auth import authenticate
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,6 +23,11 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid credentials")
 
         return user  # Return the user object if credentials are valid
+
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = '__all__'  # Include all fields from the Item model
     
     
     

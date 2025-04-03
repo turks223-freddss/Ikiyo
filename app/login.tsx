@@ -1,6 +1,7 @@
 import { View, Text, Button, StyleSheet, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -9,7 +10,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://192.168.1.8:8081/api/login/", {
+      const response = await fetch("http://192.168.1.5:8000/api/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -18,6 +19,7 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
+        await AsyncStorage.setItem("user", JSON.stringify(data.user)); // Save user data
         Alert.alert("Success", "Login successful");
         router.replace("/"); // Navigate to home
       } else {

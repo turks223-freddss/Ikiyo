@@ -1,73 +1,224 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity, Image,Alert } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const { width } = Dimensions.get("window");
 
-const items = [
-  { id: 1, name: "Sword", price: 200 },
-  { id: 2, name: "Shield", price: 300 },
-  { id: 3, name: "Potion", price: 150 },
-  { id: 4, name: "Helmet", price: 250 },
-  { id: 5, name: "Boots", price: 180 },
-  { id: 6, name: "Armor", price: 500 },
-  { id: 7, name: "Ring", price: 100 },
-  { id: 8, name: "Bow", price: 350 },
-  { id: 9, name: "haha", price: 39 },
-  { id: 10, name: "please work", price: 350 },
-  { id: 11, name: "sigi na", price: 350 },
-  { id: 12, name: "bahala ka", price: 350 },
-  { id: 13, name: "yowhelp", price: 350 },
-  { id: 14, name: "amazinbg", price: 350 },
-];
+interface Item {
+  item_id: number;
+  item_name: string;
+  image: string;
+  price: number;
+  category: string;
+  part: string | null;
+}
+
+interface UserData {
+  userID: number;
+  username: string;
+  email: string;
+  password: string;
+  gold: number;
+  ruby: number;
+  description: string | null;
+}
+
+
 
 const ShopScreen = () => {
   const router = useRouter();
-  
-  const [filteredItems, setFilteredItems] = useState(items);
 
-  const filterItems = (divisor:number) => {
-    if (divisor === 0) {
-      setFilteredItems(items);
-    } else {
-      setFilteredItems(items.filter((item) => item.id % divisor === 0));
+  const [items, setItems] = useState<Item[]>([]); // Store fetched items
+  const [filteredItems, setFilteredItems] = useState(items);
+  const [user, setUser] = useState<{
+    userID: number;
+  } | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [ownedItems, setOwnedItems] = useState<number[]>([]);
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await AsyncStorage.getItem("user");
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          if (typeof parsedUser === "number") {
+            setUser({ userID: parsedUser }); // Convert number to object
+          } else {
+            setUser(parsedUser);
+          }
+        }
+      } catch (error) {
+        console.error("Error retrieving user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (!user || !user.userID) return; // Prevent empty request
+    console.log("Current user:", user); // Debugging step
+    
+    fetch("http://192.168.1.5:8000/api/user/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userID:user.userID }),
+    })
+
+    .then(async (response) => {
+      const text = await response.text(); // Read raw response
+      console.log("Raw response:", text);
+      return JSON.parse(text);
+    })
+
+    .then((data) => {
+      console.log("Fetched user data:", data);
+      setUserData(data);
+    })
+
+      .catch((error) => console.error("Error fetching user data:", error));
+    
+  }, [user]); // Runs when `user` changes
+
+
+  // Fetch items from API
+  useEffect(() => {
+    fetch("http://192.168.1.5:8000/api/items") // Replace with your actual API URL
+      .then((response) => response.json())
+      .then((data) => {
+        setItems(data); // Set items from API
+        setFilteredItems(data); // Set initial filtered items
+      })
+      .catch((error) => console.error("Error fetching items:", error));
+  }, []);
+
+
+  useEffect(() => {
+    if (!user || !user.userID) return;
+  
+    fetch("http://192.168.1.5:8000/api/user-inventory/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userID: user.userID }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched inventory:", data);
+        setOwnedItems(data.owned_items);
+      })
+      .catch((error) => console.error("Error fetching user inventory:", error));
+  }, [user]);
+
+  const filterByCategory = (category: string) => {
+    setFilteredItems(items.filter((item) => item.category.toLowerCase() === category.toLowerCase()));
+  };
+  
+  const filterByPart = (part: string) => {
+    setFilteredItems(items.filter((item) => item.category.toLowerCase() === "accessories" && item.part?.toLowerCase() === part.toLowerCase()));
+  };
+
+  const buyItem = async (item: Item) => {
+    if (!user) {
+      Alert.alert("Error", "User not found.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://192.168.1.5:8000/api/buy-item/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userID: user.userID,
+          item_id: item.item_id,
+          price: item.price,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Success", result.message);
+        if (userData) {
+          setUserData((prevUserData) =>
+            prevUserData ? { ...prevUserData, gold: prevUserData.gold - item.price } : prevUserData
+          );
+        }
+      } else {
+        Alert.alert("Purchase Failed", result.detail);
+      }
+    } catch (error) {
+      console.error("Error purchasing item:", error);
+      Alert.alert("Error", "Failed to process the request.");
     }
   };
 
   return (
     <View style={styles.container}>
+
       <View style={styles.topButtonContainer}>
-        {[0, 2, 3, 4, 5, 6, 7].map((num) => (
-          <TouchableOpacity key={num} style={styles.button} onPress={() => filterItems(num)}>
-            <Text style={styles.buttonText}>{num === 0 ? "Reset" : `Divisible by ${num}`}</Text>
-          </TouchableOpacity>
-        ))}
+        <TouchableOpacity style={styles.button} onPress={() => filterByPart("head")}>
+          <Text style={styles.buttonText}>Head</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => filterByPart("hat")}>
+          <Text style={styles.buttonText}>Hat</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => filterByPart("body")}>
+          <Text style={styles.buttonText}>Body</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => filterByPart("torso")}>
+          <Text style={styles.buttonText}>Torso</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => filterByPart("shoes")}>
+          <Text style={styles.buttonText}>Shoes</Text>
+        </TouchableOpacity>
       </View>
+
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setFilteredItems(items.filter((item) => item.id % 2 === 0))}>
+        {/* Category Filter */}
+        <TouchableOpacity style={styles.button} onPress={() => filterByCategory("accessories")}>
           <Text style={styles.buttonText}>Accessories</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => setFilteredItems(items.filter((item) => item.id % 2 !== 0))}>
+        <TouchableOpacity style={styles.button} onPress={() => filterByCategory("furniture")}>
           <Text style={styles.buttonText}>Furniture</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.shopContainer}>
-        <FlatList
-          data={filteredItems}
-          horizontal
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
+      <FlatList
+        data={filteredItems}
+        horizontal
+        keyExtractor={(item) => item.item_id.toString()}
+        renderItem={({ item }) => {
+          const isOwned = ownedItems.includes(item.item_id) && item.category.toLowerCase() === "accessories";
+
+          return (
             <View style={styles.itemBox}>
-              <Text style={styles.itemText}>{item.name}</Text>
-              <View style={styles.priceTag}>
-                <Text style={styles.priceText}>{item.price}</Text>
-              </View>
+              <Text style={styles.itemText}>{item.item_name}</Text>
+
+              {/* Display Image */}
+              <Image source={{ uri: item.image }} style={styles.itemImage} />
+
+              {/* Purchase Button */}
+              <TouchableOpacity
+                style={[styles.priceTag, isOwned && styles.ownedTag]} 
+                onPress={() => !isOwned && buyItem(item)} 
+                disabled={isOwned} 
+              >
+                <Text style={styles.priceText}>{isOwned ? "Owned" : item.price}</Text>
+              </TouchableOpacity>
             </View>
-          )}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}
-        />
+          );
+  }}
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={styles.scrollContainer}
+/>
       </View>
       <View style={styles.container}>
     {/* Existing UI components */}
@@ -76,6 +227,10 @@ const ShopScreen = () => {
     <TouchableOpacity style={styles.floatingButton} onPress={() => router.push("/")}>
       <Text style={styles.floatingButtonText}>←</Text>
     </TouchableOpacity>
+    <View style={styles.gold_container}>
+      <Text style={styles.gold_container_text}>{userData?.gold}</Text>
+
+    </View>
   </View>
     </View>
   );
@@ -143,6 +298,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 5,
   },
+  itemImage: {
+    width: 60,
+    height: 60,
+  
+  },
   priceTag: {
     marginTop: 5,
     backgroundColor: "gold",
@@ -173,6 +333,27 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
+  },
+
+  gold_container:{
+    height:40,
+    width:100,
+    backgroundColor:"gold",
+    position:"absolute",
+    right:"-48%",
+    top:-335,
+    zIndex:9999,
+    justifyContent:"center",
+    alignItems:"center"
+  },
+  gold_container_text:{
+    color: "black",
+    fontSize: 24,
+    fontWeight: "bold"
+  },
+
+  ownedTag: {
+    backgroundColor: "gray",
   },
 
 });
