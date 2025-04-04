@@ -45,7 +45,7 @@ export default function Home() {
         console.error("Error retrieving user data:", error);
       }
     };
-
+// #jandkjasdakdj
     fetchUserData();
   }, []);
 
