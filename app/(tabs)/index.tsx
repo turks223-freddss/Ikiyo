@@ -25,7 +25,8 @@ export default function Home() {
   const [newUsername, setNewUsername] = useState("");
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [newDescription, setNewDescription] = useState("");
-
+  const [sliderValue1, setSliderValue1] = useState(50);
+  const [sliderValue2, setSliderValue2] = useState(50);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("Tab1"); // Tracks which tab is active
 
@@ -45,15 +46,15 @@ export default function Home() {
         console.error("Error retrieving user data:", error);
       }
     };
-// #jandkjasdakdj
+  // #jandkjasdakdj
     fetchUserData();
   }, []);
 
   useEffect(() => {
     if (!user || !user.userID) return; // Prevent empty request
-    console.log("Current user:", user); // Debugging step
+    // console.log("Current user:", user); // Debugging step
     
-    fetch("http://192.168.1.5:8000/api/user/", {
+    fetch("http://192.168.164.231:8081/api/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,12 +64,12 @@ export default function Home() {
 
     .then(async (response) => {
       const text = await response.text(); // Read raw response
-      console.log("Raw response:", text);
+      // console.log("Raw response:", text);
       return JSON.parse(text);
     })
 
     .then((data) => {
-      console.log("Fetched user data:", data);
+      // console.log("Fetched user data:", data);
       setUserData(data);
     })
 
@@ -94,7 +95,7 @@ export default function Home() {
   }
   
   try {
-    const response = await fetch(`http://192.168.1.5:8000/api/edit-user/${user.userID}/`, {
+    const response = await fetch(`http://192.168.164.231:8081/api/edit-user/${user.userID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +134,7 @@ const handleDescriptionUpdate = async () => {
   }
 
   try {
-    const response = await fetch(`http://192.168.1.5:8000/api/edit-user/${user.userID}/`, {
+    const response = await fetch(`http://192.168.164.231:8081/api/edit-user/${user.userID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -246,6 +247,24 @@ const handleDescriptionUpdate = async () => {
         }}
       >
         <Ionicons name="map-outline" size={32} color="black" />
+      </TouchableOpacity>
+
+      {/* edit avatar Button - Top Left */}
+      <TouchableOpacity
+        onPress={() => router.push("/profile")}
+        style={{
+          position: "absolute",
+          bottom: "16%",
+          right: "13%",
+          width: 60,
+          height: 60,
+          borderRadius: 30,
+          backgroundColor: "#ddd",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Ionicons name="shirt-outline" size={32} color="black" />
       </TouchableOpacity>
 
       {/* Edit Button - Bottom Right */}
@@ -550,7 +569,68 @@ const handleDescriptionUpdate = async () => {
               <Image source={ require("../../assets/images/test.png")} style={{ width: 200, height: 200 }} />
             </View>
             )}
-            {activeTab === "Tab3" && <Text>Content for Tab 3</Text>}
+            {activeTab === "Tab3" && (
+              <View style={{
+                flexDirection:'column',
+                gap:5,
+                width:'100%'
+
+              }}>
+                <View style={{
+                  flexDirection:'row',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  height:'15%',
+                  width:'100%',
+                  backgroundColor:'rgb(241, 167, 103)'
+                }}>
+                  <Text>
+                    Settings</Text>
+                </View>
+
+                <View style={{
+                  height:'45%',
+                  width:'100%',
+                  backgroundColor:'rgb(247, 118, 6)',
+                  borderRadius:60,
+                  flexDirection:'column'
+                }}>
+
+                </View>
+
+
+                <View style={{
+                  height:'35%',
+                  width:'100%',
+                  backgroundColor:'rgb(243, 229, 217)',
+                  borderRadius:40,
+                  alignItems:'center',
+                  justifyContent:'center'
+                  
+                }}>
+                  <TouchableOpacity style={{
+                    backgroundColor:'rgb(244, 13, 13)',
+                    width:'50%',
+                    height:'50%',
+                    alignItems:'center',
+                    justifyContent:'center',
+                    borderRadius:20
+                  }}
+                  onPress={handleLogout}>
+
+                    <Text style={{
+                      fontWeight:'bold',
+                      fontSize:20,
+                    }}>
+                      LOGOUT
+                    </Text>
+
+                  </TouchableOpacity>
+
+                </View>
+
+              </View>
+            )}
           </View>
           {/*tab1*/}
           <Pressable

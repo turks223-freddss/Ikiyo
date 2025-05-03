@@ -35,4 +35,19 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+venv/
+db.sqlite3
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+*.db
+
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/*.py
+
+.env
+*.env
+
 app-example

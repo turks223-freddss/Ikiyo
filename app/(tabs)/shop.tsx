@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity, Image,Alert } from "react-native";
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity, Image,Alert, } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -63,7 +63,7 @@ const ShopScreen = () => {
     if (!user || !user.userID) return; // Prevent empty request
     console.log("Current user:", user); // Debugging step
     
-    fetch("http://192.168.1.5:8000/api/user/", {
+    fetch("http://192.168.164.231:8081/api/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ const ShopScreen = () => {
 
   // Fetch items from API
   useEffect(() => {
-    fetch("http://192.168.1.5:8000/api/items") // Replace with your actual API URL
+    fetch("http://192.168.164.231:8081/api/items") // Replace with your actual API URL
       .then((response) => response.json())
       .then((data) => {
         setItems(data); // Set items from API
@@ -99,10 +99,10 @@ const ShopScreen = () => {
   }, []);
 
 
-  useEffect(() => {
+  const fetchUserInventory = () => {
     if (!user || !user.userID) return;
   
-    fetch("http://192.168.1.5:8000/api/user-inventory/", {
+    fetch("http://192.168.164.231:8081/api/user-inventory/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -115,6 +115,10 @@ const ShopScreen = () => {
         setOwnedItems(data.owned_items);
       })
       .catch((error) => console.error("Error fetching user inventory:", error));
+  };
+
+  useEffect(() => {
+    fetchUserInventory();
   }, [user]);
 
   const filterByCategory = (category: string) => {
@@ -132,7 +136,7 @@ const ShopScreen = () => {
     }
 
     try {
-      const response = await fetch("http://192.168.1.5:8000/api/buy-item/", {
+      const response = await fetch("http://192.168.164.231:8081/api/buy-item/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -151,6 +155,7 @@ const ShopScreen = () => {
             prevUserData ? { ...prevUserData, gold: prevUserData.gold - item.price } : prevUserData
           );
         }
+        fetchUserInventory();
       } else {
         Alert.alert("Purchase Failed", result.detail);
       }
@@ -164,19 +169,19 @@ const ShopScreen = () => {
     <View style={styles.container}>
 
       <View style={styles.topButtonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => filterByPart("head")}>
+        <TouchableOpacity style={styles.buttonT} onPress={() => filterByPart("head")}>
           <Text style={styles.buttonText}>Head</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => filterByPart("hat")}>
+        <TouchableOpacity style={styles.buttonT} onPress={() => filterByPart("hat")}>
           <Text style={styles.buttonText}>Hat</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => filterByPart("body")}>
+        <TouchableOpacity style={styles.buttonT} onPress={() => filterByPart("body")}>
           <Text style={styles.buttonText}>Body</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => filterByPart("torso")}>
+        <TouchableOpacity style={styles.buttonT} onPress={() => filterByPart("torso")}>
           <Text style={styles.buttonText}>Torso</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => filterByPart("shoes")}>
+        <TouchableOpacity style={styles.buttonT} onPress={() => filterByPart("shoes")}>
           <Text style={styles.buttonText}>Shoes</Text>
         </TouchableOpacity>
       </View>
@@ -248,11 +253,14 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     marginBottom: 0,
+    top:'5%',
+    gap:50,
   },
   buttonContainer: {
     flexDirection: "column",
     position: "absolute",
-    left: "0.5%",
+    left: "0.1%",
+    height:'50%'
   },
   button: {
     backgroundColor: "#FF5A5F",
@@ -263,6 +271,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
+    top:'1%',
+    height:'50%',
+    
+  },
+  buttonT: {
+    backgroundColor: "#FF5A5F",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    marginBottom: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    top:'15%'
   },
   buttonText: {
     color: "white",
