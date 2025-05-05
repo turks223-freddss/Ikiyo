@@ -21,7 +21,7 @@ export default function Edit() {
   
   const router = useRouter();
 
-  const [furnitureItems, setFurnitureItems] = useState([]);
+  const [furnitureItems, setFurnitureItems] = useState<Item[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
