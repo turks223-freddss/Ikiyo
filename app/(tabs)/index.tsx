@@ -13,6 +13,7 @@ interface UserData {
   gold: number;
   ruby: number;
   description: string | null;
+  buddy: number| null;
 }
 
 export default function Home() {
@@ -54,7 +55,8 @@ export default function Home() {
     if (!user || !user.userID) return; // Prevent empty request
     // console.log("Current user:", user); // Debugging step
     
-    fetch("http://192.168.68.105:8081/api/user/", {
+
+    fetch("http://192.168.1.5:8081/api/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,6 +78,7 @@ export default function Home() {
       .catch((error) => console.error("Error fetching user data:", error));
     
   }, [user]); // Runs when `user` changes
+  
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user"); // Clear user data
@@ -95,7 +98,7 @@ export default function Home() {
   }
   
   try {
-    const response = await fetch(`http://192.168.164.231:8081/api/edit-user/${user.userID}/`, {
+    const response = await fetch(`http://192.168.1.5:8081/api/edit-user/${user.userID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +137,7 @@ const handleDescriptionUpdate = async () => {
   }
 
   try {
-    const response = await fetch(`http://192.168.164.231:8081/api/edit-user/${user.userID}/`, {
+    const response = await fetch(`http://192.168.1.5:8081/api/edit-user/${user.userID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -163,6 +166,112 @@ const handleDescriptionUpdate = async () => {
   const toggleOverlay = () => {
     setIsOverlayVisible(!isOverlayVisible);
   };
+
+  const listPendingRequests = async (userID:number) => {
+    try {
+        const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'list',
+                user_id: userID,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log('Pending requests:', data.pending_requests);
+            // Set to state if using React:
+            // setPendingRequests(data.pending_requests);
+        } else {
+            console.error('Error:', data.error || 'Failed to fetch');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
+
+const sendBuddyRequest = async (userID:number, targetID:number) => {
+  try {
+      const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              action: 'send_request',
+              user_id: userID,
+              target_id: targetID,
+          }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+          console.log(data.message);
+      } else {
+          console.error('Error:', data.error || 'Failed to send request');
+      }
+  } catch (error) {
+      console.error('Error:', error);
+  }
+};
+
+const acceptBuddyRequest = async (userID:number, fromUserID:number) => {
+  try {
+      const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              action: 'accept',
+              user_id: userID,
+              target_id: fromUserID,  // the one who sent the request
+          }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+          console.log(data.message);
+      } else {
+          console.error('Error:', data.error || 'Failed to accept request');
+      }
+  } catch (error) {
+      console.error('Error:', error);
+  }
+};
+
+const declineBuddyRequest = async (userID:number, fromUserID:number) => {
+  try {
+      const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              action: 'decline',
+              user_id: userID,
+              target_id: fromUserID,
+          }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+          console.log(data.message);
+      } else {
+          console.error('Error:', data.error || 'Failed to decline request');
+      }
+  } catch (error) {
+      console.error('Error:', error);
+  }
+};
+
 
  
 
@@ -563,12 +672,46 @@ const handleDescriptionUpdate = async () => {
 
             )}
             {activeTab === "Tab2" && (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>Tab 2 Content</Text>
-              <Text>Here is an image:</Text>
-              <Image source={ require("../../assets/images/test.png")} style={{ width: 200, height: 200 }} />
-            </View>
-            )}
+                (() => {
+                    if (!userData?.buddy || userData.buddy === 0) {
+                        // No buddy yet: trigger API & show fallback content
+                        if (userData?.userID != null) {
+                          listPendingRequests(userData.userID);
+                      }
+
+                        return (
+                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+                                <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 10 }}>
+                                    No Buddy Yet!
+                                </Text>
+                                <Text style={{ fontSize: 16, textAlign: "center", marginBottom: 20 }}>
+                                    You don't have any buddy linked to your account yet. You can send a buddy request or wait for one.
+                                </Text>
+                            </View>
+                        );
+                    } else {
+                        // Buddy exists: show buddy content
+                        return (
+                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+                                <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 10 }}>
+                                    Buddy Info
+                                </Text>
+                                <Text style={{ fontSize: 18, marginBottom: 20 }}>
+                                    You're paired with: {userData.buddy}
+                                </Text>
+                                <Image
+                                    
+                                    style={{ width: 250, height: 250, resizeMode: "contain", borderRadius: 125 }}
+                                />
+                                {/* You can add more buddy details below */}
+                                <Text style={{ fontSize: 16, marginTop: 15 }}>
+                                    Contact: {userData.buddy}
+                                </Text>
+                            </View>
+                        );
+                    }
+                })()
+              )}
             {activeTab === "Tab3" && (
               <View style={{
                 flexDirection:'column',

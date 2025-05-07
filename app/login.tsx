@@ -10,13 +10,18 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://192.168.164.231:8081/api/login/", {
+      const response = await fetch("http://192.168.1.5:8081/api/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+       // Log the raw response to see the body
+      const responseText = await response.text();
+      console.log("Response Text:", responseText);
+
+      const data = JSON.parse(responseText); // Now parse the response text
+
 
       if (response.ok) {
         await AsyncStorage.setItem("user", JSON.stringify(data.user)); // Save user data
@@ -26,6 +31,7 @@ export default function LoginScreen() {
         Alert.alert("Error", data.error || "Invalid credentials");
       }
     } catch (error) {
+      console.error(error); // Log the error message
       Alert.alert("Error", "Could not connect to server");
     }
   };
