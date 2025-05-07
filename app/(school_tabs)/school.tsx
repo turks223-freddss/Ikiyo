@@ -1,246 +1,220 @@
-import { useRouter } from "expo-router";
-import { View, Text, TouchableOpacity, Image, Animated, } from "react-native";
+import React, { useState } from "react";
+import { View, Image, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useRef } from "react";
-import Slider from "@react-native-community/slider";
+import { useRouter } from "expo-router";
+import ProfileCard from "../assets/ProfileCard";
+import FeatureButton from "../assets/FeatureButton";
+import CurrencyDisplay from "../assets/CurrencyContainer";
+import OverlayWindow from "../assets/Overlay";
+import EventsContent from "../assets/Events"  
+import AdContent from "../assets/AdContent"; 
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
 
 export default function Home() {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const sidebarX = useRef(new Animated.Value(-250)).current; // Sidebar starts hidden (-250px left)
+  const { width, height } = Dimensions.get("window");
 
-  // Function to toggle sidebar visibility
-  const toggleSidebar = () => {
-    Animated.timing(sidebarX, {
-      toValue: isSidebarOpen ? -250 : 0, // Move sidebar in or out
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-    setIsSidebarOpen(!isSidebarOpen);
+  // Overlay state management
+  const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
+    overlayad: false,
+    overlayevent: false,
+  });
+
+  // Function to toggle overlay visibility by name
+  const toggleOverlay = (name: string) => {
+    setOverlays((prevOverlays) => ({
+      ...prevOverlays,
+      [name]: !prevOverlays[name],
+    }));
   };
-  const [fakeVolume, setFakeVolume] = useState(50); // Default fake value
+
+  // Function to close the overlay
+  const closeOverlay = (name: string) => {
+    setOverlays((prevOverlays) => ({
+      ...prevOverlays,
+      [name]: false,
+    }));
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      width: width,
+      height: height,
+      backgroundColor: "black",
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
+      paddingLeft: 20,
+      paddingTop: 20,
+    },
+    profileCardContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 20,
+      marginLeft: 10,
+    },
+    bottomContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      paddingHorizontal: 20,
+      paddingBottom: 30,
+      marginTop: "auto",
+      width: "100%",
+      paddingRight: 18,
+    },
+    bottomButtons: {
+      flexDirection: "row",
+      gap: 10, // Works in React Native 0.71+
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginBottom: 10, // Spacing between rows
+    },
+    overlay: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    overlayWindow: {
+      width: "80%",
+      height: "90%",
+      backgroundColor: "rgba(255, 201, 172, 0.9)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 20,
+      borderRadius: 10,
+    },
+    closeButton: {
+      marginTop: 20,
+      color: "blue",
+      textDecorationLine: "underline",
+    },
+  });
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      
-      {/* Profile Container */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          left:"15%",
-          backgroundColor: "#ddd",
-          padding: 15,
-          borderRadius: 50, // Rounded rectangle shape
-          width: "30%",
-          alignSelf: "center",
-          position: "absolute",
-          top: "5%", // Adjust position
-        }}
-      >
-         {/* fix to add photo*/}
-         <Ionicons 
-          name="person-circle-outline" 
-          size={60} 
-          color="black" 
-          style={{ marginRight: 15 }} 
-        />
+      <View style={styles.container}>
+        {/* Profile Card Container */}
+        <View style={{ 
+          flexDirection: "row", 
+          justifyContent: "space-between", 
+          alignItems: "flex-start", 
+          width: "100%",
+          paddingHorizontal: 20, 
+          marginTop: 20 
+        }}>
+          <ProfileCard
+            imageUri="https://www.w3schools.com/w3images/avatar2.png"
+            username="John Doe"
+            hashtag="#231"
+          />
 
-        {/* User Info */}
-        <View>
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>John school Doe</Text>
-          <Text style={{ fontSize: 14, color: "gray" }}>ID: 123456</Text>
+          <View style={{ alignItems: "flex-end", gap: 10 }}>
+            <CurrencyDisplay
+              icon={<Image source={HeartIcon} style={{ width: 50, height:50}} />} 
+              currencyAmount={420}
+              size={50}
+            />
+            <CurrencyDisplay
+              icon={<Image source={IkicoinIcon} style={{ width: 50, height:50}} />} 
+              currencyAmount={690}
+              size={50}
+            />
+          </View>
         </View>
+
+        {/* Bottom Buttons */}
+        <View style={styles.bottomContainer}>
+          <View style={styles.bottomButtons}>
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => toggleOverlay("overlayevent")}
+                icon={<Ionicons name="megaphone-outline" size={25} color="black" />}
+                size={60}
+              />
+            </View>
+
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => router.push("/friendlist")}
+                icon={<Image source={FriendlistIcon} style={{ width: 35, height:30}} />} 
+                size={60}
+              />
+            </View>
+
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => router.push("../maps")}
+                icon={<Image source={MapsIcon} style={{ width: 35, height:30}} />} 
+                size={60}
+              />
+            </View>
+
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => router.push("/shop")}
+                icon={<Image source={ShopIcon} style={{ width: 35, height:30}} />} 
+                size={60}
+              />
+            </View>
+
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => toggleOverlay("overlayad")} // Trigger overlay toggle
+                icon={<Ionicons name="cart-outline" size={25} color="black" />}
+                size={60}
+              />
+            </View>
+          </View>
+
+          {/* Main Action Buttons */}
+          <View style={styles.bottomButtons}>
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => router.push("/edit")}
+                icon={<Image source={EditRoomIcon} style={{ width: 50, height:40}} />} 
+                size={90}
+              />
+            </View>
+
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => router.push("/tasks")}
+                icon={<Image source={AvatarIcon} style={{ width: 50, height:40}} />} 
+                size={90}
+              />
+            </View>
+
+            <View style={styles.buttonRow}>
+              <FeatureButton
+                onPress={() => router.push("/tasks")}
+                icon={<Image source={TaskIcon} style={{ width: 50, height:40}} />} 
+                size={90}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Overlay Logic */}
+        {overlays.overlayad && (
+          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlayad")}>
+            <AdContent/>
+          </OverlayWindow>
+        )}
+
+        {overlays.overlayevent && (
+          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlayevent")}>
+            <EventsContent />
+          </OverlayWindow>
+        )}
       </View>
-
-      
-      {/* New Container with Two Rows */}
-      <View
-        style={{
-          backgroundColor: "transparent",
-          padding: 15,
-          borderRadius: 20,
-          width: "15%",
-          alignSelf: "center",
-          position: "absolute",
-          top: "5%", // Adjust position
-          right:18,
-          alignItems: "flex-start",
-        }}
-      >
-        {/* First Row: Coin Icon + Amount */}
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-          <Ionicons name="cash-outline" size={40} color="gold" style={{ marginRight: 10 }} />
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>1234</Text>
-        </View>
-
-        {/* Second Row: Heart Icon + Number */}
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Ionicons name="heart-outline" size={40} color="red" style={{ marginRight: 10 }} />
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>5</Text>
-        </View>
-      </View>
-
-
-      {/* Map Button - Top Left */}
-      <TouchableOpacity
-        onPress={() => router.push("/maps")}
-        style={{
-          position: "absolute",
-          bottom: "20%",
-          left: "13%",
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: "#ddd",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Ionicons name="map-outline" size={32} color="black" />
-      </TouchableOpacity>
-
-      {/* Edit Button - Bottom Right */}
-      <TouchableOpacity
-        onPress={() => router.push("/edit")}
-        style={{
-          position: "absolute",
-          bottom: "7%",
-          right: 50,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: "#ddd",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Ionicons name="create-outline" size={32} color="black" />
-      </TouchableOpacity>
-
-      {/* Tasks Button - Center */}
-      <TouchableOpacity
-        onPress={() => router.push("/tasks")}
-        style={{
-          position: "absolute",
-          bottom: "30%",
-          left: 50,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: "#ddd",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Ionicons name="checkmark-done-outline" size={32} color="black" />
-      </TouchableOpacity>
-
-      {/* Friends Button - Bottom Left */}
-      <TouchableOpacity
-        onPress={() => router.push("/friendlist")}
-        style={{
-          position: "absolute",
-          bottom: "8%",
-          left: 50,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: "#ddd",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Ionicons name="people-outline" size={32} color="black" />
-      </TouchableOpacity>
-
-      {/* Shop Button - Bottom Right */}
-      <TouchableOpacity
-        onPress={() => router.push("/shop")}
-        style={{
-          position: "absolute",
-          bottom: "25%",
-          right: 50,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: "#ddd",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Ionicons name="cart-outline" size={32} color="black" />
-      </TouchableOpacity>
-
-      {/* Menu Button (Top Left) */}
-      <TouchableOpacity
-        onPress={toggleSidebar}
-        style={{
-          position: "absolute",
-          top: "8%",
-          left: 50,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: "#ddd",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Ionicons name="menu" size={32} color="black" />
-      </TouchableOpacity>
-
-
-
-      {/* Sidebar (Drawer Menu) */}
-<Animated.View
-  style={{
-    position: "absolute",
-    top: 0,
-    left: 0,
-    height: "100%",
-    width: 250, // Sidebar width
-    backgroundColor: "#333", // Sidebar background color
-    padding: 20,
-    transform: [{ translateX: sidebarX }], // Slide animation
-    justifyContent: "space-between", // Align elements properly
-  }}
->
-  {/* Back Button */}
-  <TouchableOpacity
-    onPress={toggleSidebar} // Function to close sidebar
-    style={{
-      position: "absolute",
-      top: 20,
-      left: 20,
-      padding: 10,
-    }}
-  >
-    <Ionicons name="arrow-back" size={24} color="white" />
-  </TouchableOpacity>
-
-  {/* User Info Section */}
-  <View style={{ marginTop: 60 }}> {/* Space below back button */}
-    <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>
-      John Doe hahahaha
-    </Text>
-    <Text style={{ color: "gray", fontSize: 14 }}>ID: 123456</Text>
-  </View>
-
-  {/* Logout Button at the Bottom */}
-  <TouchableOpacity
-    onPress={() => router.replace("/login")}
-    style={{
-      backgroundColor: "red",
-      padding: 10,
-      borderRadius: 5,
-      alignItems: "center",
-    }}
-  >
-    <Text style={{ color: "white", fontSize: 16 }}>Logout</Text>
-  </TouchableOpacity>
-</Animated.View>
-
     </View>
   );
 }

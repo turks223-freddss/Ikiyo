@@ -2,8 +2,8 @@ import { useRouter } from "expo-router";
 import { View, Text, TouchableOpacity, Image, Animated, Pressable, Modal,TextInput,Alert} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useRef, useEffect } from "react";
-import Slider from "@react-native-community/slider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 
 interface UserData {
   userID: number;
@@ -54,7 +54,7 @@ export default function Home() {
     if (!user || !user.userID) return; // Prevent empty request
     // console.log("Current user:", user); // Debugging step
     
-    fetch("http://192.168.164.231:8081/api/user/", {
+    fetch("http://192.168.68.105:8081/api/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -187,8 +187,8 @@ const handleDescriptionUpdate = async () => {
           top: "5%", // Adjust position
         }}
       >
-         {/* fix to add photo*/}
-         <Ionicons 
+        {/* fix to add photo*/}
+        <Ionicons 
           name="person-circle-outline" 
           size={60} 
           color="black" 
@@ -233,7 +233,7 @@ const handleDescriptionUpdate = async () => {
 
       {/* Map Button - Top Left */}
       <TouchableOpacity
-        onPress={() => router.push("/maps")}
+        onPress={() => router.push("../maps")}
         style={{
           position: "absolute",
           bottom: "20%",

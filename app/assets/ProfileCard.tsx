@@ -1,18 +1,18 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 
-// Define prop types
+
 interface eCardProps {
-    imageUri?: string; // Optional string (can be undefined)
-    username?: string; // Optional string (can be undefined)
-    hashtag?: string; // Optional string (can be undefined)
+    imageUri?: string; 
+    username?: string; 
+    hashtag?: string; 
 }
 
 const ProfileCard: React.FC<eCardProps> = ({ imageUri, username, hashtag }) => {
     // Placeholder values
-    const placeholderImage = "https://via.placeholder.com/150"; // Placeholder image URL
-    const placeholderUsername = "Username Here"; // Placeholder username
-    const placeholderHashtag = "#Hashtag"; // Placeholder hashtag
+    const placeholderImage = "https://via.placeholder.com/150";
+    const placeholderUsername = "Username Here";
+    const placeholderHashtag = "#Hashtag"; 
 
     return (
         <View style={styles.container}>

@@ -47,9 +47,9 @@ const styles = StyleSheet.create({
     zIndex: 1,
     marginRight: -40, // Pull into the box
     borderRadius: 100,
-    backgroundColor: "white",
-    borderWidth: 2,
-    borderColor: "silver",
+    //backgroundColor: "white",
+    //borderWidth: 2,
+    //borderColor: "silver",
     justifyContent: "center",
     alignItems: "center",
   } as ViewStyle,
