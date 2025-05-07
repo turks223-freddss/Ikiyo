@@ -21,7 +21,7 @@ export default function Edit() {
   
   const router = useRouter();
 
-  const [furnitureItems, setFurnitureItems] = useState([]);
+  const [furnitureItems, setFurnitureItems] = useState<Item[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function Edit() {
   useEffect(() => {
     const fetchFurnitureItems = async () => {
       try {
-        const response = await fetch("http://192.168.164.231:8081/api/display-inventory-room/", {
+        const response = await fetch("http://192.168.1.5:8081/api/display-inventory-room/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
