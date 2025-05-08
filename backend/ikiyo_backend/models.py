@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class User(models.Model):
     userID = models.AutoField(primary_key=True)  # Auto-incrementing unique ID
@@ -108,4 +109,57 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.task_title} (Assigned to: {self.assigned_to.username})"
+    
+    
+class FriendList(models.Model):
+    from_user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='friendlist_from'
+    )
+    to_user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='friendlist_to'
+    )
+    accepted = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+
+    def __str__(self):
+        status = "Accepted" if self.accepted else "Pending"
+        return f"{self.from_user} → {self.to_user} ({status})"
+
+
+class FriendRequest(models.Model):
+    from_user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='friend_requests_sent'
+    )
+    to_user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='friend_requests_received'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+
+    def __str__(self):
+        return f"Request from {self.from_user} to {self.to_user}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f'Message from {self.sender} to {self.recipient}'
     
