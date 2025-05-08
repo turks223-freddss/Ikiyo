@@ -7,8 +7,9 @@ import FeatureButton from "../assets/FeatureButton";
 import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
-import AdContent from "../assets/AdContent"; 
+import AdContent from "../contents/AdContent"; 
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+import DailyTask from "../contents/TaskContent/DailyTask";
 
 export default function Home() {
   const router = useRouter();
@@ -204,16 +205,38 @@ export default function Home() {
 
         {/* Overlay Logic */}
         {overlays.overlayad && (
-          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlayad")}>
-            <AdContent/>
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayad")} 
+          tabs={1} 
+          tab1={<AdContent/>}>
           </OverlayWindow>
         )}
 
         {overlays.overlayevent && (
-          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlayevent")}>
-            <EventsContent />
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayevent")}
+          tabs={3}
+          tab1={<DailyTask/>}
+          tab1icon={AvatarIcon}
+          tab1label={"Daily Task"}
+          tab2={<AdContent/>}
+          tab2icon={AvatarIcon}
+          tab2label={"My Task"}
+          tab3={<EventsContent/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Partner Task"}
+          >
           </OverlayWindow>
         )}
+
+        {/*{overlays.overlaytask && (
+          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlaytask")}>
+            <TasksContent />
+          </OverlayWindow>
+        )}*/}
+
       </View>
     </View>
   );
