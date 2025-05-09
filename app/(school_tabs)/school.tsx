@@ -10,6 +10,8 @@ import EventsContent from "../assets/Events"
 import AdContent from "../contents/AdContent"; 
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
+import MyJournal from "../contents/TaskContent/MyJournalTask";
+import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
 
 export default function Home() {
   const router = useRouter();
@@ -115,6 +117,7 @@ export default function Home() {
             imageUri="https://www.w3schools.com/w3images/avatar2.png"
             username="John Doe"
             hashtag="#231"
+            onPress={() => toggleOverlay("overlayprofile")} 
           />
 
           <View style={{ alignItems: "flex-end", gap: 10 }}>
@@ -195,7 +198,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/tasks")}
+                onPress={() => toggleOverlay("overlaytask")} 
                 icon={<Image source={TaskIcon} style={{ width: 50, height:40}} />} 
                 size={90}
               />
@@ -217,25 +220,47 @@ export default function Home() {
           <OverlayWindow 
           visible={true} 
           onClose={() => toggleOverlay("overlayevent")}
+          tabs={1}
+          tab1={<EventsContent/>}
+          >
+          </OverlayWindow>
+        )}
+
+        {overlays.overlaytask && (
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlaytask")}
           tabs={3}
           tab1={<DailyTask/>}
           tab1icon={AvatarIcon}
           tab1label={"Daily Task"}
-          tab2={<AdContent/>}
+          tab2={<MyJournal/>}
           tab2icon={AvatarIcon}
           tab2label={"My Task"}
-          tab3={<EventsContent/>}
+          tab3={<PartnerJournal/>}
           tab3icon={AvatarIcon}
           tab3label={"Partner Task"}
           >
           </OverlayWindow>
         )}
 
-        {/*{overlays.overlaytask && (
-          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlaytask")}>
-            <TasksContent />
+        {overlays.overlayprofile && (
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayprofile")}
+          tabs={3}
+          tab1={<DailyTask/>}
+          tab1icon={AvatarIcon}
+          tab1label={"Profile"}
+          tab2={<MyJournal/>}
+          tab2icon={AvatarIcon}
+          tab2label={"Partner Profile"}
+          tab3={<EventsContent/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Settings"}
+          >
           </OverlayWindow>
-        )}*/}
+        )}
 
       </View>
     </View>
