@@ -1,35 +1,33 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 
 
 interface eCardProps {
     imageUri?: string; 
-    username?: string; 
+    username?: string;
     hashtag?: string; 
+    onPress?: () => void;
 }
 
-const ProfileCard: React.FC<eCardProps> = ({ imageUri, username, hashtag }) => {
+const ProfileCard: React.FC<eCardProps> = ({ imageUri, username, hashtag, onPress }) => {
     // Placeholder values
     const placeholderImage = "https://via.placeholder.com/150";
     const placeholderUsername = "Username Here";
     const placeholderHashtag = "#Hashtag"; 
 
     return (
-        <View style={styles.container}>
-            {/* Circle for the profile image */}
+        <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
             <View style={styles.imageContainer}>
                 <Image
-                    source={{ uri: imageUri || placeholderImage }} // Use placeholder if no imageUri provided
-                    style={styles.profileImage}
+                source={{ uri: imageUri || placeholderImage }}
+                style={styles.profileImage}
                 />
             </View>
-
-            {/* Username and hashtag text */}
             <View style={styles.textContainer}>
                 <Text style={styles.username}>{username || placeholderUsername}</Text>
                 <Text style={styles.hashtag}>{hashtag || placeholderHashtag}</Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 
