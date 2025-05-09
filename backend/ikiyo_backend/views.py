@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .models import User, Item, Inventory
-from .serializers import UserSerializer, LoginSerializer, ItemSerializer
+from .models import User, Item, Inventory, PartnerRequest,Task
+from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSerializer
 from django.shortcuts import get_object_or_404
 import json
 
@@ -178,5 +178,235 @@ class DisplayInventoryAvatar(APIView):
 
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-
     
+    
+class BuddyRequestView(APIView):
+
+    def post(self, request):
+        action = request.data.get('action')
+        
+        if not action:
+            return Response({'error': 'Action is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Call the specific method for the action
+        if action == 'list':
+            return self.list_pending_requests(request)
+        elif action == 'send_request':
+            return self.send_buddy_request(request)
+        elif action == 'accept':
+            return self.accept_buddy_request(request)
+        elif action == 'decline':
+            return self.decline_buddy_request(request)
+        elif action == 'remove_buddy':
+            return self.remove_buddy(request)
+        else:
+            return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def list_pending_requests(self, request):
+        user_id = request.data.get('user_id')
+
+        if not user_id:
+            return Response({'error': 'user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(userID=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        pending_requests = PartnerRequest.objects.filter(to_user=user, accepted=False)
+        data = [
+            {
+                'id': req.id,
+                'from_user_id': req.from_user.userID,
+                'from_username': req.from_user.username,
+                'timestamp': req.timestamp,
+                'accepted': req.accepted
+            } 
+            for req in pending_requests
+        ]
+        return Response({'pending_requests': data}, status=status.HTTP_200_OK)
+
+    def send_buddy_request(self, request):
+        user_id = request.data.get('user_id')
+        target_id = request.data.get('target_id')
+
+        if not user_id or not target_id:
+            return Response({'error': 'user_id and target_id are required for sending a request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if str(user_id) == str(target_id):
+            return Response({'error': 'You cannot send a request to yourself.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(userID=user_id)
+            target_user = User.objects.get(userID=target_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User or target user not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if PartnerRequest.objects.filter(from_user=user, to_user=target_user).exists():
+            return Response({'error': 'Request already sent.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        PartnerRequest.objects.create(from_user=user, to_user=target_user)
+        return Response({'message': 'Buddy request sent.'}, status=status.HTTP_201_CREATED)
+
+    def accept_buddy_request(self, request):
+        user_id = request.data.get('user_id')
+        target_id = request.data.get('target_id')
+
+        if not user_id or not target_id:
+            return Response({'error': 'user_id and target_id are required for accepting a request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(userID=user_id)
+            request_obj = PartnerRequest.objects.get(from_user__userID=target_id, to_user=user, accepted=False)
+        except User.DoesNotExist:
+            return Response({'error': 'User or target user not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except PartnerRequest.DoesNotExist:
+            return Response({'error': 'No pending request from this user.'}, status=status.HTTP_404_NOT_FOUND)
+
+        request_obj.accept()
+        return Response({'message': f'Buddy request from {request_obj.from_user.username} accepted.'}, status=status.HTTP_200_OK)
+
+    def decline_buddy_request(self, request):
+        user_id = request.data.get('user_id')
+        target_id = request.data.get('target_id')
+
+        if not user_id or not target_id:
+            return Response({'error': 'user_id and target_id are required for declining a request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(userID=user_id)
+            request_obj = PartnerRequest.objects.get(from_user__userID=target_id, to_user=user, accepted=False)
+        except User.DoesNotExist:
+            return Response({'error': 'User or target user not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except PartnerRequest.DoesNotExist:
+            return Response({'error': 'No pending request from this user.'}, status=status.HTTP_404_NOT_FOUND)
+
+        request_obj.decline()
+        return Response({'message': f'Buddy request from {request_obj.from_user.username} declined.'}, status=status.HTTP_200_OK)
+    
+    def remove_buddy(self, request):
+        user_id = request.data.get('user_id')
+
+        if not user_id:
+            return Response({'error': 'user_id is required to remove a buddy.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(userID=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not user.buddy:
+            return Response({'error': 'User has no buddy to remove.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Store buddy for message (optional)
+        buddy_username = user.buddy.username
+
+        # This will trigger your save() logic to update both users
+        user.buddy = None
+        user.save()
+
+        return Response({'message': f'Buddy relationship with {buddy_username} has been removed.'}, status=status.HTTP_200_OK)
+    
+class TaskActionView(APIView):
+    def post(self, request):
+        action = request.data.get('action', 'create')  # Default to 'create' if no action is provided
+        user_id = request.data.get('userID')
+
+        if not user_id:
+            return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = get_object_or_404(User, userID=user_id)
+
+        # ===== CREATE =====
+        if action == 'create':
+            if not user.buddy:
+                return Response({"error": "This user does not have a buddy to assign the task to."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task_title = request.data.get('task_title')
+            task_description = request.data.get('task_description')
+            difficulty_level = request.data.get('difficulty_level')
+            attachment = request.FILES.get('attachment')
+
+            if not all([task_title, task_description, difficulty_level]):
+                return Response({"error": "task_title, task_description, and difficulty_level are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task = Task.objects.create(
+                assigned_by=user,
+                assigned_to=user.buddy,
+                task_title=task_title,
+                task_description=task_description,
+                difficulty_level=difficulty_level,
+                attachment=attachment
+            )
+            serializer = TaskSerializer(task)
+            return Response({"message": "Task created successfully.", "task": serializer.data}, status=status.HTTP_201_CREATED)
+
+        # ===== EDIT =====
+        elif action == 'edit':
+            task_id = request.data.get('task_id')
+            if not task_id:
+                return Response({"error": "task_id is required to edit a task."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task = get_object_or_404(Task, id=task_id)
+
+            # Update only the fields provided
+            task_title = request.data.get('task_title')
+            task_description = request.data.get('task_description')
+            difficulty_level = request.data.get('difficulty_level')
+            attachment = request.FILES.get('attachment')
+
+            if task_title:
+                task.task_title = task_title
+            if task_description:
+                task.task_description = task_description
+            if difficulty_level:
+                task.difficulty_level = difficulty_level
+            if attachment:
+                task.attachment = attachment
+
+            task.save()
+            serializer = TaskSerializer(task)
+            return Response({"message": "Task updated successfully.", "task": serializer.data}, status=status.HTTP_200_OK)
+
+        # ===== DELETE =====
+        elif action == 'delete':
+            task_id = request.data.get('task_id')
+            if not task_id:
+                return Response({"error": "task_id is required to delete a task."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task = get_object_or_404(Task, id=task_id)
+
+            # Check if the user is the one who assigned the task
+            if task.assigned_by != user:
+                return Response({"error": "Only the user who assigned this task can delete it."}, status=status.HTTP_403_FORBIDDEN)
+
+            task.delete()
+            return Response({"message": "Task deleted successfully."}, status=status.HTTP_200_OK)
+        
+          # ===== LIST - Assigned by User =====
+        elif action == 'list_assigned_by':
+            # List tasks assigned by the user
+            tasks_assigned = Task.objects.filter(assigned_by=user)
+
+            if not tasks_assigned.exists():
+                return Response({"message": "No tasks assigned by this user."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Serialize the tasks and return them
+            serializer = TaskSerializer(tasks_assigned, many=True)
+            return Response({"tasks_assigned_by_user": serializer.data}, status=status.HTTP_200_OK)
+
+        # ===== LIST - Assigned to User =====
+        elif action == 'list_assigned_to':
+            # List tasks assigned to the user
+            tasks_received = Task.objects.filter(assigned_to=user)
+
+            if not tasks_received.exists():
+                return Response({"message": "No tasks assigned to this user."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Serialize the tasks and return them
+            serializer = TaskSerializer(tasks_received, many=True)
+            return Response({"tasks_assigned_to_user": serializer.data}, status=status.HTTP_200_OK)
+
+
+        else:
+            return Response({"error": "Invalid action. Use 'create', 'edit', or 'delete'."}, status=status.HTTP_400_BAD_REQUEST)

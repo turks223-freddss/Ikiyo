@@ -49,7 +49,7 @@ export default function Edit() {
   useEffect(() => {
     const fetchFurnitureItems = async () => {
       try {
-        const response = await fetch("http://192.168.164.231:8081/api/display-inventory-room/", {
+        const response = await fetch("http://192.168.1.5:8081/api/display-inventory-room/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

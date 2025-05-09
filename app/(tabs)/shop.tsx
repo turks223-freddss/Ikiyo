@@ -63,7 +63,7 @@ const ShopScreen = () => {
     if (!user || !user.userID) return; // Prevent empty request
     console.log("Current user:", user); // Debugging step
     
-    fetch("http://192.168.164.231:8081/api/user/", {
+    fetch("http://192.168.1.5:8081/api/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ const ShopScreen = () => {
 
   // Fetch items from API
   useEffect(() => {
-    fetch("http://192.168.164.231:8081/api/items") // Replace with your actual API URL
+    fetch("http://192.168.1.5:8081/api/items") // Replace with your actual API URL
       .then((response) => response.json())
       .then((data) => {
         setItems(data); // Set items from API
@@ -102,7 +102,7 @@ const ShopScreen = () => {
   const fetchUserInventory = () => {
     if (!user || !user.userID) return;
   
-    fetch("http://192.168.164.231:8081/api/user-inventory/", {
+    fetch("http://192.168.1.5:8081/api/user-inventory/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -136,7 +136,7 @@ const ShopScreen = () => {
     }
 
     try {
-      const response = await fetch("http://192.168.164.231:8081/api/buy-item/", {
+      const response = await fetch("http://192.168.1.5:8081/api/buy-item/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
