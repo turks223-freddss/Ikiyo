@@ -12,6 +12,7 @@ import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsI
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
+import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 
 export default function Home() {
   const router = useRouter();
@@ -249,7 +250,7 @@ export default function Home() {
           visible={true} 
           onClose={() => toggleOverlay("overlayprofile")}
           tabs={3}
-          tab1={<DailyTask/>}
+          tab1={<MainProfile/>}
           tab1icon={AvatarIcon}
           tab1label={"Profile"}
           tab2={<MyJournal/>}
