@@ -1,9 +1,29 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { HeartIcon } from "../../../assets/images/homeIcons";
 
-const ProfilePage: React.FC = () => {
+interface ProfilePageProps {
+  userid: number;
+  username?: string;
+  hashtag?: string;
+  description?: string;
+  dateJoined?: string;
+  partner?: string;
+  school?: string;
+  hearts?: number;
+  outfits?: number;
+}
+
+const ProfilePage: React.FC<ProfilePageProps> = ({
+  username = "John Doe",
+  hashtag = "#john_doe123",
+  description = "A short description about the user goes here. This is a bio section.",
+  dateJoined = "January 1, 2020",
+  partner = "N/A",
+  school = "Unknown School",
+  hearts = 321,
+  outfits = 123,
+}) => {
   return (
     <View style={styles.container}>
       {/* Left Side */}
@@ -18,11 +38,11 @@ const ProfilePage: React.FC = () => {
         <View style={styles.iconRow}>
           <View style={styles.iconText}>
             <Image source={HeartIcon} style={styles.iconImage} />
-            <Text style={styles.iconLabel}>321</Text>
+            <Text style={styles.iconLabel}> {hearts}</Text>
           </View>
           <View style={styles.iconText}>
             <Image source={HeartIcon} style={styles.iconImage} />
-            <Text style={styles.iconLabel}>321</Text>
+            <Text style={styles.iconLabel}> {outfits}</Text>
           </View>
         </View>
       </View>
@@ -33,19 +53,24 @@ const ProfilePage: React.FC = () => {
           source={{ uri: 'https://via.placeholder.com/150' }}
           style={styles.avatar}
         />
-        <Text style={styles.username}>John Doe</Text>
-        <Text style={styles.hashtag}>#john_doe123</Text>
+        <Text style={styles.username}>{username}</Text>
+        <Text style={styles.hashtag}>{hashtag}</Text>
 
         <View style={styles.descriptionBox}>
-          <Text style={styles.descriptionText}>
-            A short description about the user goes here. This is a bio section.
-          </Text>
+          <Text style={styles.descriptionText}>{description}</Text>
         </View>
 
         <View style={styles.additionalTexts}>
-          <Text style={styles.infoLabel}>Date joined:</Text>
-          <Text style={styles.infoLabel}>Partner:</Text>
-          <Text style={styles.infoLabel}>School:</Text>
+          <Text style={styles.infoLabel}>Date joined: {dateJoined}</Text>
+          <Text style={styles.infoLabel}>Partner: {partner}</Text>
+          <Text style={styles.infoLabel}>School: {school}</Text>
+        </View>
+
+        {/* Flex-spacer container to push button to bottom */}
+        <View style={styles.editButtonContainer}>
+          <TouchableOpacity style={styles.editButton} onPress={() => {}}>
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -58,7 +83,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   leftContainer: {
     flex: 1,
@@ -88,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconImage: {
-    width: 36, // slightly bigger
+    width: 36,
     height: 36,
   },
   iconLabel: {
@@ -121,7 +145,7 @@ const styles = StyleSheet.create({
   hashtag: {
     fontSize: 14,
     color: '#777',
-    marginBottom: 16, // spacing before description
+    marginBottom: 16,
   },
   descriptionBox: {
     height: '40%',
@@ -140,12 +164,30 @@ const styles = StyleSheet.create({
   additionalTexts: {
     alignSelf: 'flex-start',
     width: '100%',
-    gap: 10, // gap between each info row
+    gap: 10,
   },
   infoLabel: {
     fontSize: 15,
     color: '#333',
     fontWeight: '400',
+  },
+  editButtonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    width: '100%',
+    paddingTop: 10,
+  },
+  editButton: {
+    backgroundColor: '#4a90e2',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
