@@ -1,192 +1,145 @@
 import React, { useState } from 'react';
 import TaskCard from '../../assets/Tasks/MyJournalTaskCard';
-import TaskDetail  from '../../assets/Tasks/TaskDetail';
+import TaskDetail from '../../assets/Tasks/TaskDetail';
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    FlatList,
-    TouchableOpacity,
-    TextInput,
-    Button,
-    Image,
-    ImageSourcePropType,
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  useWindowDimensions,
+  PixelRatio,
 } from 'react-native';
 
-// Task structure using your format
-type TaskData = {
-    questImage: ImageSourcePropType;
-    titleName: string;
-    rewardImage: ImageSourcePropType;
-    reward?: number;
-    description?: string;
-    previewImage?: ImageSourcePropType;
+const { width, height } = Dimensions.get('window');
+
+const normalize = (size: number) => {
+  const scale = Math.min(width / 375, 1);
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
 };
 
-// Sample task data
+type TaskData = {
+  questImage: any;
+  titleName: string;
+  rewardImage: any;
+  reward?: number;
+  description?: string;
+  previewImage?: any;
+};
+
 const tasks: TaskData[] = [
-    {
-        questImage: require('../../../assets/images/homeIcons/avatar.png'),
-        titleName: 'Defeat 5 Enemies',
-        rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-        reward: 100,
-        description: 'Eliminate 5 enemies in the field to protect the village.',
-        previewImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-    },
-    {
-        questImage: require('../../../assets/images/homeIcons/avatar.png'),
-        titleName: 'Block 10 Attacks',
-        rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-        reward: 150,
-        description: 'Use your shield to block 10 incoming attacks.',
-    },
+  {
+    questImage: require('../../../assets/images/homeIcons/avatar.png'),
+    titleName: 'Defeat 5 Enemies',
+    rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
+    reward: 100,
+    description: 'Eliminate 5 enemies in the field to protect the village.',
+    previewImage: require('../../../assets/images/homeIcons/ikicoin.png'),
+  },
+  {
+    questImage: require('../../../assets/images/homeIcons/avatar.png'),
+    titleName: 'Block 10 Attacks',
+    rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
+    reward: 150,
+    description: 'Use your shield to block 10 incoming attacks.',
+  },
 ];
 
 const MyJournal: React.FC = () => {
-const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
-const [isSubmitting, setIsSubmitting] = useState(false);
-const [submissionText, setSubmissionText] = useState('');
+  const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionText, setSubmissionText] = useState('');
+  const { width } = useWindowDimensions();
 
-    return (
-        <View style={styles.container}>
-        <Text style={styles.title}>My Journal</Text>
+  const isSmallScreen = width < 600;
 
-        <View style={styles.content}>
-            {/* Left: Task List */}
-            <View style={styles.leftColumn}>
-            <FlatList
-                data={tasks}
-                keyExtractor={(_, index) => index.toString()}
-                contentContainerStyle={styles.taskList}
-                renderItem={({ item }) => (
-                    <TaskCard
-                        questImage={item.questImage}
-                        titleName={item.titleName}
-                        rewardImage={item.rewardImage}
-                        reward={item.reward}
-                        onPress={() => {
-                        setSelectedTask(item);
-                        setIsSubmitting(false);
-                        }}
-                    />
-                )}
-            />
-            </View>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>My Journal</Text>
 
-            {/* Right: Task Details */}
-            <View style={styles.rightColumn}>
-            {selectedTask && (
-                <TaskDetail
-                    selectedTask={selectedTask}
-                    isSubmitting={isSubmitting}
-                    submissionText={submissionText}
-                    setIsSubmitting={setIsSubmitting}
-                    setSubmissionText={setSubmissionText}
-                />
+      <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
+        <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
+          <FlatList
+            data={tasks}
+            keyExtractor={(_, index) => index.toString()}
+            contentContainerStyle={styles.taskList}
+            renderItem={({ item }) => (
+              <TaskCard
+                questImage={item.questImage}
+                titleName={item.titleName}
+                rewardImage={item.rewardImage}
+                reward={item.reward}
+                isSelf={1}
+                onPress={() => {
+                  setSelectedTask(item);
+                  setIsSubmitting(false);
+                }}
+              />
             )}
-            </View>
+          />
         </View>
+
+        <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
+          {selectedTask && (
+            <TaskDetail
+              selectedTask={selectedTask}
+              isSubmitting={isSubmitting}
+              submissionText={submissionText}
+              isSelf={1}
+              setIsSubmitting={setIsSubmitting}
+              setSubmissionText={setSubmissionText}
+            />
+          )}
         </View>
-    );
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        width: "100%",
-        paddingTop: 20,
-        paddingHorizontal: 16,
-        backgroundColor: '#f4f4f4',
-        paddingBottom: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#333',
-        marginBottom: 20,
-        textTransform: 'uppercase',
-    },
-    content: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    leftColumn: {
-        flex: 1,
-        paddingRight: 8,
-    },
-    rightColumn: {
-        flex: 1,
-        paddingLeft: 8,
-        
-        backgroundColor: "white",
-    },
-    taskList: {
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 10,
-        marginBottom: 12,
-        elevation: 2,
-    },
-    icon: {
-        width: 40,
-        height: 40,
-        marginBottom: 6,
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    rewardRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 6,
-    },
-    rewardIcon: {
-        width: 16,
-        height: 16,
-        marginRight: 4,
-    },
-    reward: {
-        fontSize: 14,
-        color: '#666',
-    },
-    details: {
-        paddingBottom: 20,
-    },
-    detailTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    description: {
-        fontSize: 16,
-        marginBottom: 10,
-    },
-    image: {
-        width: '100%',
-        height: 150,
-        borderRadius: 8,
-        marginBottom: 10,
-    },
-    input: {
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10,
-        minHeight: 80,
-        marginBottom: 10,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 12,
-        marginTop: 10,
-    },
+  container: {
+    flex: 1,
+    width: '100%',
+    paddingTop: height * 0.03,
+    paddingHorizontal: width * 0.04,
+    paddingBottom: height * 0.03,
+    backgroundColor: '#f4f4f4',
+    justifyContent: 'flex-start',
+  },
+  title: {
+    fontSize: normalize(14),
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: height * 0.02,
+    textTransform: 'uppercase',
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: normalize(8),
+  },
+  contentColumn: {
+    flexDirection: 'column',
+  },
+  leftColumn: {
+    width: '40%',  // Adjust to 30% width
+    paddingRight: normalize(4),
+  },
+  rightColumn: {
+    width: '60%',  // Adjust to 70% width
+    paddingLeft: normalize(4),
+    backgroundColor: 'white',
+  },
+  fullWidth: {
+    width: '100%',
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  taskList: {
+    paddingBottom: normalize(10),
+  },
 });
 
 export default MyJournal;
