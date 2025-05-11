@@ -309,8 +309,19 @@ class BuddyRequestView(APIView):
         return Response({'message': f'Buddy relationship with {buddy_username} has been removed.'}, status=status.HTTP_200_OK)
     
 class TaskActionView(APIView):
+    def get_reward(self, difficulty_level):
+        reward_map = {
+            'very easy': 10,
+            'easy': 20,
+            'normal': 30,
+            'hard': 40,
+            'very hard': 50
+        }
+        return reward_map.get(difficulty_level.lower(), 0)
+
     def post(self, request):
-        action = request.data.get('action', 'create')  # Default to 'create' if no action is provided
+        print("Received data:", request.data)  # <-- This line will log the incoming POST data
+        action = request.data.get('action', 'create')
         user_id = request.data.get('userID')
 
         if not user_id:
@@ -318,7 +329,6 @@ class TaskActionView(APIView):
 
         user = get_object_or_404(User, userID=user_id)
 
-        # ===== CREATE =====
         if action == 'create':
             if not user.buddy:
                 return Response({"error": "This user does not have a buddy to assign the task to."}, status=status.HTTP_400_BAD_REQUEST)
@@ -326,10 +336,13 @@ class TaskActionView(APIView):
             task_title = request.data.get('task_title')
             task_description = request.data.get('task_description')
             difficulty_level = request.data.get('difficulty_level')
-            attachment = request.FILES.get('attachment')
+            attachment = request.data.get('attachment')  # Expect URL now
+            icon = request.data.get('icon')  # New field
 
             if not all([task_title, task_description, difficulty_level]):
                 return Response({"error": "task_title, task_description, and difficulty_level are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            reward = self.get_reward(difficulty_level)
 
             task = Task.objects.create(
                 assigned_by=user,
@@ -337,12 +350,13 @@ class TaskActionView(APIView):
                 task_title=task_title,
                 task_description=task_description,
                 difficulty_level=difficulty_level,
-                attachment=attachment
+                attachment=attachment,
+                reward=reward,
+                icon=icon
             )
             serializer = TaskSerializer(task)
             return Response({"message": "Task created successfully.", "task": serializer.data}, status=status.HTTP_201_CREATED)
 
-        # ===== EDIT =====
         elif action == 'edit':
             task_id = request.data.get('task_id')
             if not task_id:
@@ -350,11 +364,11 @@ class TaskActionView(APIView):
 
             task = get_object_or_404(Task, id=task_id)
 
-            # Update only the fields provided
             task_title = request.data.get('task_title')
             task_description = request.data.get('task_description')
             difficulty_level = request.data.get('difficulty_level')
-            attachment = request.FILES.get('attachment')
+            attachment = request.data.get('attachment')  # Expect URL now
+            icon = request.data.get('icon')
 
             if task_title:
                 task.task_title = task_title
@@ -362,14 +376,16 @@ class TaskActionView(APIView):
                 task.task_description = task_description
             if difficulty_level:
                 task.difficulty_level = difficulty_level
+                task.reward = self.get_reward(difficulty_level)
             if attachment:
                 task.attachment = attachment
+            if icon:
+                task.icon = icon
 
             task.save()
             serializer = TaskSerializer(task)
             return Response({"message": "Task updated successfully.", "task": serializer.data}, status=status.HTTP_200_OK)
 
-        # ===== DELETE =====
         elif action == 'delete':
             task_id = request.data.get('task_id')
             if not task_id:
@@ -377,37 +393,153 @@ class TaskActionView(APIView):
 
             task = get_object_or_404(Task, id=task_id)
 
-            # Check if the user is the one who assigned the task
             if task.assigned_by != user:
                 return Response({"error": "Only the user who assigned this task can delete it."}, status=status.HTTP_403_FORBIDDEN)
 
             task.delete()
             return Response({"message": "Task deleted successfully."}, status=status.HTTP_200_OK)
-        
-          # ===== LIST - Assigned by User =====
+
         elif action == 'list_assigned_by':
-            # List tasks assigned by the user
             tasks_assigned = Task.objects.filter(assigned_by=user)
 
             if not tasks_assigned.exists():
                 return Response({"message": "No tasks assigned by this user."}, status=status.HTTP_404_NOT_FOUND)
 
-            # Serialize the tasks and return them
             serializer = TaskSerializer(tasks_assigned, many=True)
             return Response({"tasks_assigned_by_user": serializer.data}, status=status.HTTP_200_OK)
 
-        # ===== LIST - Assigned to User =====
         elif action == 'list_assigned_to':
-            # List tasks assigned to the user
             tasks_received = Task.objects.filter(assigned_to=user)
 
             if not tasks_received.exists():
                 return Response({"message": "No tasks assigned to this user."}, status=status.HTTP_404_NOT_FOUND)
 
-            # Serialize the tasks and return them
             serializer = TaskSerializer(tasks_received, many=True)
             return Response({"tasks_assigned_to_user": serializer.data}, status=status.HTTP_200_OK)
 
+        else:
+            return Response({"error": "Invalid action. Use 'create', 'edit', or 'delete'."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FriendActionView(APIView):
+    def post(self, request):
+        action = request.data.get('action')
+        user_id = request.data.get('userID')
+
+        if not user_id:
+            return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = get_object_or_404(User, userID=user_id)
+
+        # ===== ADD FRIEND =====
+        if action == 'add_friend':
+            to_user_id = request.data.get('to_user_id')
+            if not to_user_id:
+                return Response({"error": "to_user_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+            to_user = get_object_or_404(User, userID=to_user_id)
+
+            if FriendRequest.objects.filter(from_user=user, to_user=to_user).exists():
+                return Response({"error": "Friend request already sent."}, status=status.HTTP_400_BAD_REQUEST)
+
+            FriendRequest.objects.create(from_user=user, to_user=to_user)
+            return Response({"message": "Friend request sent."}, status=status.HTTP_201_CREATED)
+
+        # ===== DECLINE FRIEND =====
+        elif action == 'decline_friend':
+            request_id = request.data.get('request_id')
+            friend_request = get_object_or_404(FriendRequest, id=request_id, to_user=user)
+            friend_request.delete()
+            return Response({"message": "Friend request declined."}, status=status.HTTP_200_OK)
+
+        # ===== REMOVE REQUEST =====
+        elif action == 'remove_request':
+            request_id = request.data.get('request_id')
+            friend_request = get_object_or_404(FriendRequest, id=request_id, from_user=user)
+            friend_request.delete()
+            return Response({"message": "Friend request canceled."}, status=status.HTTP_200_OK)
+
+        # ===== ACCEPT FRIEND =====
+        elif action == 'accept_friend':
+            request_id = request.data.get('request_id')
+            friend_request = get_object_or_404(FriendRequest, id=request_id, to_user=user)
+
+            # Save accepted friendship
+            FriendList.objects.create(from_user=friend_request.from_user, to_user=friend_request.to_user, accepted=True)
+            friend_request.delete()
+            return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
+
+        # ===== VIEW FRIENDS =====
+        elif action == 'view_friends':
+            friends = FriendList.objects.filter(
+                Q(from_user=user) | Q(to_user=user),
+                accepted=True
+            )
+            friend_usernames = []
+            for friend in friends:
+                if friend.from_user == user:
+                    friend_usernames.append(friend.to_user.username)
+                else:
+                    friend_usernames.append(friend.from_user.username)
+            return Response({"friends": friend_usernames}, status=status.HTTP_200_OK)
+         # ===== VIEW FRIENDS_REQUEST =====
+        elif action == 'view_friend_requests':
+            requests = FriendRequest.objects.filter(to_user=user)
+            request_list = []
+            for fr in requests:
+                request_list.append({
+                    "request_id": fr.id,
+                    "from_user_id": fr.from_user.userID,
+                    "from_username": fr.from_user.username,
+                    "created_at": fr.created_at
+                })
+            return Response({"friend_requests": request_list}, status=status.HTTP_200_OK)
+
+        else:
+            return Response({"error": "Invalid action. Use 'add_friend', 'decline_friend', 'remove_request', 'accept_friend', or 'view_friends'."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChatView(APIView):
+    def post(self, request):
+        action = request.data.get('action')
+        user_id = request.data.get('userID')
+        user = get_object_or_404(User, userID=user_id)
+
+        if action == 'send_message':
+            recipient_id = request.data.get('recipient_id')
+            content = request.data.get('content')
+
+            if not all([recipient_id, content]):
+                return Response({"error": "recipient_id and content are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            recipient = get_object_or_404(User, userID=recipient_id)
+
+            # Check if they are friends
+            is_friend = FriendList.objects.filter(
+                (Q(from_user=user, to_user=recipient) | Q(from_user=recipient, to_user=user)),
+                accepted=True
+            ).exists()
+
+            if not is_friend:
+                return Response({"error": "You can only chat with friends."}, status=status.HTTP_403_FORBIDDEN)
+
+            message = Message.objects.create(sender=user, recipient=recipient, content=content)
+            serializer = MessageSerializer(message)
+            return Response({"message": "Message sent.", "data": serializer.data}, status=status.HTTP_201_CREATED)
+
+        elif action == 'get_messages':
+            friend_id = request.data.get('friend_id')
+            if not friend_id:
+                return Response({"error": "friend_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            friend = get_object_or_404(User, userID=friend_id)
+
+            # Get messages between the two users
+            messages = Message.objects.filter(
+                (Q(sender=user, recipient=friend) | Q(sender=friend, recipient=user))
+            ).order_by('timestamp')
+
+            serializer = MessageSerializer(messages, many=True)
+            return Response({"messages": serializer.data}, status=status.HTTP_200_OK)
 
         else:
             return Response({"error": "Invalid action. Use 'create', 'edit', or 'delete'."}, status=status.HTTP_400_BAD_REQUEST)

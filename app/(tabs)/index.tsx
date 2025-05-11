@@ -7,8 +7,12 @@ import FeatureButton from "../assets/FeatureButton";
 import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
-import AdContent from "../assets/AdContent"; 
+import AdContent from "../contents/AdContent"; 
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+import DailyTask from "../contents/TaskContent/DailyTask";
+import MyJournal from "../contents/TaskContent/MyJournalTask";
+import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
+import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface UserData {
@@ -26,58 +30,57 @@ export default function Home() {
   const router = useRouter();
   const { width, height } = Dimensions.get("window");
   const [user, setUser] = useState<{
-      userID: number;
-    } | null>(null);
+        userID: number;
+      } | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await AsyncStorage.getItem("user");
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          if (typeof parsedUser === "number") {
-            setUser({ userID: parsedUser }); // Convert number to object
-          } else {
-            setUser(parsedUser);
+      const fetchUserData = async () => {
+        try {
+          const userData = await AsyncStorage.getItem("user");
+          if (userData) {
+            const parsedUser = JSON.parse(userData);
+            if (typeof parsedUser === "number") {
+              setUser({ userID: parsedUser }); // Convert number to object
+            } else {
+              setUser(parsedUser);
+            }
           }
+        } catch (error) {
+          console.error("Error retrieving user data:", error);
         }
-      } catch (error) {
-        console.error("Error retrieving user data:", error);
-      }
-    };
-    // #jandkjasdakdj
-    fetchUserData();
-  }, []);
-
-  useEffect(() => {
-      if (!user || !user.userID) return; // Prevent empty request
-      // console.log("Current user:", user); // Debugging step
-      
+      };
+      // #jandkjasdakdj
+      fetchUserData();
+    }, []);
   
-      fetch("http://192.168.1.5:8081/api/user/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userID:user.userID }),
-      })
-  
-      .then(async (response) => {
-        const text = await response.text(); // Read raw response
-        // console.log("Raw response:", text);
-        return JSON.parse(text);
-      })
-  
-      .then((data) => {
-        // console.log("Fetched user data:", data);
-        setUserData(data);
-      })
-  
-        .catch((error) => console.error("Error fetching user data:", error));
-      
-  }, [user]); // Runs when `user` changes
-
+    useEffect(() => {
+        if (!user || !user.userID) return; // Prevent empty request
+        // console.log("Current user:", user); // Debugging step
+        
+    
+        fetch("http://192.168.1.5:8081/api/user/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userID:user.userID }),
+        })
+    
+        .then(async (response) => {
+          const text = await response.text(); // Read raw response
+          // console.log("Raw response:", text);
+          return JSON.parse(text);
+        })
+    
+        .then((data) => {
+          // console.log("Fetched user data:", data);
+          setUserData(data);
+        })
+    
+          .catch((error) => console.error("Error fetching user data:", error));
+        
+    }, [user]); // Runs when `user` changes
 
   // Overlay state management
   const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
@@ -179,6 +182,7 @@ export default function Home() {
             imageUri="https://www.w3schools.com/w3images/avatar2.png"
             username={userData?.username}
             hashtag={`#${userData?.userID}`}
+            onPress={() => toggleOverlay("overlayprofile")} 
           />
 
           <View style={{ alignItems: "flex-end", gap: 10 }}>
@@ -243,7 +247,7 @@ export default function Home() {
           <View style={styles.bottomButtons}>
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/edit")}
+                onPress={() => router.push("/tasks")}
                 icon={<Image source={EditRoomIcon} style={{ width: 50, height:40}} />} 
                 size={90}
               />
@@ -251,7 +255,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/tasks")}
+                onPress={() => router.push("/avatar")}
                 icon={<Image source={AvatarIcon} style={{ width: 50, height:40}} />} 
                 size={90}
               />
@@ -259,7 +263,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/tasks")}
+                onPress={() => toggleOverlay("overlaytask")} 
                 icon={<Image source={TaskIcon} style={{ width: 50, height:40}} />} 
                 size={90}
               />
@@ -269,16 +273,60 @@ export default function Home() {
 
         {/* Overlay Logic */}
         {overlays.overlayad && (
-          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlayad")}>
-            <AdContent/>
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayad")} 
+          tabs={1} 
+          tab1={<AdContent/>}>
           </OverlayWindow>
         )}
 
         {overlays.overlayevent && (
-          <OverlayWindow visible={true} onClose={() => toggleOverlay("overlayevent")}>
-            <EventsContent />
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayevent")}
+          tabs={1}
+          tab1={<EventsContent/>}
+          >
           </OverlayWindow>
         )}
+
+        {overlays.overlaytask && (
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlaytask")}
+          tabs={3}
+          tab1={<DailyTask/>}
+          tab1icon={AvatarIcon}
+          tab1label={"Daily Task"}
+          tab2={<MyJournal/>}
+          tab2icon={AvatarIcon}
+          tab2label={"My Task"}
+          tab3={<PartnerJournal/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Partner Task"}
+          >
+          </OverlayWindow>
+        )}
+
+        {overlays.overlayprofile && (
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayprofile")}
+          tabs={3}
+          tab1={<MainProfile/>}
+          tab1icon={AvatarIcon}
+          tab1label={"Profile"}
+          tab2={<MyJournal/>}
+          tab2icon={AvatarIcon}
+          tab2label={"Partner Profile"}
+          tab3={<EventsContent/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Settings"}
+          >
+          </OverlayWindow>
+        )}
+
       </View>
     </View>
   );

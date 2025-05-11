@@ -102,7 +102,9 @@ class Task(models.Model):
     task_title = models.CharField(max_length=255)
     task_description = models.TextField()
     difficulty_level = models.CharField(max_length=50)
-    attachment = models.FileField(upload_to='task_attachments/', null=True, blank=True)
+    attachment = models.URLField(max_length=500, null=True, blank=True)
+    reward = models.IntegerField(default=0)
+    icon = models.URLField(max_length=500, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
