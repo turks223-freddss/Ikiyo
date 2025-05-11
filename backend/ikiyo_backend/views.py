@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .models import User, Item, Inventory, PartnerRequest,Task, FriendList, FriendRequest, Message
+from .models import User, Item, Inventory, PartnerRequest,Task, FriendList, FriendRequest, Message, Avatar
 from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSerializer, MessageSerializer
 from django.shortcuts import get_object_or_404
 import json
@@ -16,6 +16,10 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]  # For testing, allows any request (Change in production)
+    def perform_create(self, serializer):
+        user = serializer.save()
+        # Create an Avatar linked to this user
+        Avatar.objects.create(user=user)
 
 # Login API View
 class LoginView(APIView):
@@ -666,3 +670,27 @@ class ChatView(APIView):
 
         else:
             return Response({"error": "Invalid action. Use 'send_message' or 'get_messages'."}, status=status.HTTP_400_BAD_REQUEST)
+
+class RetrieveAvatarView(APIView):
+    def post(self, request):
+        user_id = request.data.get("userID")
+
+        if not user_id:
+            return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            avatar = Avatar.objects.get(user__userID=user_id)
+            avatar_data = {
+                "avatarID": avatar.avatarID,
+                "userID": avatar.user.userID,
+                "head": avatar.head,
+                "body": avatar.body,
+                "left_arm": avatar.left_arm,
+                "right_arm": avatar.right_arm,
+                "left_leg": avatar.left_leg,
+                "right_leg": avatar.right_leg,
+            }
+            return Response(avatar_data, status=status.HTTP_200_OK)
+
+        except Avatar.DoesNotExist:
+            return Response({"error": "Avatar not found for the given userID."}, status=status.HTTP_404_NOT_FOUND)
