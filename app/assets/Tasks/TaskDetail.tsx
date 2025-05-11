@@ -12,8 +12,8 @@ import {
 
 type TaskDetailProps = {
   selectedTask: {
-    titleName: string;
-    description?: string;
+    task_title: string;
+    task_description?: string;
     previewImage?: ImageSourcePropType;
   } | null;
   isSubmitting: boolean;
@@ -34,11 +34,11 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.details}>
-        <Text style={styles.detailTitle}>{selectedTask.titleName}</Text>
+        <Text style={styles.detailTitle}>{selectedTask.task_title}</Text>
 
         {!isSubmitting ? (
           <>
-            <Text style={styles.description}>{selectedTask.description}</Text>
+            <Text style={styles.description}>{selectedTask.task_description}</Text>
             {selectedTask.previewImage && (
               <Image source={selectedTask.previewImage} style={styles.image} resizeMode="contain" />
             )}

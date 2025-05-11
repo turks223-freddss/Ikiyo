@@ -309,8 +309,19 @@ class BuddyRequestView(APIView):
         return Response({'message': f'Buddy relationship with {buddy_username} has been removed.'}, status=status.HTTP_200_OK)
     
 class TaskActionView(APIView):
+    def get_reward(self, difficulty_level):
+        reward_map = {
+            'very easy': 10,
+            'easy': 20,
+            'normal': 30,
+            'hard': 40,
+            'very hard': 50
+        }
+        return reward_map.get(difficulty_level.lower(), 0)
+
     def post(self, request):
-        action = request.data.get('action', 'create')  # Default to 'create' if no action is provided
+        print("Received data:", request.data)  # <-- This line will log the incoming POST data
+        action = request.data.get('action', 'create')
         user_id = request.data.get('userID')
 
         if not user_id:
@@ -318,7 +329,6 @@ class TaskActionView(APIView):
 
         user = get_object_or_404(User, userID=user_id)
 
-        # ===== CREATE =====
         if action == 'create':
             if not user.buddy:
                 return Response({"error": "This user does not have a buddy to assign the task to."}, status=status.HTTP_400_BAD_REQUEST)
@@ -326,10 +336,13 @@ class TaskActionView(APIView):
             task_title = request.data.get('task_title')
             task_description = request.data.get('task_description')
             difficulty_level = request.data.get('difficulty_level')
-            attachment = request.FILES.get('attachment')
+            attachment = request.data.get('attachment')  # Expect URL now
+            icon = request.data.get('icon')  # New field
 
             if not all([task_title, task_description, difficulty_level]):
                 return Response({"error": "task_title, task_description, and difficulty_level are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            reward = self.get_reward(difficulty_level)
 
             task = Task.objects.create(
                 assigned_by=user,
@@ -337,12 +350,13 @@ class TaskActionView(APIView):
                 task_title=task_title,
                 task_description=task_description,
                 difficulty_level=difficulty_level,
-                attachment=attachment
+                attachment=attachment,
+                reward=reward,
+                icon=icon
             )
             serializer = TaskSerializer(task)
             return Response({"message": "Task created successfully.", "task": serializer.data}, status=status.HTTP_201_CREATED)
 
-        # ===== EDIT =====
         elif action == 'edit':
             task_id = request.data.get('task_id')
             if not task_id:
@@ -350,11 +364,11 @@ class TaskActionView(APIView):
 
             task = get_object_or_404(Task, id=task_id)
 
-            # Update only the fields provided
             task_title = request.data.get('task_title')
             task_description = request.data.get('task_description')
             difficulty_level = request.data.get('difficulty_level')
-            attachment = request.FILES.get('attachment')
+            attachment = request.data.get('attachment')  # Expect URL now
+            icon = request.data.get('icon')
 
             if task_title:
                 task.task_title = task_title
@@ -362,14 +376,16 @@ class TaskActionView(APIView):
                 task.task_description = task_description
             if difficulty_level:
                 task.difficulty_level = difficulty_level
+                task.reward = self.get_reward(difficulty_level)
             if attachment:
                 task.attachment = attachment
+            if icon:
+                task.icon = icon
 
             task.save()
             serializer = TaskSerializer(task)
             return Response({"message": "Task updated successfully.", "task": serializer.data}, status=status.HTTP_200_OK)
 
-        # ===== DELETE =====
         elif action == 'delete':
             task_id = request.data.get('task_id')
             if not task_id:
@@ -377,40 +393,33 @@ class TaskActionView(APIView):
 
             task = get_object_or_404(Task, id=task_id)
 
-            # Check if the user is the one who assigned the task
             if task.assigned_by != user:
                 return Response({"error": "Only the user who assigned this task can delete it."}, status=status.HTTP_403_FORBIDDEN)
 
             task.delete()
             return Response({"message": "Task deleted successfully."}, status=status.HTTP_200_OK)
-        
-          # ===== LIST - Assigned by User =====
+
         elif action == 'list_assigned_by':
-            # List tasks assigned by the user
             tasks_assigned = Task.objects.filter(assigned_by=user)
 
             if not tasks_assigned.exists():
                 return Response({"message": "No tasks assigned by this user."}, status=status.HTTP_404_NOT_FOUND)
 
-            # Serialize the tasks and return them
             serializer = TaskSerializer(tasks_assigned, many=True)
             return Response({"tasks_assigned_by_user": serializer.data}, status=status.HTTP_200_OK)
 
-        # ===== LIST - Assigned to User =====
         elif action == 'list_assigned_to':
-            # List tasks assigned to the user
             tasks_received = Task.objects.filter(assigned_to=user)
 
             if not tasks_received.exists():
                 return Response({"message": "No tasks assigned to this user."}, status=status.HTTP_404_NOT_FOUND)
 
-            # Serialize the tasks and return them
             serializer = TaskSerializer(tasks_received, many=True)
             return Response({"tasks_assigned_to_user": serializer.data}, status=status.HTTP_200_OK)
 
-
         else:
             return Response({"error": "Invalid action. Use 'create', 'edit', or 'delete'."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class FriendActionView(APIView):
     def post(self, request):

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskCard from '../../assets/Tasks/MyJournalTaskCard';
 import TaskDetail  from '../../assets/Tasks/TaskDetail';
 import {
@@ -12,81 +12,125 @@ import {
     Button,
     Image,
     ImageSourcePropType,
+    Alert,
 } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Task structure using your format
 type TaskData = {
-    questImage: ImageSourcePropType;
-    titleName: string;
-    rewardImage: ImageSourcePropType;
-    reward?: number;
-    description?: string;
-    previewImage?: ImageSourcePropType;
+    id: number;
+    task_title: string;
+    task_description: string;
+    difficulty_level: string;
+    reward: number;
+    attachment?: string | null;
+    icon?: string | null;
+    created_at: string;
+    updated_at: string;
+    assigned_by: number;
+    assigned_to: number;
 };
-
-// Sample task data
-const tasks: TaskData[] = [
-    {
-        questImage: require('../../../assets/images/homeIcons/avatar.png'),
-        titleName: 'Defeat 5 Enemies',
-        rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-        reward: 100,
-        description: 'Eliminate 5 enemies in the field to protect the village.',
-        previewImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-    },
-    {
-        questImage: require('../../../assets/images/homeIcons/avatar.png'),
-        titleName: 'Block 10 Attacks',
-        rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-        reward: 150,
-        description: 'Use your shield to block 10 incoming attacks.',
-    },
-];
 
 const MyJournal: React.FC = () => {
 const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
-const [isSubmitting, setIsSubmitting] = useState(false);
-const [submissionText, setSubmissionText] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submissionText, setSubmissionText] = useState('');
+    const [user, setUser] = useState<{ userID: number } | null>(null);
+    const [taskList, setTaskList] = useState<TaskData[]>([]);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await AsyncStorage.getItem("user");
+                if (userData) {
+                    const parsedUser = JSON.parse(userData);
+                    if (typeof parsedUser === "number") {
+                        setUser({ userID: parsedUser });
+                    } else {
+                        setUser(parsedUser);
+                    }
+                }
+            } catch (error) {
+                console.error("Error retrieving user data:", error);
+            }
+        };
+        fetchUserData();
+    }, []);
+
+    useEffect(() => {
+        const fetchTasks = async () => {
+            if (!user || !user.userID) return;
+
+            try {
+                const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        action: "list_assigned_to",
+                        userID: user.userID,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data && data.tasks_assigned_to_user) {
+                    setTaskList(data.tasks_assigned_to_user);
+                }
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+                Alert.alert("Error", "Failed to load tasks. Please try again later.");
+            }
+        };
+
+        fetchTasks();
+    }, [user]);
+
+    
 
     return (
         <View style={styles.container}>
-        <Text style={styles.title}>My Journal</Text>
+            <Text style={styles.title}>My Journal</Text>
 
-        <View style={styles.content}>
-            {/* Left: Task List */}
-            <View style={styles.leftColumn}>
-            <FlatList
-                data={tasks}
-                keyExtractor={(_, index) => index.toString()}
-                contentContainerStyle={styles.taskList}
-                renderItem={({ item }) => (
-                    <TaskCard
-                        questImage={item.questImage}
-                        titleName={item.titleName}
-                        rewardImage={item.rewardImage}
-                        reward={item.reward}
-                        onPress={() => {
-                        setSelectedTask(item);
-                        setIsSubmitting(false);
-                        }}
+            <View style={styles.content}>
+                {/* Left: Task List */}
+                <View style={styles.leftColumn}>
+                <FlatList
+                    data={taskList}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.taskList}
+                    renderItem={({ item }) => (
+                        <TaskCard
+                            questImage={require('../../../assets/images/homeIcons/hearts.png')}
+                            titleName={item.task_title}
+                            rewardImage={require('../../../assets/images/homeIcons/hearts.png')}
+                            reward={item.reward}
+                            onPress={() => {
+                                setSelectedTask(item);
+                                setIsSubmitting(false);
+                            }}
+                        />
+                    )}
+                />
+                </View>
+
+                {/* Right: Task Details */}
+                <View style={styles.rightColumn}>
+                {selectedTask && (
+                    <TaskDetail
+                        selectedTask={selectedTask}
+                        isSubmitting={isSubmitting}
+                        submissionText={submissionText}
+                        setIsSubmitting={setIsSubmitting}
+                        setSubmissionText={setSubmissionText}
                     />
                 )}
-            />
+                </View>
             </View>
-
-            {/* Right: Task Details */}
-            <View style={styles.rightColumn}>
-            {selectedTask && (
-                <TaskDetail
-                    selectedTask={selectedTask}
-                    isSubmitting={isSubmitting}
-                    submissionText={submissionText}
-                    setIsSubmitting={setIsSubmitting}
-                    setSubmissionText={setSubmissionText}
-                />
-            )}
-            </View>
-        </View>
         </View>
     );
 };
