@@ -122,6 +122,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                             questImage={require('../../../assets/images/homeIcons/hearts.png')}
                             titleName={item.task_title}
                             rewardImage={require('../../../assets/images/homeIcons/hearts.png')}
+                            isSelf={1}
                             reward={item.reward}
                             onPress={() => {
                                 setSelectedTask(item);
@@ -144,11 +145,8 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                         setSubmissionText={setSubmissionText}
                     />
                 )}
-                </View>
             </View>
-
         </View>
-      </View>
     </View>
   );
 };

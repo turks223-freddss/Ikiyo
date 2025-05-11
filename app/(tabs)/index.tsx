@@ -314,7 +314,7 @@ export default function Home() {
           visible={true} 
           onClose={() => toggleOverlay("overlayprofile")}
           tabs={3}
-          tab1={<MainProfile/>}
+          tab1={<MainProfile userid={user!.userID}></MainProfile>}
           tab1icon={AvatarIcon}
           tab1label={"Profile"}
           tab2={<MyJournal/>}

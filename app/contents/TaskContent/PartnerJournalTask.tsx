@@ -254,7 +254,6 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
               <TaskDetailPT
                 selectedTask={selectedTask}
                 isEditing={isEditing}
-                isSelf={0}
                 submissionText={submissionText}
                 userID={user!.userID}
                 setIsEditing={setIsEditing}
