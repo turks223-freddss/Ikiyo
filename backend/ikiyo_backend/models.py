@@ -41,6 +41,20 @@ class User(models.Model):
     
     def __str__(self):
         return self.username
+
+class Avatar(models.Model):
+    avatarID = models.AutoField(primary_key=True)  # Unique ID for the avatar
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='avatar')
+
+    head = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946049/avatar-head_ailcd2.png")
+    body = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946063/avatar-body_y9kk2p.png")
+    left_arm = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946074/avatar-arm-left_jmkfjo.png")
+    right_arm = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946032/avatar-arm-right_o9hhzy.png")
+    left_leg = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946098/avatar-foot-left_y1zp71.png")
+    right_leg = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946088/avatar-foot-right_mtigq8.png")
+
+    def __str__(self):
+        return f"{self.user.username}'s Avatar"
     
 
 class PartnerRequest(models.Model):

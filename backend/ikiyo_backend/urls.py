@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, LoginView, EditUserView,ItemListView, GetUserByIDView, BuyItemView, UserInventoryView, DisplayInventoryAvatar,DisplayInventoryRoom, BuddyRequestView, TaskActionView, FriendActionView, ChatView
+from .views import UserViewSet, LoginView, EditUserView,ItemListView, GetUserByIDView, BuyItemView, UserInventoryView, DisplayInventoryAvatar,DisplayInventoryRoom, BuddyRequestView, TaskActionView, FriendActionView, ChatView,RetrieveAvatarView
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -19,4 +19,5 @@ urlpatterns = [
     path('task-action/', TaskActionView.as_view(), name='task-action'),
     path('friend-action/', FriendActionView.as_view(), name='friend-action'),
     path('chat/', ChatView.as_view(), name='chat'),
+    path('retrieve-avatar/', RetrieveAvatarView.as_view(), name='retrieve-avatar'),
 ]

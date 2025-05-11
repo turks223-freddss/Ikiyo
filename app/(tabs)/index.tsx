@@ -13,6 +13,8 @@ import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
 import MainProfile from "../contents/ProfileContent/ProfileMainPage"
+import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
+import Settings from "../contents/ProfileContent/Settings"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface UserData {
@@ -314,13 +316,13 @@ export default function Home() {
           visible={true} 
           onClose={() => toggleOverlay("overlayprofile")}
           tabs={3}
-          tab1={<MainProfile/>}
+          tab1={<MainProfile userid={321}></MainProfile>}
           tab1icon={AvatarIcon}
           tab1label={"Profile"}
-          tab2={<MyJournal/>}
+          tab2={<PartnerProfile id={321}/>}
           tab2icon={AvatarIcon}
           tab2label={"Partner Profile"}
-          tab3={<EventsContent/>}
+          tab3={<Settings/>}
           tab3icon={AvatarIcon}
           tab3label={"Settings"}
           >
