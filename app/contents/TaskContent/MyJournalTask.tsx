@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TaskCard from '../../assets/Tasks/MyJournalTaskCard';
-import TaskDetail  from '../../assets/Tasks/TaskDetail';
+import TaskDetail from '../../assets/Tasks/TaskDetail';
 import {
     View,
     Text,
@@ -13,11 +13,22 @@ import {
     Image,
     ImageSourcePropType,
     Alert,
+    Dimensions,
+    useWindowDimensions,
+    PixelRatio,
 } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Task structure using your format
+const { width, height } = Dimensions.get('window');
+
+const normalize = (size: number) => {
+  const scale = Math.min(width / 375, 1);
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
+};
+
 type TaskData = {
+
     id: number;
     task_title: string;
     task_description: string;
@@ -37,6 +48,9 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     const [submissionText, setSubmissionText] = useState('');
     const [user, setUser] = useState<{ userID: number } | null>(null);
     const [taskList, setTaskList] = useState<TaskData[]>([]);
+    const { width } = useWindowDimensions();
+
+    const isSmallScreen = width < 600;
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -96,9 +110,9 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
         <View style={styles.container}>
             <Text style={styles.title}>My Journal</Text>
 
-            <View style={styles.content}>
+            <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
                 {/* Left: Task List */}
-                <View style={styles.leftColumn}>
+                <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
                 <FlatList
                     data={taskList}
                     keyExtractor={(item) => item.id.toString()}
@@ -119,118 +133,69 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 </View>
 
                 {/* Right: Task Details */}
-                <View style={styles.rightColumn}>
+                <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
                 {selectedTask && (
                     <TaskDetail
                         selectedTask={selectedTask}
                         isSubmitting={isSubmitting}
                         submissionText={submissionText}
+                        isSelf={1}
                         setIsSubmitting={setIsSubmitting}
                         setSubmissionText={setSubmissionText}
                     />
                 )}
                 </View>
             </View>
+
         </View>
-    );
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        width: "100%",
-        paddingTop: 20,
-        paddingHorizontal: 16,
-        backgroundColor: '#f4f4f4',
-        paddingBottom: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#333',
-        marginBottom: 20,
-        textTransform: 'uppercase',
-    },
-    content: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    leftColumn: {
-        flex: 1,
-        paddingRight: 8,
-    },
-    rightColumn: {
-        flex: 1,
-        paddingLeft: 8,
-        
-        backgroundColor: "white",
-    },
-    taskList: {
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 10,
-        marginBottom: 12,
-        elevation: 2,
-    },
-    icon: {
-        width: 40,
-        height: 40,
-        marginBottom: 6,
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    rewardRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 6,
-    },
-    rewardIcon: {
-        width: 16,
-        height: 16,
-        marginRight: 4,
-    },
-    reward: {
-        fontSize: 14,
-        color: '#666',
-    },
-    details: {
-        paddingBottom: 20,
-    },
-    detailTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    description: {
-        fontSize: 16,
-        marginBottom: 10,
-    },
-    image: {
-        width: '100%',
-        height: 150,
-        borderRadius: 8,
-        marginBottom: 10,
-    },
-    input: {
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10,
-        minHeight: 80,
-        marginBottom: 10,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 12,
-        marginTop: 10,
-    },
+  container: {
+    flex: 1,
+    width: '100%',
+    paddingTop: height * 0.03,
+    paddingHorizontal: width * 0.04,
+    paddingBottom: height * 0.03,
+    backgroundColor: '#f4f4f4',
+    justifyContent: 'flex-start',
+  },
+  title: {
+    fontSize: normalize(14),
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: height * 0.02,
+    textTransform: 'uppercase',
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: normalize(8),
+  },
+  contentColumn: {
+    flexDirection: 'column',
+  },
+  leftColumn: {
+    width: '40%',  // Adjust to 30% width
+    paddingRight: normalize(4),
+  },
+  rightColumn: {
+    width: '60%',  // Adjust to 70% width
+    paddingLeft: normalize(4),
+    backgroundColor: 'white',
+  },
+  fullWidth: {
+    width: '100%',
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  taskList: {
+    paddingBottom: normalize(10),
+  },
 });
 
 export default MyJournal;

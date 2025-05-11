@@ -3,12 +3,21 @@ import {
   View,
   Text,
   Image,
-  Button,
   TextInput,
   ScrollView,
   StyleSheet,
   ImageSourcePropType,
+  Dimensions,
+  PixelRatio,
+  TouchableOpacity,
 } from 'react-native';
+
+// Normalize function for responsive scaling
+const { width } = Dimensions.get('window');
+const normalize = (size: number) => {
+  const scale = Math.min(width / 375, 1);
+  return Math.round(PixelRatio.roundToNearestPixel(size * scale));
+};
 
 type TaskDetailProps = {
   selectedTask: {
@@ -20,6 +29,7 @@ type TaskDetailProps = {
   submissionText: string;
   setIsSubmitting: (val: boolean) => void;
   setSubmissionText: (val: string) => void;
+  isSelf: 0 | 1;  // New prop to conditionally show/hide the button
 };
 
 const TaskDetail: React.FC<TaskDetailProps> = ({
@@ -28,6 +38,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   submissionText,
   setIsSubmitting,
   setSubmissionText,
+  isSelf,
 }) => {
   if (!selectedTask) return null;
 
@@ -52,23 +63,34 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
               value={submissionText}
               onChangeText={setSubmissionText}
             />
-            <Button title="Add Image" onPress={() => {}} color="#2196F3" />
+            <TouchableOpacity style={styles.addImageButton} onPress={() => {}}>
+              <Text style={styles.addImageButtonText}>Add Image</Text>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>
 
-      {/* Always shows "Add Submission" at the bottom when not submitting */}
-      {!isSubmitting && (
+      {/* Show "Add Submission" button only if isSelf === 1 */}
+      {isSelf === 1 && !isSubmitting && (
         <View style={styles.fixedButtonContainer}>
-          <Button title="Add Submission" onPress={() => setIsSubmitting(true)} color="#4CAF50" />
+          <TouchableOpacity style={styles.smallButton} onPress={() => setIsSubmitting(true)}>
+            <Text style={styles.smallButtonText}>Add Submission</Text>
+          </TouchableOpacity>
         </View>
       )}
 
-      {/* Cancel and Submit buttons appear only when submitting */}
-      {isSubmitting && (
+      {/* Cancel and Submit buttons when submitting */}
+      {isSelf === 1 && isSubmitting && (
         <View style={styles.buttonRow}>
-          <Button title="Cancel" onPress={() => setIsSubmitting(false)} color="#f44336" />
-          <Button title="Submit" onPress={() => {}} color="#4CAF50" />
+          <TouchableOpacity
+            style={[styles.smallButton, styles.cancelButton]}
+            onPress={() => setIsSubmitting(false)}
+          >
+            <Text style={styles.smallButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.smallButton} onPress={() => {}}>
+            <Text style={styles.smallButtonText}>Submit</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -78,57 +100,86 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
-    paddingHorizontal: 20,
+    paddingTop: normalize(6),
+    paddingHorizontal: normalize(12),
   },
   details: {
-    paddingBottom: 100, // Provide space for buttons at the bottom
-    paddingTop: 10,
+    paddingBottom: normalize(60),
+    paddingTop: normalize(6),
   },
   detailTitle: {
-    fontSize: 22,
+    fontSize: normalize(12),
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: normalize(2),
     color: '#333',
   },
   description: {
-    fontSize: 16,
-    marginBottom: 16,
+    fontSize: normalize(9),
+    marginBottom: normalize(8),
     color: '#555',
-    lineHeight: 24,
+    lineHeight: normalize(18),
   },
   image: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    width: '50%',
+    height: normalize(60),
+    borderRadius: normalize(6),
+    marginBottom: normalize(8),
     borderWidth: 1,
     borderColor: '#ddd',
   },
   input: {
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    minHeight: 120,
-    marginBottom: 16,
-    fontSize: 16,
+    borderRadius: normalize(4),
+    padding: normalize(6),
+    minHeight: normalize(80),
+    marginBottom: normalize(8),
+    fontSize: normalize(12),
     color: '#333',
     textAlignVertical: 'top',
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    gap: normalize(8),
+    paddingHorizontal: normalize(12),
+    paddingBottom: normalize(12),
   },
   fixedButtonContainer: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    paddingHorizontal: 20,
+    bottom: normalize(8),
+    left: normalize(12),
+    right: normalize(12),
+    alignItems: 'flex-end',
+  },
+  smallButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: normalize(4),
+    paddingHorizontal: normalize(10),
+    borderRadius: normalize(4),
+    alignItems: 'center',
+  },
+  smallButtonText: {
+    fontSize: normalize(10),
+    color: '#fff',
+    fontWeight: '500',
+  },
+  cancelButton: {
+    backgroundColor: '#f44336',
+  },
+  addImageButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: normalize(4),
+    paddingHorizontal: normalize(10),
+    borderRadius: normalize(4),
+    alignItems: 'center',
+    marginBottom: normalize(8),
+    alignSelf: 'flex-start',
+  },
+  addImageButtonText: {
+    fontSize: normalize(10),
+    color: '#fff',
+    fontWeight: '500',
   },
 });
 
