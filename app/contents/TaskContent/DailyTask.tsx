@@ -1,6 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageSourcePropType } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageSourcePropType,
+  Dimensions,
+  SafeAreaView,
+  PixelRatio,
+} from 'react-native';
 import DailyTask from '../../assets/Tasks/DailyTaskCard';
+
+const { width, height } = Dimensions.get('window');
+
+// Adjusted normalize function (gentler scale)
+const normalize = (size: number) => {
+  const scale = width / 375;
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2; // subtract to tame large fonts
+};
+
 
 type TaskData = {
   questImage: ImageSourcePropType;
@@ -32,47 +50,53 @@ const tasks: TaskData[] = [
 
 const DailyTasksScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
-      {/* Title */}
-      <Text style={styles.title}>Daily Tasks</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Daily Tasks</Text>
 
-      {/* Scrollable task list */}
-      <ScrollView contentContainerStyle={styles.taskList}>
-        {tasks.map((task, index) => (
-          <DailyTask
-            key={index}
-            questImage={task.questImage}
-            titleName={task.titleName}
-            rewardImage={task.rewardImage}
-            reward={task.reward}
-          />
-        ))}
-      </ScrollView>
-    </View>
+        <View style={styles.taskList}>
+          {tasks.map((task, index) => (
+            <DailyTask
+              key={index}
+              questImage={task.questImage}
+              titleName={task.titleName}
+              rewardImage={task.rewardImage}
+              reward={task.reward}
+            />
+          ))}
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#f4f4f4',
+  },
   container: {
     flex: 1,
-    width: '100%',   // Ensure full width
-    paddingTop: 20,
-    paddingHorizontal: 16,
-    backgroundColor: '#f4f4f4', // Light background color
-    paddingBottom: 20, // Space at the bottom
-    borderRadius: 12, // Rounded corners for the container
+    width: '100%',
+    paddingTop: height * 0.03,
+    paddingHorizontal: width * 0.04,
+    paddingBottom: height * 0.03,
+    backgroundColor: '#f4f4f4',
+    justifyContent: 'flex-start',
   },
   title: {
-    fontSize: 24,
+    fontSize: normalize(8),
     fontWeight: 'bold',
-    textAlign: 'center',  // Center the title text
-    color: '#333', // Dark color for title
-    marginBottom: 20, // Space below the title
-    textTransform: 'uppercase', // Optional: makes the title uppercase for emphasis
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: height * 0.02,
+    textTransform: 'uppercase',
   },
   taskList: {
-    width: '100%', // Ensure the ScrollView uses 100% width of the container
-    paddingBottom: 20,
+    flexGrow: 1,
+    justifyContent: 'space-evenly', // space out tasks vertically
+    gap: 10,
   },
 });
 
