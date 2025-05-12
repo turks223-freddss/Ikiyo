@@ -129,10 +129,12 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
               contentContainerStyle={styles.taskList}
               renderItem={({ item }) => (
                 <TaskCard
-                  questImage={require('../../../assets/images/homeIcons/hearts.png')}
+                  questImage={require('../../../assets/images/homeIcons/task.png')}
                   titleName={item.task_title}
-                  rewardImage={require('../../../assets/images/homeIcons/hearts.png')}
+                  rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
                   status={item.status}
+                  userID={user!.userID}
+                  task_id={item.id}
                   reward={item.reward}
                   isSelf={0}
                   onPress={() => {

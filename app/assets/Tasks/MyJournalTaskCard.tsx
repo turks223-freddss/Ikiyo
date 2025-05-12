@@ -8,6 +8,7 @@ import {
   ImageSourcePropType,
   Dimensions,
   PixelRatio,
+  Alert,
 } from 'react-native';
 
 // Normalize function for responsive scaling
@@ -21,10 +22,13 @@ type MyJournalTaskCardProps = {
   questImage: ImageSourcePropType;
   titleName: string;
   rewardImage: ImageSourcePropType;
-  status: string
+  status: string;
+  userID: number;
+  task_id: number;
   reward?: number;
   isSelf: 0 | 1;
   onPress: () => void;
+  onClaimed?: () => void; // ✅ Add this line
 };
 
 const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
@@ -32,10 +36,40 @@ const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
   titleName,
   rewardImage,
   status,
+  userID,
+  task_id,
   reward,
   isSelf,
   onPress,
+  onClaimed
 }) => {
+
+  const handleClaim = async () => {
+    try {
+      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "claim",
+          userID: userID,
+          task_id: task_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to claim reward");
+      }
+
+      Alert.alert("Success", "Reward claimed!");
+      if (onClaimed) onClaimed();
+    } catch (error) {
+      console.error("Claim Error:", error);
+      Alert.alert("Error", "Something went wrong while claiming the reward.");
+    }
+  };
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <Image source={questImage} style={styles.icon} />
@@ -52,7 +86,7 @@ const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.claimButton}
-            onPress={() => console.log('Submit task:', titleName)}
+            onPress={handleClaim}
           >
             <Text style={styles.buttonText}>Claim</Text>
           </TouchableOpacity>

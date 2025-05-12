@@ -115,6 +115,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
           action: "verify",
           task_id: selectedTask.id,
           userID: userID,
+          verified: true
         }),
       });
 

@@ -1,5 +1,5 @@
 // cloudinaryUpload.ts
-
+import React from 'react';
 import axios from "axios";
 
 const CLOUD_NAME = "dlz7oiktg";
