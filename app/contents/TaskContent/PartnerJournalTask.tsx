@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import TaskCard from '../../assets/Tasks/MyJournalTaskCard';
 import { Ionicons } from "@expo/vector-icons";
 import AddTask from '../../assets/Tasks/AddTask';
-
+import * as ImagePicker from "expo-image-picker";
+import { uploadToCloudinary } from "../../assets/Tasks/CloudinaryUpload"
 import {
     View,
     Text,
@@ -16,6 +17,7 @@ import {
     Dimensions,
     PixelRatio,
     useWindowDimensions,
+    Image,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,6 +39,10 @@ type TaskData = {
     reward: number;
     attachment?: string | null;
     icon?: string | null;
+    submission?:string| null;
+    submission_attachment?: string | null;
+    status:string;
+    verification:boolean;
     created_at: string;
     updated_at: string;
     assigned_by: number;
@@ -112,70 +118,6 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
         fetchTasks();
     }, [user, reloadTrigger]);
 
-    const handleAddTask = async () => {
-      if (!user || !user.userID) {
-        Alert.alert("Error", "User not found.");
-        return;
-      }
-
-      if (!newTask.task_title || !newTask.task_description) {
-        Alert.alert("Validation Error", "Please fill in the title and description.");
-        return;
-      }
-
-      try {
-        const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "create",
-            userID: user.userID,
-            task_title: newTask.task_title,
-            task_description: newTask.task_description,
-            difficulty_level: newTask.difficulty_level,
-            // Add more fields if your backend expects them (e.g., image, reward, etc.)
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data.success) {
-          Alert.alert("Success", "Task added successfully!");
-          setIsAddingTask(false);
-          setNewTask({
-            task_title: '',
-            task_description: '',
-            difficulty_level: 'Easy',
-            image: null,
-          });
-           // ✅ refresh task list
-          setReloadTrigger(prev => !prev);
-
-          // ✅ optionally close the add form
-          setIsAddingTask(false);
-        } else {
-          Alert.alert("Error", "Failed to add task.");
-        }
-        setNewTask({
-            task_title: '',
-            task_description: '',
-            difficulty_level: 'Easy',
-            image: null,
-          });
-        setReloadTrigger(prev => !prev);
-
-          // ✅ optionally close the add form
-        setIsAddingTask(false);
-      } catch (error) {
-        console.error("Error adding task:", error);
-        Alert.alert("Error", "Failed to add task. Please try again later.");
-      }
-    };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Journal</Text>
@@ -187,9 +129,12 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
               contentContainerStyle={styles.taskList}
               renderItem={({ item }) => (
                 <TaskCard
-                  questImage={require('../../../assets/images/homeIcons/hearts.png')}
+                  questImage={require('../../../assets/images/homeIcons/task.png')}
                   titleName={item.task_title}
-                  rewardImage={require('../../../assets/images/homeIcons/hearts.png')}
+                  rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                  status={item.status}
+                  userID={user!.userID}
+                  task_id={item.id}
                   reward={item.reward}
                   isSelf={0}
                   onPress={() => {
@@ -215,40 +160,46 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
         <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
           {isAddingTask ? (
-
-            <View>
-              <Text style={styles.detailTitle}>Add New Task</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Title"
-                value={newTask.task_title}
-                onChangeText={(text) => setNewTask({ ...newTask, task_title: text })}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Description"
-                value={newTask.task_description}
-                multiline
-                onChangeText={(text) => setNewTask({ ...newTask,task_description: text })}
-              />
-              <Picker
-                selectedValue={newTask.difficulty_level}
-                onValueChange={(itemValue) =>
-                  setNewTask({ ...newTask, difficulty_level: itemValue })
+            <AddTask
+              onClose={() => setIsAddingTask(false)}
+              onSubmit={async (submittedTask) => {
+                if (!user || !user.userID) {
+                  Alert.alert("Error", "User not found.");
+                  return;
                 }
-              >
-                <Picker.Item label="Easy" value="Easy" />
-                <Picker.Item label="Very Easy" value="Very Easy" />
-                <Picker.Item label="Normal" value="Normal" />
-                <Picker.Item label="Hard" value="Hard" />
-                <Picker.Item label="Very Hard" value="Very Hard" />
-              </Picker>
-              <Button title="Add Image (not implemented)" onPress={() => {}} />
-              <View style={styles.buttonRow}>
-                <Button title="Cancel" onPress={() => setIsAddingTask(false)} />
-                <Button title="Add" onPress={() => { handleAddTask(); setIsAddingTask(false); }} />
-              </View>
-            </View>
+
+                try {
+                  const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      action: "create",
+                      userID: user.userID,
+                      ...submittedTask,
+                    }),
+                  });
+
+                  if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                  }
+
+                  const data = await response.json();
+                  if (data.success) {
+                    Alert.alert("Success", "Task added successfully!");
+                    setIsAddingTask(false);
+                    setReloadTrigger((prev) => !prev);
+                  }
+                  setReloadTrigger(prev => !prev);
+                  setIsAddingTask(false)
+
+                } catch (error) {
+                  console.error("Error adding task:", error);
+                  Alert.alert("Error", "Failed to add task. Please try again.");
+                }
+              }}
+            />
           ) : (
             selectedTask && (
               <TaskDetailPT

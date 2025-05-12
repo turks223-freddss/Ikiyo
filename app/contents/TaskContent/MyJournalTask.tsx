@@ -28,7 +28,6 @@ const normalize = (size: number) => {
 };
 
 type TaskData = {
-
     id: number;
     task_title: string;
     task_description: string;
@@ -36,6 +35,10 @@ type TaskData = {
     reward: number;
     attachment?: string | null;
     icon?: string | null;
+    submission?:string| null;
+    submission_attachment?: string | null;
+    status:string;
+    verification:boolean;
     created_at: string;
     updated_at: string;
     assigned_by: number;
@@ -71,40 +74,38 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
         fetchUserData();
     }, []);
 
-    useEffect(() => {
-        const fetchTasks = async () => {
-            if (!user || !user.userID) return;
+    const fetchTasks = async () => {
+        if (!user || !user.userID) return;
 
-            try {
-                const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        action: "list_assigned_to",
-                        userID: user.userID,
-                    }),
-                });
+        try {
+            const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                action: "list_assigned_to",
+                userID: user.userID,
+            }),
+            });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data && data.tasks_assigned_to_user) {
-                    setTaskList(data.tasks_assigned_to_user);
-                }
-            } catch (error) {
-                console.error("Error fetching tasks:", error);
-                Alert.alert("Error", "Failed to load tasks. Please try again later.");
+            if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
             }
-        };
 
+            const data = await response.json();
+            if (data && data.tasks_assigned_to_user) {
+            setTaskList(data.tasks_assigned_to_user);
+            }
+        } catch (error) {
+            console.error("Error fetching tasks:", error);
+            Alert.alert("Error", "Failed to load tasks. Please try again later.");
+        }
+        };
+    
+    useEffect(() => {
         fetchTasks();
     }, [user]);
-
-    
 
     return (
         <View style={styles.container}>
@@ -119,15 +120,19 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                     contentContainerStyle={styles.taskList}
                     renderItem={({ item }) => (
                         <TaskCard
-                            questImage={require('../../../assets/images/homeIcons/hearts.png')}
+                            questImage={require('../../../assets/images/homeIcons/task.png')}
                             titleName={item.task_title}
-                            rewardImage={require('../../../assets/images/homeIcons/hearts.png')}
+                            rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                            status = {item.status}
+                            userID={user!.userID}
+                            task_id={item.id}
                             isSelf={1}
                             reward={item.reward}
                             onPress={() => {
                                 setSelectedTask(item);
                                 setIsSubmitting(false);
                             }}
+                            onClaimed={fetchTasks} // ✅ This triggers refresh
                         />
                     )}
                 />
@@ -140,6 +145,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                         selectedTask={selectedTask}
                         isSubmitting={isSubmitting}
                         submissionText={submissionText}
+                        userID={user!.userID}
                         isSelf={1}
                         setIsSubmitting={setIsSubmitting}
                         setSubmissionText={setSubmissionText}
