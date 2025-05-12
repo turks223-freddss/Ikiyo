@@ -119,6 +119,10 @@ class Task(models.Model):
     attachment = models.URLField(max_length=500, null=True, blank=True)
     reward = models.IntegerField(default=0)
     icon = models.URLField(max_length=500, null=True, blank=True)
+    submission = models.TextField(null=True, blank=True)
+    submission_attachment = models.URLField(max_length=500, null=True, blank=True)
+    status = models.CharField(default='Inprogress', max_length=50)
+    verification = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

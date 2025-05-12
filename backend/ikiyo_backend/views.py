@@ -420,6 +420,71 @@ class TaskActionView(APIView):
 
             serializer = TaskSerializer(tasks_received, many=True)
             return Response({"tasks_assigned_to_user": serializer.data}, status=status.HTTP_200_OK)
+        
+        elif action == 'submit':
+            task_id = request.data.get('task_id')
+            submission = request.data.get('submission')
+            submission_attachment = request.data.get('submission_attachment')
+
+            if not task_id or not submission:
+                return Response({"error": "task_id and submission are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task = get_object_or_404(Task, id=task_id)
+
+            if task.assigned_to != user:
+                return Response({"error": "Only the assigned user can submit this task."}, status=status.HTTP_403_FORBIDDEN)
+
+            task.submission = submission
+            if submission_attachment:
+                task.submission_attachment = submission_attachment
+            task.status = "For validation"
+            task.save()
+
+            serializer = TaskSerializer(task)
+            return Response({"message": "Task submitted for validation.", "task": serializer.data}, status=status.HTTP_200_OK)
+
+        elif action == 'verify':
+            task_id = request.data.get('task_id')
+            verified = request.data.get('verified', False)
+
+            if not task_id:
+                return Response({"error": "task_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task = get_object_or_404(Task, id=task_id)
+
+            if task.assigned_by != user:
+                return Response({"error": "Only the assigning user can verify the task."}, status=status.HTTP_403_FORBIDDEN)
+
+            if verified:
+                task.status = "Complete"
+                task.verification = True
+                task.save()
+                serializer = TaskSerializer(task)
+                return Response({"message": "Submission verified successfully.", "task": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Verification flag not set to true."}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif action == 'claim':
+            task_id = request.data.get('task_id')
+
+            if not task_id:
+                return Response({"error": "task_id is required to claim a task."}, status=status.HTTP_400_BAD_REQUEST)
+
+            task = get_object_or_404(Task, id=task_id)
+
+            if task.assigned_to != user:
+                return Response({"error": "Only the assigned user can claim the reward."}, status=status.HTTP_403_FORBIDDEN)
+
+            if task.status != "Complete" or not task.verification:
+                return Response({"error": "Task must be complete and verified to claim reward."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if hasattr(user, 'gold'):
+                user.gold += task.reward
+                user.save()
+                task.delete()
+                return Response({"message": f"Reward of {task.reward} gold claimed successfully and task deleted."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "User does not have a 'gold' field."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         else:
             return Response({"error": "Invalid action. Use 'create', 'edit', or 'delete'."}, status=status.HTTP_400_BAD_REQUEST)

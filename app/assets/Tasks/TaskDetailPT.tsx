@@ -9,15 +9,29 @@ import {
   StyleSheet,
   ImageSourcePropType,
   Alert,
+  Dimensions,
+  PixelRatio,
+  TouchableOpacity,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+
+// Normalize function for responsive scaling
+const { width } = Dimensions.get('window');
+const normalize = (size: number) => {
+  const scale = Math.min(width / 375, 1);
+  return Math.round(PixelRatio.roundToNearestPixel(size * scale));
+};
 
 type TaskDetailProps = {
   selectedTask: {
     id: number;
     task_title: string;
     task_description?: string;
-    previewImage?: ImageSourcePropType;
+    attachment?: string|null;
+    submission?:string| null;
+    submission_attachment?: string | null;
+    staus:string;
+    verification:boolean;
   } | null;
   isEditing: boolean;
   submissionText: string;
@@ -102,8 +116,15 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
         {!isEditing ? (
           <>
             <Text style={styles.description}>{selectedTask.task_description}</Text>
-            {selectedTask.previewImage && (
-              <Image source={selectedTask.previewImage} style={styles.image} resizeMode="contain" />
+            {console.log(selectedTask.attachment)}
+           {selectedTask.attachment ? (
+              <Image
+                source={{ uri: selectedTask.attachment }}
+                style={styles.image}
+                resizeMode="contain"
+              />
+            ) : (
+              <Text style={{ color: 'gray' }}>No image attached</Text>
             )}
           </>
         ) : (
@@ -143,7 +164,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       </ScrollView>
 
       {!isEditing && (
-        <View style={styles.fixedButtonContainer}>
+        <View style={styles.buttonRow}>
           <Button title="Edit" onPress={() => setIsEditing(true)} color="#4CAF50" />
           <Button title="Delete" onPress={() => Alert.alert("Delete pressed")} color="#f44336" />
         </View>
@@ -162,57 +183,57 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
-    paddingHorizontal: 20,
+    paddingTop: normalize(6),
+    paddingHorizontal: normalize(12),
   },
   details: {
-    paddingBottom: 100, // Provide space for buttons at the bottom
-    paddingTop: 10,
+    paddingBottom: normalize(60), // Provide space for buttons at the bottom
+    paddingTop: normalize(6),
   },
   detailTitle: {
-    fontSize: 22,
+    fontSize: normalize(12),
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: normalize(2),
     color: '#333',
   },
   description: {
-    fontSize: 16,
-    marginBottom: 16,
+    fontSize: normalize(9),
+    marginBottom: normalize(8),
     color: '#555',
-    lineHeight: 24,
+    lineHeight: normalize(18),
   },
   image: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 16,
+    width: '50%',
+    height: normalize(60),
+    borderRadius: normalize(6),
+    marginBottom: normalize(8),
     borderWidth: 1,
     borderColor: '#ddd',
   },
   input: {
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    minHeight: 120,
-    marginBottom: 16,
-    fontSize: 16,
+    borderRadius: normalize(4),
+    padding: normalize(6),
+    minHeight: normalize(80),
+    marginBottom: normalize(8),
+    fontSize: normalize(12),
     color: '#333',
     textAlignVertical: 'top',
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    gap: normalize(8),
+    paddingHorizontal: normalize(12),
+    paddingBottom: normalize(12),
   },
   fixedButtonContainer: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    paddingHorizontal: 20,
+    bottom: normalize(8),
+    left: normalize(12),
+    right: normalize(12),
+    paddingHorizontal: normalize(12),
   },
 });
 
