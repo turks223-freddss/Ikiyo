@@ -125,6 +125,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                             questImage={require('../../../assets/images/homeIcons/hearts.png')}
                             titleName={item.task_title}
                             rewardImage={require('../../../assets/images/homeIcons/hearts.png')}
+                            status = {item.status}
                             isSelf={1}
                             reward={item.reward}
                             onPress={() => {

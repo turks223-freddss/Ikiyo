@@ -21,6 +21,7 @@ type MyJournalTaskCardProps = {
   questImage: ImageSourcePropType;
   titleName: string;
   rewardImage: ImageSourcePropType;
+  status: string
   reward?: number;
   isSelf: 0 | 1;
   onPress: () => void;
@@ -30,6 +31,7 @@ const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
   questImage,
   titleName,
   rewardImage,
+  status,
   reward,
   isSelf,
   onPress,
@@ -46,7 +48,7 @@ const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
         </View>
       </View>
 
-      {isSelf === 1 && (
+      {isSelf === 1 && status === "Complete" && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.claimButton}
