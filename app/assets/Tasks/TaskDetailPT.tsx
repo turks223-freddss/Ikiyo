@@ -11,11 +11,9 @@ import {
   Alert,
   Dimensions,
   PixelRatio,
-  TouchableOpacity,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-// Normalize function for responsive scaling
 const { width } = Dimensions.get('window');
 const normalize = (size: number) => {
   const scale = Math.min(width / 375, 1);
@@ -27,11 +25,11 @@ type TaskDetailProps = {
     id: number;
     task_title: string;
     task_description?: string;
-    attachment?: string|null;
-    submission?:string| null;
+    attachment?: string | null;
+    submission?: string | null;
     submission_attachment?: string | null;
-    staus:string;
-    verification:boolean;
+    status: string;
+    verification: boolean;
   } | null;
   isEditing: boolean;
   submissionText: string;
@@ -58,6 +56,8 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
     difficulty_level: 'Easy',
     image: null as ImageSourcePropType | null,
   });
+
+  const [viewSubmission, setViewSubmission] = useState(false);
 
   useEffect(() => {
     if (isEditing && selectedTask) {
@@ -95,8 +95,6 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       const data = await response.json();
       if (data.success) {
         Alert.alert("Success", "Task updated successfully!");
-        
-        // Optional: Refresh task list if needed
       } else {
         Alert.alert("Error", "Failed to update task.");
       }
@@ -108,76 +106,164 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
     }
   };
 
+  const handleApprove = async () => {
+    try {
+      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify",
+          task_id: selectedTask.id,
+          userID: userID,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert("Success", "Submission approved!");
+        triggerReload();
+      } else {
+        Alert.alert("Error", data.error || "Approval failed.");
+      }
+    } catch (error) {
+      console.error("Approve error:", error);
+      Alert.alert("Error", "Approval failed.");
+    }
+  };
+
+  const getStatusStyle = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'inprogress':
+        return { backgroundColor: 'gray' };
+      case 'for validation':
+        return { backgroundColor: '#2196F3' };
+      case 'complete':
+        return { backgroundColor: 'green' };
+      default:
+        return { backgroundColor: '#ccc' };
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.details}>
-        <Text style={styles.detailTitle}>{selectedTask.task_title}</Text>
-
-        {!isEditing ? (
+        {viewSubmission ? (
+          // --- SUBMISSION-ONLY VIEW ---
           <>
-            <Text style={styles.description}>{selectedTask.task_description}</Text>
-            {console.log(selectedTask.attachment)}
-           {selectedTask.attachment ? (
+            <View style={[styles.statusContainer, getStatusStyle(selectedTask.status)]}>
+              <Text style={styles.statusText}>Submission Details</Text>
+            </View>
+
+            <Text style={styles.description}>Submission: {selectedTask.submission}</Text>
+
+            {selectedTask.submission_attachment ? (
               <Image
-                source={{ uri: selectedTask.attachment }}
+                source={{ uri: selectedTask.submission_attachment }}
                 style={styles.image}
                 resizeMode="contain"
               />
             ) : (
-              <Text style={{ color: 'gray' }}>No image attached</Text>
+              <Text style={{ color: 'gray' }}>No submission image</Text>
             )}
+
+            <Text style={styles.description}>Status: {selectedTask.status}</Text>
+
+            {selectedTask.status.toLowerCase() === 'for validation' && (
+              <View style={{ marginTop: normalize(8) }}>
+                <Button title="Approve Submission" onPress={handleApprove} color="#009688" />
+              </View>
+            )}
+
+            <View style={{ marginTop: normalize(8) }}>
+              <Button title="Hide Submission" onPress={() => setViewSubmission(false)} color="#607D8B" />
+            </View>
           </>
         ) : (
+          // --- REGULAR TASK DETAIL VIEW ---
           <>
-            <TextInput
-              style={styles.input}
-              placeholder="Title"
-              value={editedTask.task_title}
-              onChangeText={(text) =>
-                setEditedTask((prev) => ({ ...prev, task_title: text }))
-              }
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Description"
-              value={editedTask.task_description}
-              onChangeText={(text) =>
-                setEditedTask((prev) => ({ ...prev, task_description: text }))
-              }
-              multiline
-            />
-            <Picker
-              selectedValue={editedTask.difficulty_level}
-              onValueChange={(itemValue) =>
-                setEditedTask((prev) => ({ ...prev, difficulty_level: itemValue }))
-              }
-            >
-              <Picker.Item label="Easy" value="Easy" />
-              <Picker.Item label="Very Easy" value="Very Easy" />
-              <Picker.Item label="Normal" value="Normal" />
-              <Picker.Item label="Hard" value="Hard" />
-              <Picker.Item label="Very Hard" value="Very Hard" />
-            </Picker>
-            <Button title="Add Image" onPress={() => {}} color="#2196F3" />
+            <View style={[styles.statusContainer, getStatusStyle(selectedTask.status)]}>
+              <Text style={styles.statusText}>
+                {selectedTask.task_title} ({selectedTask.status})
+              </Text>
+            </View>
+
+            {!isEditing ? (
+              <>
+                <Text style={styles.description}>{selectedTask.task_description}</Text>
+                {selectedTask.attachment ? (
+                  <Image
+                    source={{ uri: selectedTask.attachment }}
+                    style={styles.image}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Text style={{ color: 'gray' }}>No image attached</Text>
+                )}
+              </>
+            ) : (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Title"
+                  value={editedTask.task_title}
+                  onChangeText={(text) =>
+                    setEditedTask((prev) => ({ ...prev, task_title: text }))
+                  }
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Description"
+                  value={editedTask.task_description}
+                  onChangeText={(text) =>
+                    setEditedTask((prev) => ({ ...prev, task_description: text }))
+                  }
+                  multiline
+                />
+                <Picker
+                  selectedValue={editedTask.difficulty_level}
+                  onValueChange={(itemValue) =>
+                    setEditedTask((prev) => ({ ...prev, difficulty_level: itemValue }))
+                  }
+                >
+                  <Picker.Item label="Easy" value="Easy" />
+                  <Picker.Item label="Very Easy" value="Very Easy" />
+                  <Picker.Item label="Normal" value="Normal" />
+                  <Picker.Item label="Hard" value="Hard" />
+                  <Picker.Item label="Very Hard" value="Very Hard" />
+                </Picker>
+                <Button title="Add Image" onPress={() => {}} color="#2196F3" />
+              </>
+            )}
+
+            {!isEditing && (
+              <View style={styles.buttonRow}>
+                <Button title="Edit" onPress={() => setIsEditing(true)} color="#4CAF50" />
+                <Button title="Delete" onPress={() => Alert.alert("Delete pressed")} color="#f44336" />
+              </View>
+            )}
+
+            {isEditing && (
+              <View style={styles.buttonRow}>
+                <Button title="Cancel" onPress={() => setIsEditing(false)} color="#f44336" />
+                <Button title="Save" onPress={handleEditTask} color="#4CAF50" />
+              </View>
+            )}
+
+            {selectedTask.submission && selectedTask.submission.trim() !== '' && (
+              <View style={{ marginTop: normalize(10) }}>
+                <Button
+                  title="View Submission"
+                  onPress={() => setViewSubmission(true)}
+                  color="#3F51B5"
+                />
+              </View>
+            )}
           </>
         )}
       </ScrollView>
-
-      {!isEditing && (
-        <View style={styles.buttonRow}>
-          <Button title="Edit" onPress={() => setIsEditing(true)} color="#4CAF50" />
-          <Button title="Delete" onPress={() => Alert.alert("Delete pressed")} color="#f44336" />
-        </View>
-      )}
-
-      {isEditing && (
-        <View style={styles.buttonRow}>
-          <Button title="Cancel" onPress={() => setIsEditing(false)} color="#f44336" />
-          <Button title="Save" onPress={handleEditTask} color="#4CAF50" />
-        </View>
-      )}
     </View>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -187,14 +273,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: normalize(12),
   },
   details: {
-    paddingBottom: normalize(60), // Provide space for buttons at the bottom
+    paddingBottom: normalize(60),
     paddingTop: normalize(6),
   },
-  detailTitle: {
-    fontSize: normalize(12),
+  statusContainer: {
+    padding: normalize(6),
+    borderRadius: normalize(6),
+    marginBottom: normalize(8),
+  },
+  statusText: {
+    color: 'white',
     fontWeight: '600',
-    marginBottom: normalize(2),
-    color: '#333',
+    fontSize: normalize(11),
   },
   description: {
     fontSize: normalize(9),
@@ -227,13 +317,6 @@ const styles = StyleSheet.create({
     gap: normalize(8),
     paddingHorizontal: normalize(12),
     paddingBottom: normalize(12),
-  },
-  fixedButtonContainer: {
-    position: 'absolute',
-    bottom: normalize(8),
-    left: normalize(12),
-    right: normalize(12),
-    paddingHorizontal: normalize(12),
   },
 });
 

@@ -10,7 +10,10 @@ import {
   Dimensions,
   PixelRatio,
   TouchableOpacity,
+  Alert
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadToCloudinary } from "../Tasks/CloudinaryUpload"
 
 // Normalize function for responsive scaling
 const { width } = Dimensions.get('window');
@@ -21,10 +24,16 @@ const normalize = (size: number) => {
 
 type TaskDetailProps = {
   selectedTask: {
+    id:number
     task_title: string;
     task_description?: string;
-    previewImage?: ImageSourcePropType;
+    attachment?: string | null;
+    submission?: string | null;
+    submission_attachment?: string | null;
+    status: string;
+    verification: boolean;
   } | null;
+  userID: number;
   isSubmitting: boolean;
   submissionText: string;
   setIsSubmitting: (val: boolean) => void;
@@ -36,11 +45,78 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   selectedTask,
   isSubmitting,
   submissionText,
+  userID,
   setIsSubmitting,
   setSubmissionText,
   isSelf,
 }) => {
   if (!selectedTask) return null;
+const [submissionImage, setSubmissionImage] = React.useState<string | null>(null);
+const [isLoading, setIsLoading] = React.useState(false);
+
+const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Camera roll permission is required.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images','videos','livePhotos'],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSubmissionImage(result.assets[0].uri);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!submissionText.trim()) {
+      alert("Please write something before submitting.");
+      return;
+    }
+
+    setIsLoading(true);
+    let uploadedUrl = null;
+
+    if (submissionImage) {
+      try {
+        uploadedUrl = await uploadToCloudinary(submissionImage);
+      } catch (error) {
+        console.error('Cloudinary Upload Error:', error);
+        Alert.alert('Upload Error', 'Failed to upload image.');
+        setIsLoading(false);
+        return;
+      }
+    }
+    try {
+      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action:"submit",
+          userID:userID,
+          task_id: selectedTask.id,
+          submission: submissionText,
+          submission_attachment: uploadedUrl || null,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Submission failed");
+
+      alert("Submission sent!");
+      setIsSubmitting(false);
+      setSubmissionText('');
+      setSubmissionImage(null);
+    } catch (error) {
+      alert("Error submitting task.");
+      console.error(error);
+    }
+    setIsLoading(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -50,8 +126,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
         {!isSubmitting ? (
           <>
             <Text style={styles.description}>{selectedTask.task_description}</Text>
-            {selectedTask.previewImage && (
-              <Image source={selectedTask.previewImage} style={styles.image} resizeMode="contain" />
+            {selectedTask.attachment && (
+              <Image source={{ uri: selectedTask.attachment }} style={styles.image} resizeMode="contain" />
             )}
           </>
         ) : (
@@ -63,7 +139,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
               value={submissionText}
               onChangeText={setSubmissionText}
             />
-            <TouchableOpacity style={styles.addImageButton} onPress={() => {}}>
+            <TouchableOpacity style={styles.addImageButton} onPress={pickImage}>
               <Text style={styles.addImageButtonText}>Add Image</Text>
             </TouchableOpacity>
           </>
@@ -88,8 +164,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
           >
             <Text style={styles.smallButtonText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.smallButton} onPress={() => {}}>
-            <Text style={styles.smallButtonText}>Submit</Text>
+          <TouchableOpacity style={styles.smallButton} onPress={handleSubmit} disabled={isLoading}>
+            <Text style={styles.smallButtonText}>{isLoading ? "Submitting..." : "Submit"}</Text>
           </TouchableOpacity>
         </View>
       )}

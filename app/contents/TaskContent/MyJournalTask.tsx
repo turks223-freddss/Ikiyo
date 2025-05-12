@@ -28,7 +28,6 @@ const normalize = (size: number) => {
 };
 
 type TaskData = {
-
     id: number;
     task_title: string;
     task_description: string;
@@ -36,6 +35,10 @@ type TaskData = {
     reward: number;
     attachment?: string | null;
     icon?: string | null;
+    submission?:string| null;
+    submission_attachment?: string | null;
+    status:string;
+    verification:boolean;
     created_at: string;
     updated_at: string;
     assigned_by: number;
@@ -140,6 +143,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                         selectedTask={selectedTask}
                         isSubmitting={isSubmitting}
                         submissionText={submissionText}
+                        userID={user!.userID}
                         isSelf={1}
                         setIsSubmitting={setIsSubmitting}
                         setSubmissionText={setSubmissionText}

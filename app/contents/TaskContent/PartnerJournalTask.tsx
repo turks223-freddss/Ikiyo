@@ -41,7 +41,7 @@ type TaskData = {
     icon?: string | null;
     submission?:string| null;
     submission_attachment?: string | null;
-    staus:string;
+    status:string;
     verification:boolean;
     created_at: string;
     updated_at: string;
