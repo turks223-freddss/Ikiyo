@@ -24,6 +24,18 @@ const getMimeType = (fileUri: string): string => {
       return 'video/mp4';
     case 'mov':
       return 'video/quicktime';
+    case 'pdf':
+      return 'application/pdf';
+    case 'doc':
+      return 'application/msword';
+    case 'docx':
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    case 'xls':
+      return 'application/vnd.ms-excel';
+    case 'xlsx':
+      return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    case 'txt':
+      return 'text/plain';
     default:
       return 'application/octet-stream';
   }
@@ -37,13 +49,13 @@ export const uploadToCloudinary = async (fileUri: string): Promise<string> => {
   formData.append("file", {
     uri: fileUri,
     type: mimeType,
-    name: `task-image.${fileExtension}`,
+    name: `task-attachment.${fileExtension}`,
   } as any);
 
   formData.append("upload_preset", UPLOAD_PRESET);
 
   const response = await axios.post(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`,
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
     formData,
     {
       headers: {
