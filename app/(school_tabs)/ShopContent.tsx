@@ -113,9 +113,7 @@ const ShopScreen = () => {
             
           ))}
           {/* Imaginary Card */}
-          <View style={styles.imaginaryCard}>
-            
-          </View>
+          <View style={styles.imaginaryCard} />
         </ScrollView>
 
         {/* Item List */}
