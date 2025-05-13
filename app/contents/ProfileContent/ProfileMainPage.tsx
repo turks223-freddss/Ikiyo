@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  useWindowDimensions,
+  PixelRatio,
+} from 'react-native';
 import { HeartIcon } from "../../../assets/images/homeIcons";
 
 interface ProfilePageProps {
@@ -24,6 +32,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   hearts = 321,
   outfits = 123,
 }) => {
+  const { width } = useWindowDimensions();
+
+  const normalize = (size: number) => {
+    const scale = width / 375;
+    const newSize = size * scale;
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  };
+
+  const dynamicStyles = getRightSideStyles(normalize, width);
+
   return (
     <View style={styles.container}>
       {/* Left Side */}
@@ -48,34 +66,120 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       </View>
 
       {/* Right Side */}
-      <View style={styles.rightContainer}>
-        <Image
-          source={{ uri: 'https://via.placeholder.com/150' }}
-          style={styles.avatar}
-        />
-        <Text style={styles.username}>{username}</Text>
-        <Text style={styles.hashtag}>{hashtag}</Text>
-
-        <View style={styles.descriptionBox}>
-          <Text style={styles.descriptionText}>{description}</Text>
-        </View>
-
-        <View style={styles.additionalTexts}>
-          <Text style={styles.infoLabel}>Date joined: {dateJoined}</Text>
-          <Text style={styles.infoLabel}>Partner: {partner}</Text>
-          <Text style={styles.infoLabel}>School: {school}</Text>
-        </View>
-
-        {/* Flex-spacer container to push button to bottom */}
-        <View style={styles.editButtonContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={() => {}}>
-            <Text style={styles.editButtonText}>Edit</Text>
+      <View style={dynamicStyles.rightContainer}>
+        {/* Avatar and User Info */}
+        
+        <View style={dynamicStyles.avatarContainer}>
+          <Image source={{ uri: 'https://via.placeholder.com/150' }} style={dynamicStyles.avatar} />
+          <View style={dynamicStyles.userDetails}>
+            <Text style={dynamicStyles.username}>{username}</Text>
+            <Text style={dynamicStyles.hashtag}>{hashtag}</Text>
+          </View>
+          <View style={dynamicStyles.editButtonContainer}>
+          <TouchableOpacity style={dynamicStyles.editButton} onPress={() => {}}>
+            <Text style={dynamicStyles.editButtonText}>Edit</Text>
           </TouchableOpacity>
         </View>
+        </View>
+
+        {/* Description */}
+        <View style={dynamicStyles.descriptionBox}>
+          <Text style={dynamicStyles.descriptionText}>{description}</Text>
+        </View>
+
+        {/* Additional Info */}
+        <View style={dynamicStyles.additionalTexts}>
+          <Text style={dynamicStyles.infoLabel}>Date joined: {dateJoined}</Text>
+          <Text style={dynamicStyles.infoLabel}>Partner: {partner}</Text>
+          <Text style={dynamicStyles.infoLabel}>School: {school}</Text>
+        </View>
+
+        {/* Edit Button */}
+        
       </View>
     </View>
   );
 };
+
+const getRightSideStyles = (normalize: (size: number) => number, width: number) =>
+  StyleSheet.create({
+    rightContainer: {
+      flex: 1,
+      backgroundColor: '#fff',
+      borderRadius: 12,
+      padding: normalize(5),
+      marginLeft: width < 700 ? 0 : normalize(20),
+      marginTop: width < 700 ? normalize(20) : 0,
+      flexDirection: 'column',
+      justifyContent: 'flex-start', // Ensure the content aligns at the top
+    },
+    avatarContainer: {
+      flexDirection: 'row', // Align avatar and user details horizontally
+      alignItems: 'center',
+      marginBottom: normalize(5),
+    },
+    avatar: {
+      width: normalize(20),
+      height: normalize(20),
+      borderRadius: normalize(25),
+      borderWidth: 3,
+      borderColor: '#4a90e2',
+      marginRight: normalize(5),
+    },
+    userDetails: {
+      flexDirection: 'column',
+    },
+    username: {
+      fontSize: normalize(8),
+      fontWeight: '700',
+      color: '#222',
+    },
+    hashtag: {
+      fontSize: normalize(6),
+      color: '#777',
+    },
+    descriptionBox: {
+      height: '30%',
+      width: '100%',
+      backgroundColor: '#f0f0f0',
+      padding: normalize(6),
+      borderRadius: normalize(8),
+      justifyContent: 'center',
+      marginBottom: normalize(6),
+    },
+    descriptionText: {
+      fontSize: normalize(4),
+      color: '#444',
+      textAlign: 'center',
+    },
+    additionalTexts: {
+      alignSelf: 'flex-start',
+      width: '100%',
+      gap: normalize(2),
+    },
+    infoLabel: {
+      fontSize: normalize(5),
+      color: '#333',
+      fontWeight: '400',
+    },
+    editButtonContainer: {
+      flexGrow: 1, // This will push the button upwards
+      justifyContent: 'flex-start', // Ensure the button is at the top of the container
+      alignItems: 'flex-end', // Align button to the right
+    },
+    editButton: {
+      backgroundColor: '#4a90e2',
+      paddingHorizontal: normalize(4),
+      paddingVertical: normalize(2.5),
+      borderRadius: normalize(6),
+      marginTop: normalize(0), // Ensure some spacing at the top
+    },
+    editButtonText: {
+      color: '#fff',
+      fontSize: normalize(4),
+      fontWeight: '600',
+    },
+  });
 
 const styles = StyleSheet.create({
   container: {
@@ -120,74 +224,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 6,
     fontWeight: '500',
-  },
-  rightContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginLeft: 20,
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: '#4a90e2',
-    marginBottom: 12,
-  },
-  username: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#222',
-  },
-  hashtag: {
-    fontSize: 14,
-    color: '#777',
-    marginBottom: 16,
-  },
-  descriptionBox: {
-    height: '40%',
-    width: '100%',
-    backgroundColor: '#f0f0f0',
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  descriptionText: {
-    fontSize: 15,
-    color: '#444',
-    textAlign: 'center',
-  },
-  additionalTexts: {
-    alignSelf: 'flex-start',
-    width: '100%',
-    gap: 10,
-  },
-  infoLabel: {
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '400',
-  },
-  editButtonContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    width: '100%',
-    paddingTop: 10,
-  },
-  editButton: {
-    backgroundColor: '#4a90e2',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
   },
 });
 
