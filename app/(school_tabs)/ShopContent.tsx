@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 const isTablet = width > 1080;
@@ -49,6 +50,7 @@ const selectorIcons: { [key in SelectorTabs]: any } = {
 };
 
 const ShopScreen = () => {
+  const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState('Hats');
   const [currentPage, setCurrentPage] = useState(1);
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
@@ -71,7 +73,7 @@ const ShopScreen = () => {
     <View style={styles.screen}>
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="arrow-back" size={normalize(10)} color="#3a2e1f" />
           </View>
