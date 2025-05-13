@@ -166,7 +166,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/shop")}
+                onPress={() => router.push("/ShopContent")}
                 icon={<Image source={ShopIcon} style={{ width: 35, height:30}} />} 
                 size={60}
               />
