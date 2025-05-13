@@ -10,6 +10,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+// Import images for each category
+/*import hatsIcon from '../../assets/images/homeIcons/avatar.png';
+import faceAccessoriesIcon from '../../assets/images/faceAccessoriesIcon.png';
+import facialExpressionIcon from '../../assets/images/facialExpressionIcon.png';
+import upperwearIcon from '../../assets/images/upperwearIcon.png';
+import lowerwearIcon from '../../assets/images/lowerwearIcon.png';
+import shoesIcon from '../../assets/images/shoesIcon.png';*/
 
 const { width } = Dimensions.get('window');
 const isTablet = width > 1080;
@@ -34,8 +42,17 @@ const items = [
   { id: 8, name: 'Eye Patch', category: 'Face Accessories', price: 60, image: require('../../assets/images/homeIcons/avatar.png') },
   { id: 9, name: 'Angry Face', category: 'Facial Expression', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
 ];
-
+type SelectorTabs = 'Hats' | 'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
 const ITEMS_PER_PAGE = 6;
+
+const selectorIcons: { [key in SelectorTabs]: any } = {
+  Hats: HeartIcon,
+  'Face Accessories': HeartIcon,
+  'Facial Expression': HeartIcon,
+  Upperwear: HeartIcon,
+  Lowerwear: HeartIcon,
+  Shoes: HeartIcon,
+};
 
 const ShopScreen = () => {
   const [selectedTab, setSelectedTab] = useState('Hats');
@@ -89,6 +106,7 @@ const ShopScreen = () => {
                 setCurrentPage(1);
               }}
             >
+              <Image source={selectorIcons[selectedTab as keyof typeof selectorIcons]} style={styles.selectorIcon} />
               <Text
                 style={[
                   styles.selectorText,
@@ -229,24 +247,25 @@ const styles = StyleSheet.create({
     gap: normalize(4),
   },
   selectorPane: {
-    flex: 1,
-    backgroundColor: '#f7e6b8',
-    borderRadius: normalize(10),
-    paddingVertical: normalize(4),
-    paddingHorizontal: normalize(3),
-    borderWidth: normalize(1),
-    borderColor: '#8a6e43',
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
+  flex: 1,
+  backgroundColor: '#f7e6b8',
+  borderRadius: normalize(10),
+  paddingVertical: normalize(4),
+  paddingHorizontal: normalize(3),
+  borderWidth: normalize(1),
+  borderColor: '#8a6e43',
+  shadowColor: '#000',
+  shadowOffset: { width: 1, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 3,
+  elevation: 5,
+},
   selectorContent: {
     alignItems: 'center',
     gap: normalize(2),
   },
   selectorButton: {
+    flexDirection: 'row', // Align text and icon horizontally
     paddingVertical: normalize(3),
     paddingHorizontal: normalize(6),
     backgroundColor: '#cdb892',
@@ -255,6 +274,11 @@ const styles = StyleSheet.create({
     borderColor: '#8a6e43',
     width: '100%',
     alignItems: 'center',
+  },
+  selectorIcon: {
+    width: normalize(12), // Adjust size to fit your design
+    height: normalize(12),
+    marginRight: normalize(6), // Space between icon and text
   },
   selectorButtonActive: {
     backgroundColor: '#a37b44',
