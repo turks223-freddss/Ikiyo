@@ -11,13 +11,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
-// Import images for each category
-/*import hatsIcon from '../../assets/images/homeIcons/avatar.png';
-import faceAccessoriesIcon from '../../assets/images/faceAccessoriesIcon.png';
-import facialExpressionIcon from '../../assets/images/facialExpressionIcon.png';
-import upperwearIcon from '../../assets/images/upperwearIcon.png';
-import lowerwearIcon from '../../assets/images/lowerwearIcon.png';
-import shoesIcon from '../../assets/images/shoesIcon.png';*/
 
 const { width } = Dimensions.get('window');
 const isTablet = width > 1080;
@@ -42,6 +35,7 @@ const items = [
   { id: 8, name: 'Eye Patch', category: 'Face Accessories', price: 60, image: require('../../assets/images/homeIcons/avatar.png') },
   { id: 9, name: 'Angry Face', category: 'Facial Expression', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
 ];
+
 type SelectorTabs = 'Hats' | 'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
 const ITEMS_PER_PAGE = 6;
 
@@ -116,7 +110,12 @@ const ShopScreen = () => {
                 {tab}
               </Text>
             </TouchableOpacity>
+            
           ))}
+          {/* Imaginary Card */}
+          <View style={styles.imaginaryCard}>
+            
+          </View>
         </ScrollView>
 
         {/* Item List */}
@@ -160,6 +159,8 @@ const ShopScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
+
+          
 
           {/* Pagination */}
           <View style={styles.paginationWrapper}>
@@ -247,25 +248,25 @@ const styles = StyleSheet.create({
     gap: normalize(4),
   },
   selectorPane: {
-  flex: 1,
-  backgroundColor: '#f7e6b8',
-  borderRadius: normalize(10),
-  paddingVertical: normalize(4),
-  paddingHorizontal: normalize(3),
-  borderWidth: normalize(1),
-  borderColor: '#8a6e43',
-  shadowColor: '#000',
-  shadowOffset: { width: 1, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 3,
-  elevation: 5,
-},
+    flex: 1,
+    backgroundColor: '#f7e6b8',
+    borderRadius: normalize(10),
+    paddingVertical: normalize(4),
+    paddingHorizontal: normalize(3),
+    borderWidth: normalize(1),
+    borderColor: '#8a6e43',
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
   selectorContent: {
     alignItems: 'center',
     gap: normalize(2),
   },
   selectorButton: {
-    flexDirection: 'row', // Align text and icon horizontally
+    flexDirection: 'row',
     paddingVertical: normalize(3),
     paddingHorizontal: normalize(6),
     backgroundColor: '#cdb892',
@@ -276,9 +277,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectorIcon: {
-    width: normalize(12), // Adjust size to fit your design
+    width: normalize(12),
     height: normalize(12),
-    marginRight: normalize(6), // Space between icon and text
+    marginRight: normalize(6),
   },
   selectorButtonActive: {
     backgroundColor: '#a37b44',
@@ -401,6 +402,22 @@ const styles = StyleSheet.create({
   },
   pageIndicator: {
     fontSize: normalize(5),
+    color: '#3a2e1f',
+    fontWeight: 'bold',
+  },
+  imaginaryCard: {
+    backgroundColor: '#f7e6b8',
+    borderRadius: normalize(10),
+    padding: normalize(3),
+    marginTop: normalize(10),
+    borderWidth: normalize(1),
+    borderColor: '#8a6e43',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+  },
+  imaginaryCardText: {
+    fontSize: normalize(6),
     color: '#3a2e1f',
     fontWeight: 'bold',
   },
