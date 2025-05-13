@@ -16,6 +16,7 @@ import {
 import CustomSelector from './difficultyselector';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadToCloudinary } from "../Tasks/CloudinaryUpload"
+import * as DocumentPicker from 'expo-document-picker';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,6 +44,8 @@ const AddTask: React.FC<AddTaskProps> = ({ onClose, onSubmit }) => {
   });
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
+  const [documentUri, setDocumentUri] = useState<string | null>(null);
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -61,6 +64,35 @@ const AddTask: React.FC<AddTaskProps> = ({ onClose, onSubmit }) => {
     }
   };
 
+  const takeImage = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Camera roll permission is required.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images','videos','livePhotos'],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setDocumentUri(result.assets[0].uri);
+      setShowAttachmentOptions(false);
+    }
+  };
+
   const handleAddPress = async () => {
     if (!newTask.title || !newTask.description) {
       Alert.alert("Validation Error", "Please fill in the title and description.");
@@ -69,13 +101,13 @@ const AddTask: React.FC<AddTaskProps> = ({ onClose, onSubmit }) => {
 
     let uploadedUrl = '';
 
-    if (imageUri) {
+    if (imageUri || documentUri) {
       try {
         setUploading(true);
-        uploadedUrl = await uploadToCloudinary(imageUri);
+        uploadedUrl = await uploadToCloudinary(imageUri || documentUri!); // pick one
       } catch (error) {
         console.error('Cloudinary Upload Error:', error);
-        Alert.alert('Upload Error', 'Failed to upload image.');
+        Alert.alert('Upload Error', 'Failed to upload attachment.');
         setUploading(false);
         return;
       }
@@ -142,11 +174,47 @@ const AddTask: React.FC<AddTaskProps> = ({ onClose, onSubmit }) => {
           </View>
 
           {/* Add Image button */}
-          <TouchableOpacity style={styles.addImageButton} onPress={pickImage}>
-            <Text style={styles.buttonText}>
-              {imageUri ? 'Change Image' : 'Add Image'}
-            </Text>
-          </TouchableOpacity>
+          {!showAttachmentOptions ? (
+            <TouchableOpacity
+              style={styles.addImageButton}
+              onPress={() => setShowAttachmentOptions(true)}
+            >
+              <Text style={styles.buttonText}>
+                {imageUri || documentUri ? 'Change Attachment' : 'Add Attachment'}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ flexDirection: 'row', marginTop: 10, gap: 10 }}>
+              <TouchableOpacity
+                style={[styles.addImageButton, { backgroundColor: '#2196F3' }]}
+                onPress={pickImage}
+              >
+                <Text style={styles.buttonText}>Image</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.addImageButton, { backgroundColor: '#2196F3' }]}
+                onPress={takeImage}
+              >
+                <Text style={styles.buttonText}>Camera</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.addImageButton, { backgroundColor: '#9C27B0' }]}
+                onPress={pickDocument}
+              >
+                <Text style={styles.buttonText}>Document</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.addImageButton, { backgroundColor: '#f44336' }]}
+                onPress={() => setShowAttachmentOptions(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+            </View>
+          )}
 
           {imageUri && (
             <Image
@@ -159,6 +227,10 @@ const AddTask: React.FC<AddTaskProps> = ({ onClose, onSubmit }) => {
               }}
               resizeMode="cover"
             />
+          )}
+
+          {documentUri && !imageUri && (
+            <Text style={{ marginTop: 10 }}>Selected Document: {documentUri.split('/').pop()}</Text>
           )}
         </ScrollView>
 
