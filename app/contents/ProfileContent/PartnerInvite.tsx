@@ -1,71 +1,93 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import RequestCard from '../../assets/Profile/RequestCard';  // Assuming you have the RequestCard component created earlier
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    useWindowDimensions,
+    PixelRatio,
+} from 'react-native';
+import RequestCard from '../../assets/Profile/RequestCard';
 
 interface PartnerInviteProps {
-    userID: string;
+userID: string;
 }
 
+// Normalize helper (moved outside component so styles can access it)
+const useNormalize = () => {
+const { width } = useWindowDimensions();
+return (size: number) => {
+    const scale = width / 375;
+    const newSize = size * scale;
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+};
+};
+
 const PartnerInvite: React.FC<PartnerInviteProps> = ({ userID }) => {
-  // Placeholder data for cards
+const normalize = useNormalize();
+
+  // Placeholder data
 const requestData = [
     { username: "Jane Doe", hashtag: "#janedoe", image: "https://via.placeholder.com/50" },
     { username: "John Smith", hashtag: "#johnsmith", image: "https://via.placeholder.com/50" },
     { username: "Alice Cooper", hashtag: "#alicecooper", image: "https://via.placeholder.com/50" },
 ];
 
-return (
-    <View style={styles.container}>
-        <Text style={styles.title}>Partner Requests</Text>
+const dynamicStyles = getStyles(normalize);
 
-        <View style={styles.searchRow}>
-            <TextInput
-            style={styles.input}
-            placeholder="Enter partner username"
-            />
-            <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Search</Text>
+return (
+    <View style={dynamicStyles.container}>
+        <Text style={dynamicStyles.title}>Partner Requests</Text>
+
+        <View style={dynamicStyles.searchRow}>
+            <TextInput style={dynamicStyles.input} placeholder="Enter partner username" />
+            <TouchableOpacity style={dynamicStyles.button}>
+            <Text style={dynamicStyles.buttonText}>Search</Text>
             </TouchableOpacity>
         </View>
-
-        {/* Cards container with Pending requests label inside */}
-        <ScrollView contentContainerStyle={styles.cardsContainer}>
-            {/* Aligning "Pending requests" text to the left */}
-            <View style={styles.left}>
-            <Text style={styles.subheading}>Pending requests:</Text>
+        <View style={dynamicStyles.scrollWrapper}>
+            <View style={dynamicStyles.left}>
+                <Text style={dynamicStyles.subheading}>Pending requests:</Text>
             </View>
-            
-            {requestData.map((request, index) => (
-            <RequestCard
-                key={index}
-                username={request.username}
-                hashtag={request.hashtag}
-                image={request.image}
-            />
-            ))}
-        </ScrollView>
+            <ScrollView contentContainerStyle={dynamicStyles.cardsContainer}>
+                
+
+                {requestData.map((request, index) => (
+                <RequestCard
+                    key={index}
+                    username={request.username}
+                    hashtag={request.hashtag}
+                    image={request.image}
+                />
+                ))}
+            </ScrollView>
         </View>
+    </View>
     );
 };
 
-const styles = StyleSheet.create({
+// Dynamic styles using normalize
+const getStyles = (normalize: (size: number) => number) =>
+StyleSheet.create({
     left: {
         width: '100%',
-        alignItems: 'flex-start', // Align the text to the left
-        marginBottom: 15, // Add space between the label and cards
-        paddingLeft: 10, // Optional padding for better alignment
+        alignItems: 'flex-start',
+        marginLeft: normalize(5),
+        padding: normalize(3),
+        backgroundColor: 'transparent',
     },
     container: {
         flex: 1,
-        padding: 20,
         justifyContent: 'flex-start',
         width: '100%',
     },
     title: {
-        fontSize: 24,
+        fontSize: normalize(7),
         fontWeight: '700',
         textAlign: 'center',
-        marginBottom: 30,
+        marginBottom: normalize(2),
         color: '#333',
         letterSpacing: 1.5,
         textTransform: 'uppercase',
@@ -73,18 +95,17 @@ const styles = StyleSheet.create({
     searchRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
         justifyContent: 'center',
         width: '100%',
     },
     input: {
         flex: 0.7,
-        height: 50,
+        height: normalize(15),
         borderWidth: 1,
         borderColor: '#ccc',
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         borderRadius: 25,
-        marginRight: 10,
+        marginRight: normalize(5),
         backgroundColor: '#fff',
         shadowColor: '#000',
         shadowOpacity: 0.1,
@@ -93,23 +114,24 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#4CAF50',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
+        height: normalize(15),
+        paddingVertical: normalize(2),
+        paddingHorizontal: normalize(4),
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: normalize(6),
         fontWeight: '600',
     },
     subheading: {
-        fontSize: 18,
+        fontSize: normalize(6),
         fontWeight: '600',
         color: '#333',
-        marginBottom: 15,
-        textAlign: 'left', // Align the label text to the left
+        marginBottom: 2,
+        textAlign: 'left',
         textTransform: 'uppercase',
     },
     cardsContainer: {
@@ -117,15 +139,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        backgroundColor: '#FFF5EE', // Light contrasting background
-        padding: 20,
-        borderRadius: 16,
+        
+        padding: normalize(3),
+        
+        marginTop: normalize(2),
+    },
+    scrollWrapper: {
+        flex: 1,
+        width: '100%',
+        height: '5%',
+        borderRadius: normalize(15),
+        marginTop: normalize(4),
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 4 },
         elevation: 4,
-        marginTop: 20,
+        backgroundColor: '#FFF5EE',
+        overflow: 'hidden'
     },
 
 });
