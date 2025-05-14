@@ -381,8 +381,12 @@ class TaskActionView(APIView):
             if difficulty_level:
                 task.difficulty_level = difficulty_level
                 task.reward = self.get_reward(difficulty_level)
-            if attachment:
+                
+            if attachment is not None:  # Explicitly check if attachment is not None
                 task.attachment = attachment
+            elif attachment is None:  # Handle case where attachment is null
+                task.attachment = None
+                
             if icon:
                 task.icon = icon
 

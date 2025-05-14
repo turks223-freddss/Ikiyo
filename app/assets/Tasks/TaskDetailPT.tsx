@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   ImageSourcePropType,
   Alert,
   Dimensions,
@@ -37,6 +38,7 @@ type TaskDetailProps = {
   setIsEditing: (val: boolean) => void;
   setSubmissionText: (val: string) => void;
   triggerReload: () => void;
+  clearSelectedTask: () => void;
 };
 
 const TaskDetailPT: React.FC<TaskDetailProps> = ({
@@ -47,6 +49,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
   setIsEditing,
   setSubmissionText,
   triggerReload,
+  clearSelectedTask,
 }) => {
   if (!selectedTask) return null;
 
@@ -54,10 +57,11 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
     task_title: selectedTask.task_title || '',
     task_description: selectedTask.task_description || '',
     difficulty_level: 'Easy',
-    image: null as ImageSourcePropType | null,
+    image: selectedTask.attachment || null,
   });
 
   const [viewSubmission, setViewSubmission] = useState(false);
+  const [removedAttachment, setRemovedAttachment] = useState(false);
 
   useEffect(() => {
     if (isEditing && selectedTask) {
@@ -65,7 +69,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
         task_title: selectedTask.task_title || '',
         task_description: selectedTask.task_description || '',
         difficulty_level: 'Easy',
-        image: null,
+        image: selectedTask.attachment || null,
       });
     }
   }, [isEditing]);
@@ -75,7 +79,15 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       Alert.alert("Validation Error", "Please fill in the title and description.");
       return;
     }
-
+    console.log(JSON.stringify({
+      action: "edit",
+      task_id: selectedTask.id,
+      userID: userID,
+      task_title: editedTask.task_title,
+      task_description: editedTask.task_description,
+      difficulty_level: editedTask.difficulty_level,
+      attachment: editedTask.image || "",
+    }));
     try {
       const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
         method: "POST",
@@ -89,9 +101,10 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
           task_title: editedTask.task_title,
           task_description: editedTask.task_description,
           difficulty_level: editedTask.difficulty_level,
+          attachment:editedTask.image||"",
         }),
       });
-
+      console.log(editedTask.image)
       const data = await response.json();
       if (data.success) {
         Alert.alert("Success", "Task updated successfully!");
@@ -129,6 +142,32 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
     } catch (error) {
       console.error("Approve error:", error);
       Alert.alert("Error", "Approval failed.");
+    }
+  };
+
+  const handledelete = async () => {
+    try {
+      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          userID: userID,
+          task_id: selectedTask.id
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert("Success", "Task Deleted");
+        triggerReload();
+        clearSelectedTask(); 
+      } else {
+        Alert.alert("Error", data.error || "Task Delete failed.");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      Alert.alert("Error", "Delete failed.");
     }
   };
 
@@ -175,9 +214,6 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
               </View>
             )}
 
-            <View style={{ marginTop: normalize(8) }}>
-              <Button title="Hide Submission" onPress={() => setViewSubmission(false)} color="#607D8B" />
-            </View>
           </>
         ) : (
           // --- REGULAR TASK DETAIL VIEW ---
@@ -220,6 +256,30 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                   }
                   multiline
                 />
+                {selectedTask.attachment && !removedAttachment && (
+                   <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: normalize(8) }}>
+                      <Image
+                        source={{ uri: selectedTask.attachment }}
+                        style={styles.image}
+                        resizeMode="contain"
+                      />
+                      <TouchableOpacity
+                        onPress={() => {
+                          setRemovedAttachment(true);
+                          setEditedTask((prev) => ({ ...prev, image: null }))
+                        }}
+                        style={{
+                          marginLeft: normalize(8),
+                          backgroundColor: '#f44336',
+                          paddingVertical: normalize(4),
+                          paddingHorizontal: normalize(8),
+                          borderRadius: normalize(4),
+                        }}
+                      >
+                        <Text style={{ color: '#fff', fontSize: normalize(8) }}>Remove</Text>
+                      </TouchableOpacity>
+                    </View>
+                )}
                 <Picker
                   selectedValue={editedTask.difficulty_level}
                   onValueChange={(itemValue) =>
@@ -236,32 +296,64 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
               </>
             )}
 
-            {!isEditing && (
+           
+          </>
+        )}
+      </ScrollView>
+      <View style = {styles.bottomButtonContainer}>
+         {!isEditing && (
               <View style={styles.buttonRow}>
-                <Button title="Edit" onPress={() => setIsEditing(true)} color="#4CAF50" />
-                <Button title="Delete" onPress={() => Alert.alert("Delete pressed")} color="#f44336" />
+                 <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#4CAF50' }]}
+                    onPress={() => setIsEditing(true)}
+                  >
+                    <Text style={styles.buttonText}>Edit</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#f44336' }]}
+                    onPress={() => handledelete()}
+                  >
+                    <Text style={styles.buttonText}>Delete</Text>
+                  </TouchableOpacity>
+                  {selectedTask.submission && selectedTask.submission.trim() !== '' && (
+                      <TouchableOpacity
+                        style={[styles.button, { backgroundColor: '#3F51B5' }]}
+                        onPress={() => setViewSubmission(!viewSubmission)}
+                      >
+                      <Text style={styles.buttonText}>
+                        {viewSubmission ? 'Hide Submission' : 'View Submission'}
+                      </Text>
+                      </TouchableOpacity>
+                  )}
+                    
               </View>
             )}
 
             {isEditing && (
               <View style={styles.buttonRow}>
-                <Button title="Cancel" onPress={() => setIsEditing(false)} color="#f44336" />
-                <Button title="Save" onPress={handleEditTask} color="#4CAF50" />
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: '#f44336' }]}
+                  onPress={() => {setIsEditing(false);
+                    setRemovedAttachment(false);
+                  }}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: '#4CAF50' }]}
+                 onPress={() => {
+                    handleEditTask();
+                    setRemovedAttachment(false);
+                  }}
+                >
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
               </View>
             )}
 
-            {selectedTask.submission && selectedTask.submission.trim() !== '' && (
-              <View style={{ marginTop: normalize(10) }}>
-                <Button
-                  title="View Submission"
-                  onPress={() => setViewSubmission(true)}
-                  color="#3F51B5"
-                />
-              </View>
-            )}
-          </>
-        )}
-      </ScrollView>
+      </View>
     </View>
   );
 
@@ -313,12 +405,41 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   buttonRow: {
+    width:"100%",
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: normalize(8),
+    justifyContent: 'space-between', // or 'space-evenly'
     paddingHorizontal: normalize(12),
     paddingBottom: normalize(12),
+    gap: normalize(8), // optional: for consistent spacing if using 'space-between'
   },
+
+  button: {
+    borderRadius: normalize(6),
+    paddingVertical: normalize(6),
+    paddingHorizontal: normalize(12),
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: normalize(40),
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: normalize(7),
+    fontWeight: 'bold',
+  },
+
+  bottomButtonContainer: {
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  backgroundColor: '#fff',
+  paddingVertical: normalize(10),
+  borderTopWidth: 1,
+  borderColor: '#ccc',
+  paddingHorizontal: normalize(12),
+},
 });
 
 export default TaskDetailPT;
