@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   ImageSourcePropType,
   Alert,
   Dimensions,
@@ -238,25 +239,48 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 
             {!isEditing && (
               <View style={styles.buttonRow}>
-                <Button title="Edit" onPress={() => setIsEditing(true)} color="#4CAF50" />
-                <Button title="Delete" onPress={() => Alert.alert("Delete pressed")} color="#f44336" />
+                 <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#4CAF50' }]}
+                    onPress={() => setIsEditing(true)}
+                  >
+                    <Text style={styles.buttonText}>Edit</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#f44336' }]}
+                    onPress={() => Alert.alert("Delete pressed")}
+                  >
+                    <Text style={styles.buttonText}>Delete</Text>
+                  </TouchableOpacity>
               </View>
             )}
 
             {isEditing && (
               <View style={styles.buttonRow}>
-                <Button title="Cancel" onPress={() => setIsEditing(false)} color="#f44336" />
-                <Button title="Save" onPress={handleEditTask} color="#4CAF50" />
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: '#f44336' }]}
+                  onPress={() => setIsEditing(false)}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: '#4CAF50' }]}
+                  onPress={handleEditTask}
+                >
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
               </View>
             )}
 
             {selectedTask.submission && selectedTask.submission.trim() !== '' && (
               <View style={{ marginTop: normalize(10) }}>
-                <Button
-                  title="View Submission"
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: '#3F51B5' }]}
                   onPress={() => setViewSubmission(true)}
-                  color="#3F51B5"
-                />
+                >
+                  <Text style={styles.buttonText}>View Submission</Text>
+                </TouchableOpacity>
               </View>
             )}
           </>
@@ -318,6 +342,20 @@ const styles = StyleSheet.create({
     gap: normalize(8),
     paddingHorizontal: normalize(12),
     paddingBottom: normalize(12),
+  },
+
+  button: {
+    borderRadius: normalize(6),
+    paddingVertical: normalize(6),
+    paddingHorizontal: normalize(12),
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: normalize(40),
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: normalize(7),
+    fontWeight: 'bold',
   },
 });
 
