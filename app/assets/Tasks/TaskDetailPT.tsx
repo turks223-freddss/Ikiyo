@@ -38,6 +38,7 @@ type TaskDetailProps = {
   setIsEditing: (val: boolean) => void;
   setSubmissionText: (val: string) => void;
   triggerReload: () => void;
+  clearSelectedTask: () => void;
 };
 
 const TaskDetailPT: React.FC<TaskDetailProps> = ({
@@ -48,6 +49,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
   setIsEditing,
   setSubmissionText,
   triggerReload,
+  clearSelectedTask,
 }) => {
   if (!selectedTask) return null;
 
@@ -55,10 +57,11 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
     task_title: selectedTask.task_title || '',
     task_description: selectedTask.task_description || '',
     difficulty_level: 'Easy',
-    image: null as ImageSourcePropType | null,
+    image: selectedTask.attachment || null,
   });
 
   const [viewSubmission, setViewSubmission] = useState(false);
+  const [removedAttachment, setRemovedAttachment] = useState(false);
 
   useEffect(() => {
     if (isEditing && selectedTask) {
@@ -66,7 +69,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
         task_title: selectedTask.task_title || '',
         task_description: selectedTask.task_description || '',
         difficulty_level: 'Easy',
-        image: null,
+        image: selectedTask.attachment || null,
       });
     }
   }, [isEditing]);
@@ -76,7 +79,15 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       Alert.alert("Validation Error", "Please fill in the title and description.");
       return;
     }
-
+    console.log(JSON.stringify({
+      action: "edit",
+      task_id: selectedTask.id,
+      userID: userID,
+      task_title: editedTask.task_title,
+      task_description: editedTask.task_description,
+      difficulty_level: editedTask.difficulty_level,
+      attachment: editedTask.image || "",
+    }));
     try {
       const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
         method: "POST",
@@ -90,9 +101,10 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
           task_title: editedTask.task_title,
           task_description: editedTask.task_description,
           difficulty_level: editedTask.difficulty_level,
+          attachment:editedTask.image||"",
         }),
       });
-
+      console.log(editedTask.image)
       const data = await response.json();
       if (data.success) {
         Alert.alert("Success", "Task updated successfully!");
@@ -130,6 +142,32 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
     } catch (error) {
       console.error("Approve error:", error);
       Alert.alert("Error", "Approval failed.");
+    }
+  };
+
+  const handledelete = async () => {
+    try {
+      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          userID: userID,
+          task_id: selectedTask.id
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert("Success", "Task Deleted");
+        triggerReload();
+        clearSelectedTask(); 
+      } else {
+        Alert.alert("Error", data.error || "Task Delete failed.");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      Alert.alert("Error", "Delete failed.");
     }
   };
 
@@ -218,6 +256,30 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                   }
                   multiline
                 />
+                {selectedTask.attachment && !removedAttachment && (
+                   <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: normalize(8) }}>
+                      <Image
+                        source={{ uri: selectedTask.attachment }}
+                        style={styles.image}
+                        resizeMode="contain"
+                      />
+                      <TouchableOpacity
+                        onPress={() => {
+                          setRemovedAttachment(true);
+                          setEditedTask((prev) => ({ ...prev, image: null }))
+                        }}
+                        style={{
+                          marginLeft: normalize(8),
+                          backgroundColor: '#f44336',
+                          paddingVertical: normalize(4),
+                          paddingHorizontal: normalize(8),
+                          borderRadius: normalize(4),
+                        }}
+                      >
+                        <Text style={{ color: '#fff', fontSize: normalize(8) }}>Remove</Text>
+                      </TouchableOpacity>
+                    </View>
+                )}
                 <Picker
                   selectedValue={editedTask.difficulty_level}
                   onValueChange={(itemValue) =>
@@ -250,7 +312,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 
                   <TouchableOpacity
                     style={[styles.button, { backgroundColor: '#f44336' }]}
-                    onPress={() => Alert.alert("Delete pressed")}
+                    onPress={() => handledelete()}
                   >
                     <Text style={styles.buttonText}>Delete</Text>
                   </TouchableOpacity>
@@ -272,14 +334,19 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={[styles.button, { backgroundColor: '#f44336' }]}
-                  onPress={() => setIsEditing(false)}
+                  onPress={() => {setIsEditing(false);
+                    setRemovedAttachment(false);
+                  }}
                 >
                   <Text style={styles.buttonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.button, { backgroundColor: '#4CAF50' }]}
-                  onPress={handleEditTask}
+                 onPress={() => {
+                    handleEditTask();
+                    setRemovedAttachment(false);
+                  }}
                 >
                   <Text style={styles.buttonText}>Save</Text>
                 </TouchableOpacity>

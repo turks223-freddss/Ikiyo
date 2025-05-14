@@ -210,6 +210,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 setIsEditing={setIsEditing}
                 setSubmissionText={setSubmissionText}
                 triggerReload={() => setReloadTrigger(prev => !prev)} // 👈 Pass this
+                clearSelectedTask={() => setSelectedTask(null)}
               />
             )
           )}
