@@ -176,9 +176,6 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
               </View>
             )}
 
-            <View style={{ marginTop: normalize(8) }}>
-              <Button title="Hide Submission" onPress={() => setViewSubmission(false)} color="#607D8B" />
-            </View>
           </>
         ) : (
           // --- REGULAR TASK DETAIL VIEW ---
@@ -237,7 +234,12 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
               </>
             )}
 
-            {!isEditing && (
+           
+          </>
+        )}
+      </ScrollView>
+      <View style = {styles.bottomButtonContainer}>
+         {!isEditing && (
               <View style={styles.buttonRow}>
                  <TouchableOpacity
                     style={[styles.button, { backgroundColor: '#4CAF50' }]}
@@ -252,6 +254,17 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                   >
                     <Text style={styles.buttonText}>Delete</Text>
                   </TouchableOpacity>
+                  {selectedTask.submission && selectedTask.submission.trim() !== '' && (
+                      <TouchableOpacity
+                        style={[styles.button, { backgroundColor: '#3F51B5' }]}
+                        onPress={() => setViewSubmission(!viewSubmission)}
+                      >
+                      <Text style={styles.buttonText}>
+                        {viewSubmission ? 'Hide Submission' : 'View Submission'}
+                      </Text>
+                      </TouchableOpacity>
+                  )}
+                    
               </View>
             )}
 
@@ -273,19 +286,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
               </View>
             )}
 
-            {selectedTask.submission && selectedTask.submission.trim() !== '' && (
-              <View style={{ marginTop: normalize(10) }}>
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: '#3F51B5' }]}
-                  onPress={() => setViewSubmission(true)}
-                >
-                  <Text style={styles.buttonText}>View Submission</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </>
-        )}
-      </ScrollView>
+      </View>
     </View>
   );
 
@@ -337,11 +338,12 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   buttonRow: {
+    width:"100%",
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: normalize(8),
+    justifyContent: 'space-between', // or 'space-evenly'
     paddingHorizontal: normalize(12),
     paddingBottom: normalize(12),
+    gap: normalize(8), // optional: for consistent spacing if using 'space-between'
   },
 
   button: {
@@ -357,6 +359,20 @@ const styles = StyleSheet.create({
     fontSize: normalize(7),
     fontWeight: 'bold',
   },
+
+  bottomButtonContainer: {
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  backgroundColor: '#fff',
+  paddingVertical: normalize(10),
+  borderTopWidth: 1,
+  borderColor: '#ccc',
+  paddingHorizontal: normalize(12),
+},
 });
 
 export default TaskDetailPT;
