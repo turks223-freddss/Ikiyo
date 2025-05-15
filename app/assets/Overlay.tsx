@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   window: {
     backgroundColor: "rgba(255, 201, 172, 0)",
     borderRadius: 15,
-    padding: 10,
+    paddingTop: 10,
     flexDirection: "row",
   },
   closeButton: {
