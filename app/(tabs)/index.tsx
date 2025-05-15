@@ -16,6 +16,7 @@ import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
 import Settings from "../contents/ProfileContent/Settings"
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import eventBus from "../assets/utils/eventBus"
 
 interface UserData {
   userID: number;
@@ -61,26 +62,33 @@ export default function Home() {
         // console.log("Current user:", user); // Debugging step
         
     
-        fetch("http://192.168.1.5:8081/api/user/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userID:user.userID }),
-        })
-    
-        .then(async (response) => {
-          const text = await response.text(); // Read raw response
-          // console.log("Raw response:", text);
-          return JSON.parse(text);
-        })
-    
-        .then((data) => {
-          // console.log("Fetched user data:", data);
-          setUserData(data);
-        })
-    
-          .catch((error) => console.error("Error fetching user data:", error));
+        const fetchUserData = () => {
+          fetch("http://192.168.1.5:8081/api/user/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userID: user.userID }),
+          })
+            .then(async (response) => {
+              const text = await response.text(); // Read raw response
+              return JSON.parse(text);
+            })
+            .then((data) => {
+              setUserData(data);
+            })
+            .catch((error) => console.error("Error fetching user data:", error));
+        };
+        // Initial fetch when user changes
+        fetchUserData();
+
+        // Listen for buddyUpdate event to refresh user data
+        eventBus.on("buddyUpdate", fetchUserData);
+
+        // Cleanup listener on unmount or when user changes
+        return () => {
+          eventBus.off("buddyUpdate", fetchUserData);
+  };
         
     }, [user]); // Runs when `user` changes
 
@@ -316,10 +324,19 @@ export default function Home() {
           visible={true} 
           onClose={() => toggleOverlay("overlayprofile")}
           tabs={3}
-          tab1={<MainProfile userid={321}></MainProfile>}
+          tab1={<MainProfile userid={userData!.userID}
+          username={userData?.username}
+          hashtag= {`#${userData?.userID}`}
+          description={userData?.description ?? ""}
+          partner={userData?.buddy ?? undefined}
+          >
+          
+
+          </MainProfile>}
           tab1icon={AvatarIcon}
           tab1label={"Profile"}
-          tab2={<PartnerProfile id={321}/>}
+          tab2={<PartnerProfile id={userData!.userID}
+          partner_id={userData?.buddy ?? undefined}/>}
           tab2icon={AvatarIcon}
           tab2label={"Partner Profile"}
           tab3={<Settings/>}
