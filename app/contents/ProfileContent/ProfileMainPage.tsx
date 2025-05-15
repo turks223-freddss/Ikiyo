@@ -16,18 +16,18 @@ interface ProfilePageProps {
   hashtag?: string;
   description?: string;
   dateJoined?: string;
-  partner?: string;
+  partner?: number;
   school?: string;
   hearts?: number;
   outfits?: number;
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({
-  username = "John Doe",
-  hashtag = "#john_doe123",
-  description = "A short description about the user goes here. This is a bio section.",
+  username,
+  hashtag,
+  description,
   dateJoined = "January 1, 2020",
-  partner = "N/A",
+  partner,
   school = "Unknown School",
   hearts = 321,
   outfits = 123,

@@ -204,6 +204,8 @@ class BuddyRequestView(APIView):
             return self.decline_buddy_request(request)
         elif action == 'remove_buddy':
             return self.remove_buddy(request)
+        elif action == 'search':  # <--- NEW ACTION
+            return self.search_user(request)
         else:
             return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -269,6 +271,7 @@ class BuddyRequestView(APIView):
             return Response({'error': 'No pending request from this user.'}, status=status.HTTP_404_NOT_FOUND)
 
         request_obj.accept()
+        request_obj.delete()  # Delete after accepting
         return Response({'message': f'Buddy request from {request_obj.from_user.username} accepted.'}, status=status.HTTP_200_OK)
 
     def decline_buddy_request(self, request):
@@ -287,6 +290,7 @@ class BuddyRequestView(APIView):
             return Response({'error': 'No pending request from this user.'}, status=status.HTTP_404_NOT_FOUND)
 
         request_obj.decline()
+        request_obj.delete()   # Delete after declining
         return Response({'message': f'Buddy request from {request_obj.from_user.username} declined.'}, status=status.HTTP_200_OK)
     
     def remove_buddy(self, request):
@@ -311,6 +315,31 @@ class BuddyRequestView(APIView):
         user.save()
 
         return Response({'message': f'Buddy relationship with {buddy_username} has been removed.'}, status=status.HTTP_200_OK)
+    
+    def search_user(self, request):
+        target_id = request.data.get('target_id')
+        username = request.data.get('username')
+
+        if not target_id and not username:
+            return Response({'error': 'target_id or username is required for search.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Use Q to filter by either userID or username
+            user = User.objects.filter(
+                Q(userID=target_id) | Q(username__iexact=username)
+            ).first()
+
+            if not user:
+                return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            data = {
+                'userID': user.userID,
+                'username': user.username,
+                'buddy_id': user.buddy.userID if user.buddy else None,
+            }
+            return Response({'user': data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': f'Error during search: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class TaskActionView(APIView):
     def get_reward(self, difficulty_level):
