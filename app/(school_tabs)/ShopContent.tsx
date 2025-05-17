@@ -49,7 +49,7 @@ const selectorIcons: { [key in SelectorTabs]: any } = {
   Shoes: HeartIcon,
 };
 
-const AvatarScreen = () => {
+const ShopScreen = () => {
   const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState('Hats');
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,11 +78,11 @@ const AvatarScreen = () => {
             <Ionicons name="arrow-back" size={normalize(10)} color="#3a2e1f" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.topBarTitle}>Avatar Customization</Text>
+        <Text style={styles.topBarTitle}>Shop</Text>
         <View style={styles.topBarSpacer} />
       </View>
 
-      {/* Main Avatar UI */}
+      {/* Main Shop UI */}
       <View style={styles.container}>
         {/* Selector Tabs */}
         <ScrollView
@@ -141,9 +141,9 @@ const AvatarScreen = () => {
                   <>
                     <Image source={item.image} style={styles.itemImage} />
                     <Text style={styles.itemText}>{item.name}</Text>
-                    {/*<View style={styles.buyButton}>
+                    <View style={styles.buyButton}>
                       <Text style={styles.buyButtonText}>{item.price} G</Text>
-                    </View>*/}
+                    </View>
                   </>
                 ) : (
                   <>
@@ -423,4 +423,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AvatarScreen;
+export default ShopScreen;
