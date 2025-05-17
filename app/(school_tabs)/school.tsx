@@ -15,6 +15,7 @@ import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
 import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
 import Settings from "../contents/ProfileContent/Settings"
+import FriendList from "../assets/Friends/friendlist";
 
 export default function Home() {
   const router = useRouter();
@@ -150,7 +151,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/friendlist")}
+                onPress={() => toggleOverlay("overlayfriend")} 
                 icon={<Image source={FriendlistIcon} style={{ width: 35, height:30}} />} 
                 size={60}
               />
@@ -166,7 +167,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/ShopContent")}
+                onPress={() => router.push("/shop")}
                 icon={<Image source={ShopIcon} style={{ width: 35, height:30}} />} 
                 size={60}
               />
@@ -193,7 +194,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/tasks")}
+                onPress={() => router.push("/Avatar")}
                 icon={<Image source={AvatarIcon} style={{ width: 50, height:40}} />} 
                 size={90}
               />
@@ -247,14 +248,14 @@ export default function Home() {
           </OverlayWindow>
         )}
 
-        {overlays.overlayprofile && (
+        {overlays.overlayfriend && (
           <OverlayWindow 
           visible={true} 
-          onClose={() => toggleOverlay("overlayprofile")}
+          onClose={() => toggleOverlay("overlayfriend")}
           tabs={3}
-          tab1={<MainProfile userid={321}></MainProfile>}
+          tab1={<FriendList/>}
           tab1icon={AvatarIcon}
-          tab1label={"Profile"}
+          tab1label={"Friendlist"}
           tab2={<PartnerProfile id={321}/>}
           tab2icon={AvatarIcon}
           tab2label={"Partner Profile"}
