@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { normalize } from '../../../assets/normalize';
 
-// Placeholder icons/images
 import {
   AvatarIcon,
   MapsIcon,
@@ -24,6 +23,10 @@ type Friend = {
   avatarUrl?: string;
 };
 
+type FriendListProps = {
+  onOpenChat: (userID: string) => void;  // callback to open chat view
+};
+
 const mockFriends: Friend[] = [
   { id: '1', name: 'Alice', hashtag: '#1234', isOnline: true },
   { id: '2', name: 'Bob', hashtag: '#5678', isOnline: false },
@@ -32,7 +35,7 @@ const mockFriends: Friend[] = [
   { id: '5', name: 'Eve', hashtag: '#7890', isOnline: true },
 ];
 
-const FriendList = () => {
+const FriendList = ({ onOpenChat }: FriendListProps) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Friends</Text>
@@ -48,20 +51,28 @@ const FriendList = () => {
                 <Text style={styles.name}>{friend.name}</Text>
                 <Text style={styles.hashtag}>{friend.hashtag}</Text>
                 <View style={styles.statusContainer}>
-                    <View
-                        style={[
-                        styles.statusDot,
-                        { backgroundColor: friend.isOnline ? 'green' : 'gray' },
-                        ]}
-                    />
-                    <Text style={[styles.status, { color: friend.isOnline ? 'green' : 'gray' }]}>
-                        {friend.isOnline ? 'Online' : 'Offline'}
-                    </Text>
-                    </View>
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: friend.isOnline ? 'green' : 'gray' },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.status,
+                      { color: friend.isOnline ? 'green' : 'gray' },
+                    ]}
+                  >
+                    {friend.isOnline ? 'Online' : 'Offline'}
+                  </Text>
+                </View>
               </View>
             </View>
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.iconButton}>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => onOpenChat(friend.id)}
+              >
                 <Image source={MapsIcon} style={styles.icon} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconButton}>
@@ -147,16 +158,15 @@ const styles = StyleSheet.create({
     tintColor: '#555',
   },
   statusContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-},
-statusDot: {
-  width: normalize(2.5),
-  height: normalize(2.5),
-  borderRadius: normalize(1.25),
-  marginRight: normalize(1.5),
-},
-
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: normalize(2.5),
+    height: normalize(2.5),
+    borderRadius: normalize(1.25),
+    marginRight: normalize(1.5),
+  },
 });
 
 export default FriendList;

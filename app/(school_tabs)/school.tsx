@@ -17,17 +17,22 @@ import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
 import Settings from "../contents/ProfileContent/Settings"
 import FriendList from "../contents/Friends/friendlist";
 import FriendRequest from "../contents/Friends/friendrequest"
+import ChatScreen from "../contents/Friends/chat";
 import { normalize } from '../../assets/normalize';
 
 
 export default function Home() {
   const router = useRouter();
   const { width, height } = Dimensions.get("window");
-
+  const [view, setView] = useState<'friendlist' | 'chat'>('friendlist');
+  const [selectedUserID, setSelectedUserID] = useState<string | null>(null);
   // Overlay state management
   const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
     overlayad: false,
     overlayevent: false,
+    overlayfriend: false,
+    overlaytask: false,
+    overlayprofile: false,
   });
 
   // Function to toggle overlay visibility by name
@@ -254,7 +259,17 @@ export default function Home() {
           visible={true} 
           onClose={() => toggleOverlay("overlayfriend")}
           tabs={2}
-          tab1={<FriendList/>}
+          tab1={
+            view === 'friendlist' 
+              ? <FriendList onOpenChat={(userID: string) => {
+                  setSelectedUserID(userID);
+                  setView('chat');
+                }} />
+              : <ChatScreen 
+                  onBack={() => setView('friendlist')} 
+                  userID={selectedUserID ?? ""} 
+                />
+          }
           tab1icon={AvatarIcon}
           tab1label={"Friendlist"}
           tab2={<FriendRequest userID="321"/>}
