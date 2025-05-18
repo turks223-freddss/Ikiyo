@@ -16,6 +16,7 @@ import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
 import Settings from "../contents/ProfileContent/Settings"
 import FriendList from "../assets/Friends/friendlist";
+import { normalize } from '../../assets/normalize';
 
 export default function Home() {
   const router = useRouter();
@@ -51,33 +52,31 @@ export default function Home() {
       backgroundColor: "black",
       justifyContent: "flex-start",
       alignItems: "flex-start",
-      paddingLeft: 20,
-      paddingTop: 20,
+      paddingLeft: normalize(2),
+      paddingTop: normalize(4),
     },
     profileCardContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginTop: 20,
-      marginLeft: 10,
+      marginTop: normalize(2),
+      marginLeft: normalize(2),
     },
     bottomContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "flex-end",
-      paddingHorizontal: 20,
-      paddingBottom: 30,
+      paddingHorizontal: normalize(4),
       marginTop: "auto",
       width: "100%",
-      paddingRight: 18,
+      paddingRight: normalize(12),
     },
     bottomButtons: {
       flexDirection: "row",
-      gap: 10, // Works in React Native 0.71+
+      gap: normalize(5), // Works in React Native 0.71+
     },
     buttonRow: {
       flexDirection: "row",
-      justifyContent: "center",
-      marginBottom: 10, // Spacing between rows
+      justifyContent: "center", 
     },
     overlay: {
       position: "absolute",
@@ -114,8 +113,8 @@ export default function Home() {
           justifyContent: "space-between", 
           alignItems: "flex-start", 
           width: "100%",
-          paddingHorizontal: 20, 
-          marginTop: 20 
+          paddingHorizontal: normalize(10), 
+          marginTop: normalize(4), 
         }}>
           <ProfileCard
             imageUri="https://www.w3schools.com/w3images/avatar2.png"
@@ -126,14 +125,14 @@ export default function Home() {
 
           <View style={{ alignItems: "flex-end", gap: 10 }}>
             <CurrencyDisplay
-              icon={<Image source={HeartIcon} style={{ width: 50, height:50}} />} 
+              icon={<Image source={HeartIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
               currencyAmount={420}
-              size={50}
+              size={normalize(5)}
             />
             <CurrencyDisplay
-              icon={<Image source={IkicoinIcon} style={{ width: 50, height:50}} />} 
+              icon={<Image source={IkicoinIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
               currencyAmount={690}
-              size={50}
+              size={normalize(5)}
             />
           </View>
         </View>
@@ -144,40 +143,40 @@ export default function Home() {
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => toggleOverlay("overlayevent")}
-                icon={<Ionicons name="megaphone-outline" size={25} color="black" />}
-                size={60}
+                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => toggleOverlay("overlayfriend")} 
-                icon={<Image source={FriendlistIcon} style={{ width: 35, height:30}} />} 
-                size={60}
+                icon={<Image source={FriendlistIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("../maps")}
-                icon={<Image source={MapsIcon} style={{ width: 35, height:30}} />} 
-                size={60}
+                icon={<Image source={MapsIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/ShopContent")}
-                icon={<Image source={ShopIcon} style={{ width: 35, height:30}} />} 
-                size={60}
+                icon={<Image source={ShopIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => toggleOverlay("overlayad")} // Trigger overlay toggle
-                icon={<Ionicons name="cart-outline" size={25} color="black" />}
-                size={60}
+                icon={<Ionicons name="cart-outline" size={normalize(10)} color="black" />}
+                size={normalize(20)}
               />
             </View>
           </View>
@@ -187,24 +186,24 @@ export default function Home() {
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/edit")}
-                icon={<Image source={EditRoomIcon} style={{ width: 50, height:40}} />} 
-                size={90}
+                icon={<Image source={EditRoomIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                size={normalize(30)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/Avatar")}
-                icon={<Image source={AvatarIcon} style={{ width: 50, height:40}} />} 
-                size={90}
+                icon={<Image source={AvatarIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                size={normalize(30)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => toggleOverlay("overlaytask")} 
-                icon={<Image source={TaskIcon} style={{ width: 50, height:40}} />} 
-                size={90}
+                icon={<Image source={TaskIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                size={normalize(30)}
               />
             </View>
           </View>

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-
+import { normalize } from '../../assets/normalize';
 
 interface eCardProps {
     imageUri?: string; 
@@ -36,9 +36,7 @@ const styles = StyleSheet.create({
         flexDirection: "row", // Arrange elements horizontally
         alignItems: "center", // Center vertically
         backgroundColor: "rgba(255, 201, 172, 0.85)", 
-        paddingVertical: 10, // reduced from 15
-        paddingHorizontal: 10, // reduced from 15
-        margin: 10,
+        paddingVertical: normalize(1), // reduced from 15
         borderRadius: 200, // Rounded corners
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -47,11 +45,11 @@ const styles = StyleSheet.create({
         elevation: 5, // Shadow effect for elevation on Android
     },
     imageContainer: {
-        width: 70,
-        height: 70,
-        borderRadius: 30, // Circular container
+        width: normalize(25),
+        height: normalize(25),
+        borderRadius: normalize(40), // Circular container
         overflow: "hidden", // Ensure the image is contained within the circle
-        marginRight: 10, // Increased space between image and text
+        marginRight: normalize(5), // Increased space between image and text
     },
     profileImage: {
         width: "100%", // Take up the full container width
@@ -60,15 +58,15 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flexDirection: "column", // Stack the text vertically
-        marginRight: 10,
+        marginRight: normalize(6),
     },
     username: {
-        fontSize: 16,
+        fontSize: normalize(8),
         fontWeight: "bold",
         color: "rgb(255, 244, 239)",
     },
     hashtag: {
-        fontSize: 14,
+        fontSize: normalize(6),
         color: "rgb(123, 123, 123)",
     },
 });

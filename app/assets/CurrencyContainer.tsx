@@ -1,80 +1,73 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
+import { normalize } from '../../assets/normalize';
 
 interface CurrencyDisplayProps {
   icon: React.ReactNode;
   currencyAmount: number;
-  size?: number;       // diameter of the icon
-  boxSize?: number;    // optional, no longer used strictly
+  size?: number;       // size of icon
 }
 
 const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   icon,
   currencyAmount,
-  size = 80,
+  size = 40, // More compact by default
 }) => {
   return (
-    <View style={[styles.container]}>
-      <View style={[styles.iconCircle, { width: size, height: size }]}>
-        <View style={styles.iconContainer}>{icon}</View>
-      </View>
-
+    <View
+      style={[
+        styles.currencyContainer,
+        {
+          height: size + 20,
+          borderRadius: (size + 20) / 2,
+          paddingRight: size * 0.6,
+        },
+      ]}
+    >
       <View
         style={[
-          styles.currencyBox,
+          styles.iconWrapper,
           {
+            width: size,
             height: size,
-            width: size*4,
-            paddingLeft: size * 0.6 + 10, // enough space to show text clearly
+            borderRadius: size / 2,
+            marginRight: 10,
           },
         ]}
       >
-        <View style={{ alignItems: "center" }}>
-            <Text style={styles.currencyText}>{currencyAmount}</Text>
-        </View>
+        {icon}
       </View>
+
+      <Text style={[styles.currencyText, { fontSize: normalize(6) }]}>
+        {currencyAmount}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  currencyContainer: {
+    backgroundColor: "rgba(255, 201, 172, 0.85)",
     flexDirection: "row",
     alignItems: "center",
   } as ViewStyle,
 
-  iconCircle: {
-    zIndex: 1,
-    marginRight: -40, // Pull into the box
-    borderRadius: 100,
-    //backgroundColor: "white",
-    //borderWidth: 2,
-    //borderColor: "silver",
+  iconWrapper: {
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   } as ViewStyle,
 
-  iconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  currencyBox: {
-    backgroundColor: "rgba(255, 201, 172, 0.85)",
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingRight: 20,
-    justifyContent: "center",
-    alignItems: "center",     // Center all children
-    flex: 1,                  // Allow it to fill available space
-  },
-  
-  
-
   currencyText: {
-    fontSize: 18,
     fontWeight: "bold",
-    color: "black",
+    color: "#222",
+    marginLeft: normalize(3),
+    marginRight: normalize(6),
   } as TextStyle,
 });
 
