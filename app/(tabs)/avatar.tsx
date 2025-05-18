@@ -40,7 +40,6 @@ const Avatar = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Avatar</Text>
       <AvatarSkiaDisplay userID={user.userID} />
     </View>
   );

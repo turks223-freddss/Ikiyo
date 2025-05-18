@@ -50,7 +50,9 @@ const ProfilePageWrapper: React.FC<ProfilePageWrapperProps> = ({ id, partner_id 
         username={partnerData?.username}
         hashtag= {`#${partnerData?.userID}`}
         description={partnerData?.description ?? ""}
-        partner={partnerData?.buddy ?? undefined}/>
+        partner={partnerData?.buddy ?? undefined}
+        variant={2}/>
+        
 
         : <PartnerInvite userID={id} />;
 };

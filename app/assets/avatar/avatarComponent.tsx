@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Canvas, Image as SkImage, useImage } from "@shopify/react-native-skia";
+import { Canvas, Image as SkImage, useImage, Group } from "@shopify/react-native-skia";
+
 
 // Define a type for the avatar data
 interface AvatarData {
@@ -49,6 +50,12 @@ const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
     }
   }, [userID]);
 
+  const angleInRadians = -3 * (Math.PI / 180);
+
+  // Calculate center of the head image (based on its size and position)
+  const headCenterX = 105; // -5 + width / 2 => -5 + 110 = 105
+  const headCenterY = 115; // -10 + height / 2 => -10 + 125 = 115
+
   // Ensure useImage is called the same on every render (even when avatarData is null)
   const headImage = useImage(avatarData?.head || "");
   const bodyImage = useImage(avatarData?.body || "");
@@ -56,6 +63,9 @@ const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
   const rightArmImage = useImage(avatarData?.right_arm || "");
   const leftLegImage = useImage(avatarData?.left_leg || "");
   const rightLegImage = useImage(avatarData?.right_leg || "");
+  const hatImage = useImage(require("../../../assets/images/Avatar/hat2.png"))
+  const eyesImage = useImage(require("../../../assets/images/Avatar/eye2.png"))
+  const upperImage = useImage(require("../../../assets/images/Avatar/upper1.png"))
 
   // Check if all images are loaded by ensuring they are not null
   const ready = headImage && bodyImage && leftArmImage && rightArmImage && leftLegImage && rightLegImage;
@@ -72,7 +82,21 @@ const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
         <SkImage image={bodyImage} x={0} y={0} width={220} height={250} />
         <SkImage image={leftLegImage} x={6} y={8} width={200} height={250} />
         <SkImage image={rightLegImage} x={13} y={8} width={200} height={250} />
-        <SkImage image={headImage} x={-5} y={-10} width={220} height={250} />
+        {/* <SkImage image={headImage} x={-5} y={-10} width={220} height={250} /> */}
+        <Group
+          transform={[
+            { translateX: headCenterX },
+            { translateY: headCenterY },
+            { rotate: angleInRadians },
+            { translateX: -headCenterX },
+            { translateY: -headCenterY },
+          ]}
+        >
+          <SkImage image={headImage} x={-5} y={-10} width={220} height={250} />
+        </Group>
+        <SkImage image={hatImage} x={-5} y={-10} width={220} height={250} />
+        <SkImage image={eyesImage} x={-6.5} y={-12.5} width={220} height={250} />
+        <SkImage image={upperImage} x={-5} y={-11} width={220} height={250} />
       </Canvas>
     </View>
   );

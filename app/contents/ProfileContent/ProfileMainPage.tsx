@@ -1,7 +1,8 @@
-import React from 'react';
+import React,{useState} from 'react';
 import {
   View,
   Text,
+  TextInput,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -9,6 +10,8 @@ import {
   PixelRatio,
 } from 'react-native';
 import { HeartIcon } from "../../../assets/images/homeIcons";
+import AvatarSkiaDisplay from '../../assets/avatar/avatarComponent';
+import eventBus from "../../assets/utils/eventBus"
 
 interface ProfilePageProps {
   userid: number;
@@ -20,10 +23,12 @@ interface ProfilePageProps {
   school?: string;
   hearts?: number;
   outfits?: number;
+  variant?: 1 | 2;
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({
   username,
+  userid,
   hashtag,
   description,
   dateJoined = "January 1, 2020",
@@ -31,6 +36,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   school = "Unknown School",
   hearts = 321,
   outfits = 123,
+  variant = 1, 
 }) => {
   const { width } = useWindowDimensions();
 
@@ -41,17 +47,45 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   };
 
   const dynamicStyles = getRightSideStyles(normalize, width);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUsername, setEditedUsername] = useState(username || '');
+  const [editedDescription, setEditedDescription] = useState(description || '');
+
+  const handleSave = async () => {
+  try {
+    const response = await fetch(`http://192.168.1.5:8081/api/edit-user/${userid}/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: editedUsername,
+        description: editedDescription,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || 'Failed to update user.');
+      return;
+    }
+
+    // Optionally update displayed values
+    setIsEditing(false);
+    console.log('Update success:', data);
+  } catch (error) {
+    console.error('Error updating user:', error);
+    alert('An error occurred while updating.');
+  }
+};
 
   return (
     <View style={styles.container}>
       {/* Left Side */}
       <View style={styles.leftContainer}>
         <View style={styles.mainImageContainer}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/600x800' }}
-            style={styles.mainImage}
-            resizeMode="cover"
-          />
+          <AvatarSkiaDisplay userID={userid} />
         </View>
         <View style={styles.iconRow}>
           <View style={styles.iconText}>
@@ -72,19 +106,53 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         <View style={dynamicStyles.avatarContainer}>
           <Image source={{ uri: 'https://via.placeholder.com/150' }} style={dynamicStyles.avatar} />
           <View style={dynamicStyles.userDetails}>
-            <Text style={dynamicStyles.username}>{username}</Text>
+            {isEditing ? (
+              <TextInput
+                style={[dynamicStyles.username, { borderBottomWidth: 1 }]}
+                value={editedUsername}
+                onChangeText={setEditedUsername}
+              />
+            ) : (
+              <Text style={dynamicStyles.username}>{editedUsername}</Text>
+            )}
             <Text style={dynamicStyles.hashtag}>{hashtag}</Text>
           </View>
           <View style={dynamicStyles.editButtonContainer}>
-          <TouchableOpacity style={dynamicStyles.editButton} onPress={() => {}}>
-            <Text style={dynamicStyles.editButtonText}>Edit</Text>
+          <TouchableOpacity
+            style={variant === 2 ? dynamicStyles.deleteButton : dynamicStyles.editButton}
+            onPress={() => {
+              if (variant === 1) {
+                 if (isEditing) {
+                    handleSave();
+                    eventBus.emit("UserUpdate");
+                    eventBus.emit("refreshHome");
+                  } else {
+                    setIsEditing(true);
+                  }
+              } else {
+                console.log('Delete button pressed');
+              }
+            }}
+          >
+            <Text style={dynamicStyles.editButtonText}>
+              {variant === 1 ? (isEditing ? 'Save' : 'Edit') : 'Delete'}
+            </Text>
           </TouchableOpacity>
         </View>
         </View>
 
         {/* Description */}
         <View style={dynamicStyles.descriptionBox}>
-          <Text style={dynamicStyles.descriptionText}>{description}</Text>
+          {isEditing ? (
+            <TextInput
+              style={dynamicStyles.descriptionText}
+              value={editedDescription}
+              onChangeText={setEditedDescription}
+              multiline
+            />
+          ) : (
+            <Text style={dynamicStyles.descriptionText}>{editedDescription}</Text>
+          )}
         </View>
 
         {/* Additional Info */}
@@ -173,6 +241,13 @@ const getRightSideStyles = (normalize: (size: number) => number, width: number) 
       paddingVertical: normalize(2.5),
       borderRadius: normalize(6),
       marginTop: normalize(0), // Ensure some spacing at the top
+    },
+    deleteButton: {
+      backgroundColor: '#e74c3c',
+      paddingHorizontal: normalize(4),
+      paddingVertical: normalize(2.5),
+      borderRadius: normalize(6),
+      marginTop: normalize(0),
     },
     editButtonText: {
       color: '#fff',
