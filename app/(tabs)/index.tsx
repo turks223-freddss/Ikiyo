@@ -36,6 +36,8 @@ export default function Home() {
         userID: number;
       } | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [test,setTest] = useState("test");
 
   useEffect(() => {
       const fetchUserData = async () => {
@@ -81,13 +83,17 @@ export default function Home() {
         };
         // Initial fetch when user changes
         fetchUserData();
-
+        console.log("hello entered")
         // Listen for buddyUpdate event to refresh user data
         eventBus.on("buddyUpdate", fetchUserData);
+        eventBus.on("UserUpdate",fetchUserData);
+        eventBus.on("refreshHome", refreshWholeScreen); // ⬅️ Add this line
 
         // Cleanup listener on unmount or when user changes
         return () => {
           eventBus.off("buddyUpdate", fetchUserData);
+          eventBus.off("UserUpdate",fetchUserData);
+          eventBus.off("refreshHome", refreshWholeScreen); // ⬅️ Add this line
   };
         
     }, [user]); // Runs when `user` changes
@@ -112,6 +118,10 @@ export default function Home() {
       ...prevOverlays,
       [name]: false,
     }));
+  };
+  const refreshWholeScreen = () => {
+    setTest("newtest")
+    setRefreshKey(prev => prev + 1);
   };
 
   const styles = StyleSheet.create({
@@ -176,9 +186,14 @@ export default function Home() {
     },
   });
 
+  console.log("Inside render, test =", test);
+  console.log("buddy:",userData?.buddy)
+  console.log("buddy:",userData?.username)
+  console.log("buddy:",userData?.description)
+
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <View style={styles.container}>
+      <View key={refreshKey} style={styles.container}>
         {/* Profile Card Container */}
         <View style={{ 
           flexDirection: "row", 
@@ -318,8 +333,8 @@ export default function Home() {
           >
           </OverlayWindow>
         )}
-
         {overlays.overlayprofile && (
+          
           <OverlayWindow 
           visible={true} 
           onClose={() => toggleOverlay("overlayprofile")}

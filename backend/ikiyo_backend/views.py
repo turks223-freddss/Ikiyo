@@ -309,10 +309,19 @@ class BuddyRequestView(APIView):
 
         # Store buddy for message (optional)
         buddy_username = user.buddy.username
+        buddy = user.buddy
+        
+        from ikiyo_backend.models import Task  # Make sure to import your Task model
+        Task.objects.filter(
+            Q(assigned_by=user, assigned_to=buddy) | Q(assigned_by=buddy, assigned_to=user)
+        ).delete()
+
 
         # This will trigger your save() logic to update both users
         user.buddy = None
         user.save()
+        buddy.buddy = None  # Also unset for the other user
+        buddy.save()
 
         return Response({'message': f'Buddy relationship with {buddy_username} has been removed.'}, status=status.HTTP_200_OK)
     
