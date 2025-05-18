@@ -78,7 +78,6 @@ const FriendList = () => {
 const styles = StyleSheet.create({
   container: {
     padding: normalize(4),
-    backgroundColor: '#f5f5f5',
     flex: 1,
     width: '100%',
   },
