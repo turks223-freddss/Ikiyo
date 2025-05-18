@@ -74,7 +74,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#f4f4f4',
   },
   container: {
     flex: 1,
@@ -82,7 +81,6 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.03,
     paddingHorizontal: width * 0.04,
     paddingBottom: height * 0.03,
-    backgroundColor: '#f4f4f4',
     justifyContent: 'flex-start',
   },
   title: {

@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.03,
     paddingHorizontal: width * 0.04,
     paddingBottom: height * 0.03,
-    backgroundColor: '#f4f4f4',
     justifyContent: 'flex-start',
   },
   title: {
@@ -112,7 +111,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
-    marginBottom: height * 0.02,
+    marginBottom: height * 0.01,
     textTransform: 'uppercase',
   },
   content: {

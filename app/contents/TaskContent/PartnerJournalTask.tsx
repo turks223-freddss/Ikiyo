@@ -69,7 +69,7 @@ const PartnerJournal: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Journal</Text>
+      <Text style={styles.title}>Partner Journal</Text>
       <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
         <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
           <FlatList
@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.03,
     paddingHorizontal: width * 0.04,
     paddingBottom: height * 0.02,
-    backgroundColor: '#f4f4f4',
   },
   title: {
     fontSize: normalize(14),

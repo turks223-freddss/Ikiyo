@@ -266,6 +266,24 @@ export default function Home() {
           </OverlayWindow>
         )}
 
+        {overlays.overlayprofile && (
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayprofile")}
+          tabs={3}
+          tab1={<MainProfile userid = {321} />}
+          tab1icon={AvatarIcon}
+          tab1label={"My Profile"}
+          tab2={<PartnerProfile id={321}/>}
+          tab2icon={AvatarIcon}
+          tab2label={"Partner Profile"}
+          tab3={<Settings/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Settings"}
+          >
+          </OverlayWindow>
+        )}
+
       </View>
     </View>
   );
