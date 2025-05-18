@@ -179,6 +179,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2ead3',
     padding: normalize(2),
+    width: "100%",
+    borderRadius: normalize(7),
   },
   tabWrapper: {
     alignItems: 'center',

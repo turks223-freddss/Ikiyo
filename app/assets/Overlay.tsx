@@ -9,6 +9,7 @@ import {
   Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { normalize } from "@/assets/normalize";
 
 interface OverlayWindowProps {
   visible: boolean;
@@ -87,7 +88,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
           >
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <View style={styles.closeIconWrapper}>
-                <Ionicons name="close" size={20} color="red" />
+                <Ionicons name="close" size={20} color="white" />
               </View>
             </TouchableOpacity>
 
@@ -127,6 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   window: {
     backgroundColor: "rgba(255, 201, 172, 0)",
@@ -136,8 +138,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 0,
+    right: -20,
     zIndex: 1,
   },
   closeIconWrapper: {
@@ -146,6 +148,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 2,
     borderColor: "red",
+    backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -188,7 +191,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 0,
   },
 });
 

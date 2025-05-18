@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, View, StyleSheet, Image, ImageSourcePropType, ViewStyle } from "react-native";
+import { normalize } from '../../assets/normalize';
 
 interface FeatureButtonProps {
     onPress: () => void;
@@ -29,8 +30,6 @@ const getStyles = {
         backgroundColor: "white",
         justifyContent: "center" as const,
         alignItems: "center" as const,
-        elevation: 5,
-        padding: 6, // Padding remains smaller for reduced gap
     }),
     inner: (size: number): ViewStyle => ({
         width: size,
