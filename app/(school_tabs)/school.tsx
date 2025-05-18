@@ -15,8 +15,10 @@ import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
 import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
 import Settings from "../contents/ProfileContent/Settings"
-import FriendList from "../assets/Friends/friendlist";
+import FriendList from "../contents/Friends/friendlist";
+import FriendRequest from "../contents/Friends/friendrequest"
 import { normalize } from '../../assets/normalize';
+
 
 export default function Home() {
   const router = useRouter();
@@ -251,16 +253,13 @@ export default function Home() {
           <OverlayWindow 
           visible={true} 
           onClose={() => toggleOverlay("overlayfriend")}
-          tabs={3}
+          tabs={2}
           tab1={<FriendList/>}
           tab1icon={AvatarIcon}
           tab1label={"Friendlist"}
-          tab2={<PartnerProfile id={321}/>}
+          tab2={<FriendRequest userID="321"/>}
           tab2icon={AvatarIcon}
-          tab2label={"Partner Profile"}
-          tab3={<Settings/>}
-          tab3icon={AvatarIcon}
-          tab3label={"Settings"}
+          tab2label={"Friend Request"}
           >
           </OverlayWindow>
         )}
