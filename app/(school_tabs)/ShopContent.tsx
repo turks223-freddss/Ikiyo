@@ -141,9 +141,20 @@ const ShopScreen = () => {
                   <>
                     <Image source={item.image} style={styles.itemImage} />
                     <Text style={styles.itemText}>{item.name}</Text>
-                    <View style={styles.buyButton}>
-                      <Text style={styles.buyButtonText}>{item.price} G</Text>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.buyButton}
+                      onPress={() => {
+                        console.log(`Buying ${item.name} for ${item.price} Ikicoins`);
+                        // Add your buying logic here
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.priceContainer}>
+                        <Text style={styles.buyButtonText}>{item.price}</Text>
+                        <Image source={IkicoinIcon} style={styles.coinIcon} />
+                      </View>
+                    </TouchableOpacity>
+
                   </>
                 ) : (
                   <>
@@ -373,6 +384,8 @@ const styles = StyleSheet.create({
     borderRadius: normalize(5),
     borderWidth: normalize(1),
     borderColor: '#5e4021',
+    alignItems: 'center',
+    alignContent: 'center',
   },
   buyButtonText: {
     fontSize: normalize(5),
@@ -421,6 +434,19 @@ const styles = StyleSheet.create({
     color: '#3a2e1f',
     fontWeight: 'bold',
   },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: normalize(1),
+  },
+
+  coinIcon: {
+    width: normalize(5.5),
+    height: normalize(5.5),
+    resizeMode: 'contain',
+    marginLeft: normalize(1),
+  },
+
 });
 
 export default ShopScreen;
