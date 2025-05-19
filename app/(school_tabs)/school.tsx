@@ -8,7 +8,7 @@ import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
 import AdContent from "../contents/AdContent"; 
-import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
