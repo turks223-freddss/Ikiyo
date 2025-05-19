@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,11 @@ import {
   Dimensions,
   PixelRatio,
   TouchableOpacity,
+  Alert
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { uploadToCloudinary } from "../Tasks/CloudinaryUpload"
 
 // Normalize function for responsive scaling
 const { width } = Dimensions.get('window');
@@ -21,10 +25,16 @@ const normalize = (size: number) => {
 
 type TaskDetailProps = {
   selectedTask: {
-    titleName: string;
-    description?: string;
-    previewImage?: ImageSourcePropType;
+    id:number
+    task_title: string;
+    task_description?: string;
+    attachment?: string | null;
+    submission?: string | null;
+    submission_attachment?: string | null;
+    status: string;
+    verification: boolean;
   } | null;
+  userID: number;
   isSubmitting: boolean;
   submissionText: string;
   setIsSubmitting: (val: boolean) => void;
@@ -36,22 +46,137 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   selectedTask,
   isSubmitting,
   submissionText,
+  userID,
   setIsSubmitting,
   setSubmissionText,
   isSelf,
 }) => {
   if (!selectedTask) return null;
+  const [submissionImage, setSubmissionImage] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
+  const [documentUri, setDocumentUri] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Camera roll permission is required.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images','videos','livePhotos'],
+      quality: 1,
+    });
+
+    setShowAttachmentOptions(false);
+
+    if (!result.canceled) {
+      setSubmissionImage(result.assets[0].uri);
+      setShowAttachmentOptions(false);
+      setDocumentUri(null); // clear document when image is selected
+    }
+  };
+
+  const takeImage = async () => {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission required', 'Camera roll permission is required.');
+        return;
+      }
+  
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images','videos','livePhotos'],
+        quality: 1,
+      });
+      setShowAttachmentOptions(false);
+      if (!result.canceled) {
+        setSubmissionImage(result.assets[0].uri);
+        setShowAttachmentOptions(false);
+        setDocumentUri(null); // clear document when image is selected
+      }
+    };
+  
+    const pickDocument = async () => {
+      const result = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      setShowAttachmentOptions(false);
+      if (!result.canceled && result.assets.length > 0) {
+        setDocumentUri(result.assets[0].uri);
+        setShowAttachmentOptions(false);
+        setSubmissionImage(null); // clear image when document is selected
+      }
+    };
+
+
+  const handleSubmit = async () => {
+    if (!submissionText.trim()) {
+      alert("Please write something before submitting.");
+      return;
+    }
+
+    setIsLoading(true);
+    let uploadedUrl = null;
+
+    try {
+      if (submissionImage && documentUri) {
+        alert("Please attach only an image *or* a document, not both.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (submissionImage) {
+        uploadedUrl = await uploadToCloudinary(submissionImage);
+      } else if (documentUri) {
+        uploadedUrl = await uploadToCloudinary(documentUri);
+      }
+    } catch (error) {
+      console.error('Cloudinary Upload Error:', error);
+      Alert.alert('Upload Error', 'Failed to upload attachment.');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action:"submit",
+          userID:userID,
+          task_id: selectedTask.id,
+          submission: submissionText,
+          submission_attachment: uploadedUrl || null,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Submission failed");
+
+      alert("Submission sent!");
+      setIsSubmitting(false);
+      setSubmissionText('');
+      setSubmissionImage(null);
+    } catch (error) {
+      alert("Error submitting task.");
+      console.error(error);
+    }
+    setIsLoading(false);
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.details}>
-        <Text style={styles.detailTitle}>{selectedTask.titleName}</Text>
+        <Text style={styles.detailTitle}>{selectedTask.task_title}</Text>
 
         {!isSubmitting ? (
           <>
-            <Text style={styles.description}>{selectedTask.description}</Text>
-            {selectedTask.previewImage && (
-              <Image source={selectedTask.previewImage} style={styles.image} resizeMode="contain" />
+            <Text style={styles.description}>{selectedTask.task_description}</Text>
+            {selectedTask.attachment && (
+              <Image source={{ uri: selectedTask.attachment }} style={styles.image} resizeMode="contain" />
             )}
           </>
         ) : (
@@ -63,10 +188,70 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
               value={submissionText}
               onChangeText={setSubmissionText}
             />
-            <TouchableOpacity style={styles.addImageButton} onPress={() => {}}>
-              <Text style={styles.addImageButtonText}>Add Image</Text>
-            </TouchableOpacity>
+            {submissionImage && (
+              <Image
+                source={{ uri: submissionImage }}
+                style={{
+                  width: '100%',
+                  height: 150,
+                  borderRadius: 8,
+                  marginTop: 10,
+                }}
+                resizeMode="cover"
+              />
+            )}
+  
+            {documentUri && !submissionImage && (
+              <Text style={{ marginTop: 10 }}>Selected Document: {documentUri.split('/').pop()}</Text>
+            )}
+            {!showAttachmentOptions ? (
+              <TouchableOpacity
+                style={styles.addImageButton}
+                onPress={() => setShowAttachmentOptions(true)}
+              >
+                <Text style={styles.buttonText}>
+                  {submissionImage || documentUri ? 'Change Attachment' : 'Add Attachment'}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={{ flexDirection: 'row', marginTop: 10, gap: 10 }}>
+                <TouchableOpacity
+                  style={[styles.addImageButton, { backgroundColor: '#2196F3' }]}
+                  onPress={pickImage}
+                >
+                  <Text style={styles.buttonText}>Image</Text>
+                </TouchableOpacity>
+  
+                <TouchableOpacity
+                  style={[styles.addImageButton, { backgroundColor: '#2196F3' }]}
+                  onPress={takeImage}
+                >
+                  <Text style={styles.buttonText}>Camera</Text>
+                </TouchableOpacity>
+  
+                <TouchableOpacity
+                  style={[styles.addImageButton, { backgroundColor: '#9C27B0' }]}
+                  onPress={pickDocument}
+                >
+                  <Text style={styles.buttonText}>Document</Text>
+                </TouchableOpacity>
+  
+                <TouchableOpacity
+                  style={[styles.addImageButton, { backgroundColor: '#f44336' }]}
+                  onPress={() => setShowAttachmentOptions(false)}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                
+              </View>
+            )}
+          
+          
+          
           </>
+        
+        
+        
         )}
       </ScrollView>
 
@@ -88,8 +273,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
           >
             <Text style={styles.smallButtonText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.smallButton} onPress={() => {}}>
-            <Text style={styles.smallButtonText}>Submit</Text>
+          <TouchableOpacity style={styles.smallButton} onPress={handleSubmit} disabled={isLoading}>
+            <Text style={styles.smallButtonText}>{isLoading ? "Submitting..." : "Submit"}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -180,6 +365,11 @@ const styles = StyleSheet.create({
     fontSize: normalize(10),
     color: '#fff',
     fontWeight: '500',
+  },
+    buttonText: {
+    color: '#fff',
+    fontSize: normalize(7),
+    fontWeight: 'bold',
   },
 });
 

@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskCard from '../../assets/Tasks/MyJournalTaskCard';
 import TaskDetail from '../../assets/Tasks/TaskDetail';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Dimensions,
-  useWindowDimensions,
-  PixelRatio,
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    FlatList,
+    TouchableOpacity,
+    TextInput,
+    Button,
+    Image,
+    ImageSourcePropType,
+    Alert,
+    Dimensions,
+    useWindowDimensions,
+    PixelRatio,
 } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,79 +28,131 @@ const normalize = (size: number) => {
 };
 
 type TaskData = {
-  questImage: any;
-  titleName: string;
-  rewardImage: any;
-  reward?: number;
-  description?: string;
-  previewImage?: any;
+    id: number;
+    task_title: string;
+    task_description: string;
+    difficulty_level: string;
+    reward: number;
+    attachment?: string | null;
+    icon?: string | null;
+    submission?:string| null;
+    submission_attachment?: string | null;
+    status:string;
+    verification:boolean;
+    created_at: string;
+    updated_at: string;
+    assigned_by: number;
+    assigned_to: number;
 };
 
-const tasks: TaskData[] = [
-  {
-    questImage: require('../../../assets/images/homeIcons/avatar.png'),
-    titleName: 'Defeat 5 Enemies',
-    rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-    reward: 100,
-    description: 'Eliminate 5 enemies in the field to protect the village.',
-    previewImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-  },
-  {
-    questImage: require('../../../assets/images/homeIcons/avatar.png'),
-    titleName: 'Block 10 Attacks',
-    rewardImage: require('../../../assets/images/homeIcons/ikicoin.png'),
-    reward: 150,
-    description: 'Use your shield to block 10 incoming attacks.',
-  },
-];
-
 const MyJournal: React.FC = () => {
-  const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionText, setSubmissionText] = useState('');
-  const { width } = useWindowDimensions();
+const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submissionText, setSubmissionText] = useState('');
+    const [user, setUser] = useState<{ userID: number } | null>(null);
+    const [taskList, setTaskList] = useState<TaskData[]>([]);
+    const { width } = useWindowDimensions();
 
-  const isSmallScreen = width < 600;
+    const isSmallScreen = width < 600;
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Journal</Text>
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await AsyncStorage.getItem("user");
+                if (userData) {
+                    const parsedUser = JSON.parse(userData);
+                    if (typeof parsedUser === "number") {
+                        setUser({ userID: parsedUser });
+                    } else {
+                        setUser(parsedUser);
+                    }
+                }
+            } catch (error) {
+                console.error("Error retrieving user data:", error);
+            }
+        };
+        fetchUserData();
+    }, []);
 
-      <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
-        <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
-          <FlatList
-            data={tasks}
-            keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={styles.taskList}
-            renderItem={({ item }) => (
-              <TaskCard
-                questImage={item.questImage}
-                titleName={item.titleName}
-                rewardImage={item.rewardImage}
-                reward={item.reward}
-                isSelf={1}
-                onPress={() => {
-                  setSelectedTask(item);
-                  setIsSubmitting(false);
-                }}
-              />
-            )}
-          />
+    const fetchTasks = async () => {
+        if (!user || !user.userID) return;
+
+        try {
+            const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                action: "list_assigned_to",
+                userID: user.userID,
+            }),
+            });
+
+            if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data && data.tasks_assigned_to_user) {
+            setTaskList(data.tasks_assigned_to_user);
+            }
+        } catch (error) {
+            console.error("Error fetching tasks:", error);
+            Alert.alert("Error", "Failed to load tasks. Please try again later.");
+        }
+        };
+    
+    useEffect(() => {
+        fetchTasks();
+    }, [user]);
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>My Journal</Text>
+
+            <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
+                {/* Left: Task List */}
+                <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
+                <FlatList
+                    data={taskList}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.taskList}
+                    renderItem={({ item }) => (
+                        <TaskCard
+                            questImage={require('../../../assets/images/homeIcons/task.png')}
+                            titleName={item.task_title}
+                            rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                            status = {item.status}
+                            userID={user!.userID}
+                            task_id={item.id}
+                            isSelf={1}
+                            reward={item.reward}
+                            onPress={() => {
+                                setSelectedTask(item);
+                                setIsSubmitting(false);
+                            }}
+                            onClaimed={fetchTasks} // ✅ This triggers refresh
+                        />
+                    )}
+                />
+                </View>
+
+                {/* Right: Task Details */}
+                <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
+                {selectedTask && (
+                    <TaskDetail
+                        selectedTask={selectedTask}
+                        isSubmitting={isSubmitting}
+                        submissionText={submissionText}
+                        userID={user!.userID}
+                        isSelf={1}
+                        setIsSubmitting={setIsSubmitting}
+                        setSubmissionText={setSubmissionText}
+                    />
+                )}
+            </View>
         </View>
-
-        <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
-          {selectedTask && (
-            <TaskDetail
-              selectedTask={selectedTask}
-              isSubmitting={isSubmitting}
-              submissionText={submissionText}
-              isSelf={1}
-              setIsSubmitting={setIsSubmitting}
-              setSubmissionText={setSubmissionText}
-            />
-          )}
-        </View>
-      </View>
     </View>
   );
 };

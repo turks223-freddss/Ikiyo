@@ -1,0 +1,89 @@
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet } from "react-native";
+import { Canvas, Image as SkImage, useImage } from "@shopify/react-native-skia";
+
+// Define a type for the avatar data
+interface AvatarData {
+  head: string;
+  body: string;
+  left_arm: string;
+  right_arm: string;
+  left_leg: string;
+  right_leg: string;
+}
+
+const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
+  const [avatarData, setAvatarData] = useState<AvatarData | null>(null); // Avatar data state
+
+  // Fetch the avatar data from the server
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      try {
+        const response = await fetch("http://192.168.1.5:8081/api/retrieve-avatar/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userID }),
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          setAvatarData(data); // Set the avatar data in state
+        } else {
+          console.error("Failed to fetch avatar:", data.error);
+        }
+      } catch (error: unknown) {
+        // Type assertion: Tell TypeScript that error is an instance of Error
+        if (error instanceof Error) {
+          console.error("Error fetching avatar:", error.message);
+        } else {
+          console.error("Unknown error:", error);
+        }
+      }
+    };
+
+    if (userID) {
+      fetchAvatar();
+    }
+  }, [userID]);
+
+  // Ensure useImage is called the same on every render (even when avatarData is null)
+  const headImage = useImage(avatarData?.head || "");
+  const bodyImage = useImage(avatarData?.body || "");
+  const leftArmImage = useImage(avatarData?.left_arm || "");
+  const rightArmImage = useImage(avatarData?.right_arm || "");
+  const leftLegImage = useImage(avatarData?.left_leg || "");
+  const rightLegImage = useImage(avatarData?.right_leg || "");
+
+  // Check if all images are loaded by ensuring they are not null
+  const ready = headImage && bodyImage && leftArmImage && rightArmImage && leftLegImage && rightLegImage;
+
+  if (!ready || !avatarData) return null; // Wait until all images are loaded
+
+  const imageSize = { width: 200, height: 300 };
+
+  return (
+    <View style={styles.container}>
+      <Canvas style={imageSize}>
+        <SkImage image={leftArmImage} x={15} y={-4} width={220} height={250} />
+        <SkImage image={rightArmImage} x={0} y={-10} width={220} height={250} />
+        <SkImage image={bodyImage} x={0} y={0} width={220} height={250} />
+        <SkImage image={leftLegImage} x={6} y={8} width={200} height={250} />
+        <SkImage image={rightLegImage} x={13} y={8} width={200} height={250} />
+        <SkImage image={headImage} x={-5} y={-10} width={220} height={250} />
+      </Canvas>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 50,
+  },
+});
+
+export default AvatarSkiaDisplay;

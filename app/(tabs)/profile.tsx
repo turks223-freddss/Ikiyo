@@ -53,7 +53,7 @@ export default function Profile() {
     const fetchItems = async () => {
       try {
         console.log("Fetching inventory for userID:", user.userID);
-        const response = await fetch('http://192.168.164.231:8081/api/display-inventory-avatar/', {
+        const response = await fetch('http://192.168.1.5:8081/api/display-inventory-avatar/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

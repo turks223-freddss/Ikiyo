@@ -15,6 +15,8 @@ interface RequestCardProps {
     image?: any;
     onAccept?: () => void;
     onReject?: () => void;
+    onSendRequest?: () => void;
+    variant?: 1 | 2; // Variant 1 = Accept/Reject, Variant 2 = Send Request
 }
 
 const useNormalize = () => {
@@ -29,6 +31,8 @@ const RequestCard: React.FC<RequestCardProps> = ({
     image = 'https://via.placeholder.com/50',
     onAccept = () => {},
     onReject = () => {},
+    onSendRequest = () => {},
+    variant = 1,
 }) => {
 const normalize = useNormalize();
 const styles = getStyles(normalize);
@@ -43,12 +47,29 @@ return (
             </View>
         </View>
         <View style={styles.rightContainer}>
-            <TouchableOpacity style={[styles.button, styles.acceptButton]} onPress={onAccept}>
-                <Text style={styles.buttonText}>Accept</Text>
+             {variant === 1 ? (
+          <>
+            <TouchableOpacity
+              style={[styles.button, styles.acceptButton]}
+              onPress={onAccept}
+            >
+              <Text style={styles.buttonText}>Accept</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, styles.rejectButton]} onPress={onReject}>
-                <Text style={styles.buttonText}>Reject</Text>
+            <TouchableOpacity
+              style={[styles.button, styles.rejectButton]}
+              onPress={onReject}
+            >
+              <Text style={styles.buttonText}>Reject</Text>
             </TouchableOpacity>
+          </>
+        ) : (
+          <TouchableOpacity
+            style={[styles.button, styles.acceptButton]} // reuse acceptButton style for "Send Request"
+            onPress={onSendRequest}
+          >
+            <Text style={styles.buttonText}>Send Request</Text>
+          </TouchableOpacity>
+        )}
         </View>
     </View>
 );
