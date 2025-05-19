@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { FlatList, View, Text, StyleSheet } from "react-native";
+import { FlatList, View, Text } from "react-native";
 import MapCard from "../assets/mapcard";
 import { FriendListIcon } from "../../assets/images/friendlistIcons";
-import { normalize } from "../../assets/normalize";
+import { StyleSheet } from "react-native";
+import { normalize } from '../../assets/normalize';
+
+
+interface MapsContentProps {
+  location: string; // current location key, e.g., "home", "school"
+}
 
 const maps = [
   {
@@ -25,15 +31,13 @@ const maps = [
   },
 ];
 
-export default function MapsContent() {
-  const [selectedMap, setSelectedMap] = useState<string>("home");
+export default function MapsContent({ location }: MapsContentProps) {
+  const [selectedMap, setSelectedMap] = useState<string>(location); // default to current location
 
   return (
-    <View style={{ flex: 1, padding: normalize(5) }}>
-      {/* Fixed Title above the list */}
+    <View style={{ flex: 1, padding: 20 }}>
       <Text style={styles.title}>Ikiyo Town</Text>
 
-      {/* Scrollable list of maps */}
       <FlatList
         data={maps}
         keyExtractor={(item) => item.key}
@@ -43,11 +47,11 @@ export default function MapsContent() {
             icon={item.icon}
             image={item.image}
             isLocked={item.key === "comingSoon"}
-            isSelected={selectedMap === item.key}
+            isSelected={item.key === location} // highlight current location
             onPress={() => {
               if (item.key !== "comingSoon") {
                 setSelectedMap(item.key);
-                // Additional logic if needed
+                // Optional: trigger callback or navigation
               } else {
                 alert("Coming Soon!");
               }
@@ -55,11 +59,10 @@ export default function MapsContent() {
           />
         )}
         showsVerticalScrollIndicator={false}
-        style={{ marginTop: normalize(10) }}
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   title: {
@@ -67,5 +70,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "black",
     textAlign: "center",
+    marginBottom: normalize(4),
   },
 });

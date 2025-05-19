@@ -217,7 +217,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/Avatar")}
+                onPress={() => router.push("/editProfile")}
                 icon={<Image source={AvatarIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
                 size={normalize(30)}
               />
