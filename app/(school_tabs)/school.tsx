@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Image, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+
 import ProfileCard from "../assets/ProfileCard";
 import FeatureButton from "../assets/FeatureButton";
 import CurrencyDisplay from "../assets/CurrencyContainer";
@@ -13,12 +14,12 @@ import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/image
 import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
-import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
-import MainProfile from "../contents/ProfileContent/ProfileMainPage"
-import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
-import Settings from "../contents/ProfileContent/Settings"
+import PartnerJournal from "../contents/TaskContent/PartnerJournalTask";
+import MainProfile from "../contents/ProfileContent/ProfileMainPage";
+import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper";
+import Settings from "../contents/ProfileContent/Settings";
 import FriendList from "../contents/Friends/friendlist";
-import FriendRequest from "../contents/Friends/friendrequest"
+import FriendRequest from "../contents/Friends/friendrequest";
 import ChatScreen from "../contents/Friends/chat";
 import { normalize } from '../../assets/normalize';
 
