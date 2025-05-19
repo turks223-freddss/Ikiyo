@@ -126,7 +126,7 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <View style={styles.room}>
+      <View style={styles.room} pointerEvents="none">
         <RoomMainPage/>
       </View>
       <View style={styles.container}>
