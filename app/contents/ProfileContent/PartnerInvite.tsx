@@ -195,7 +195,8 @@ const PartnerInvite: React.FC<PartnerInviteProps> = ({ userID }) => {
                                 hashtag={`#${request.from_user_id}`}
                                 image="https://via.placeholder.com/50" // Replace with user image if available
                                 onAccept={() => {handleAction("accept", request.from_user_id);
-                                    eventBus.emit("buddyUpdate");}
+                                    eventBus.emit("buddyUpdate");
+                                    eventBus.emit("refreshHome");}
                                 }
                                 onReject={() => handleAction("decline", request.from_user_id)}
                             />
