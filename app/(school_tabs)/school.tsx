@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, Image, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
 import ProfileCard from "../assets/ProfileCard";
 import FeatureButton from "../assets/FeatureButton";
 import CurrencyDisplay from "../assets/CurrencyContainer";
@@ -184,7 +183,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/testroom")} // Trigger overlay toggle
+                onPress={() => router.push("/fakelogin")} // Trigger overlay toggle
                 icon={<Ionicons name="cart-outline" size={normalize(10)} color="black" />}
                 size={normalize(20)}
               />

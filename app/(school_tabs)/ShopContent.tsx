@@ -7,10 +7,12 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+import { ShopBackground } from "../../assets/images/shopIcons"
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
@@ -78,37 +80,58 @@ const ShopScreen = () => {
             <Ionicons name="arrow-back" size={normalize(10)} color="#3a2e1f" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.topBarTitle}>Shop</Text>
+        <View style={styles.shopTitleWrapper}>
+          <View style={styles.shopTitleBackground}>
+            <Text style={styles.topBarTitle}>Shop</Text>
+            <View style={styles.shopTitleShadow} />
+          </View>
+        </View>
+
         <View style={styles.topBarSpacer} />
       </View>
-
+      <ImageBackground
+        source={ ShopBackground} 
+        style={styles.screen}
+        resizeMode="cover" 
+      >
       {/* Main Shop UI */}
       <View style={styles.container}>
         {/* Selector Tabs */}
-        <ScrollView
-          style={styles.selectorPane}
-          contentContainerStyle={[styles.selectorContent, { justifyContent: 'space-between' }]}
-          showsVerticalScrollIndicator={false}
-        >
-          {selectors.map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={[
-                styles.selectorButton,
-                selectedTab === tab && styles.selectorButtonActive,
-              ]}
-              onPress={() => {
-                setSelectedTab(tab);
-                setCurrentPage(1);
-              }}
-            >
-              <Image source={selectorIcons[selectedTab as keyof typeof selectorIcons]} style={styles.selectorIcon} />
-            </TouchableOpacity>
-            
-          ))}
-          {/* Imaginary Card */}
-          <View style={styles.imaginaryCard} />
-        </ScrollView>
+        <View style={styles.outerBorder}>
+          <View style={styles.secondBorder}>
+            <View style={styles.thirdBorder}>
+                <ScrollView
+                  style={styles.selectorPane}
+                  contentContainerStyle={[
+                    styles.selectorContent,
+                    { justifyContent: "space-between" },
+                  ]}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {selectors.map((tab) => (
+                    <TouchableOpacity
+                      key={tab}
+                      style={[
+                        styles.selectorButton,
+                        selectedTab === tab && styles.selectorButtonActive,
+                      ]}
+                      onPress={() => {
+                        setSelectedTab(tab);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <Image
+                        source={selectorIcons[selectedTab as keyof typeof selectorIcons]}
+                        style={styles.selectorIcon}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                  <View style={styles.imaginaryCard} />
+                </ScrollView>
+            </View>
+          </View>
+        </View>
+
 
         {/* Item List */}
         <View style={styles.leftPane}>
@@ -131,8 +154,8 @@ const ShopScreen = () => {
               >
                 {item ? (
                   <>
-                    <Image source={item.image} style={styles.itemImage} />
                     <Text style={styles.itemText}>{item.name}</Text>
+                    <Image source={item.image} style={styles.itemImage} />
                     <TouchableOpacity
                       style={styles.buyButton}
                       onPress={() => {
@@ -205,6 +228,7 @@ const ShopScreen = () => {
           />
         </View>
       </View>
+      </ImageBackground>
     </View>
   );
 };
@@ -212,7 +236,6 @@ const ShopScreen = () => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#f2ead3',
   },
   topBar: {
     flexDirection: 'row',
@@ -236,11 +259,12 @@ const styles = StyleSheet.create({
   topBarTitle: {
     fontSize: normalize(9),
     fontWeight: 'bold',
-    color: '#3a2e1f',
-    textShadowColor: '#fff',
-    textShadowOffset: { width: 0.5, height: 0.5 },
+    color: '#fff',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
+
   topBarSpacer: {
     width: normalize(40),
   },
@@ -250,21 +274,7 @@ const styles = StyleSheet.create({
     padding: normalize(3),
     gap: normalize(4),
   },
-  selectorPane: {
-    flex: 1,
-    backgroundColor: '#f7e6b8',
-    borderRadius: normalize(10),
-    paddingVertical: normalize(4),
-    paddingHorizontal: normalize(3),
-    borderWidth: normalize(1),
-    borderColor: '#8a6e43',
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-    marginLeft: normalize(10),
-  },
+  
   selectorContent: {
     alignItems: 'center',
     gap: normalize(2),
@@ -301,6 +311,7 @@ const styles = StyleSheet.create({
     flex: 8,
     backgroundColor: '#fff7db',
     padding: normalize(3),
+    paddingHorizontal: normalize(10),
     borderRadius: normalize(10),
     borderWidth: normalize(1),
     borderColor: '#8a6e43',
@@ -400,7 +411,7 @@ const styles = StyleSheet.create({
   },
   paginationButton: {
     backgroundColor: '#a37b44',
-    padding: normalize(2),
+    padding: normalize(1),
     borderRadius: normalize(5),
     borderWidth: normalize(1),
     borderColor: '#5e4021',
@@ -415,15 +426,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imaginaryCard: {
-    backgroundColor: '#f7e6b8',
-    borderRadius: normalize(10),
     padding: normalize(3),
-    marginTop: normalize(10),
-    borderWidth: normalize(1),
-    borderColor: '#8a6e43',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3,
   },
   imaginaryCardText: {
     fontSize: normalize(6),
@@ -441,6 +446,78 @@ const styles = StyleSheet.create({
     height: normalize(5.5),
     resizeMode: 'contain',
     marginLeft: normalize(1),
+  },
+shopTitleWrapper: {
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+shopTitleBackground: {
+  backgroundColor: '#d2a679', // rustic brownish bg
+  paddingVertical: normalize(3),
+  paddingHorizontal: normalize(12),
+  borderRadius: normalize(5),
+  borderWidth: normalize(2),
+  borderColor: '#6b6463',
+  position: 'relative',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 2,
+  elevation: 5,
+},
+
+shopTitleShadow: {
+  position: 'absolute',
+  bottom: normalize(0),
+  left: normalize(.5),
+  right: normalize(.5),
+  height: normalize(10),
+  backgroundColor: 'rgba(0, 0, 0, 0.25)',
+  borderTopLeftRadius: normalize(20),
+  borderTopRightRadius: normalize(20),
+  borderBottomLeftRadius: 0,
+  borderBottomRightRadius: 0,
+  opacity: 0.3,
+  transform: [{ scaleX: -1 }], // Flips the top semicircle shape vertically
+},
+outerBorder: {
+  flex: 1.2,
+  borderRadius: normalize(3),
+  borderWidth: normalize(1.7),
+  borderColor: '#6b6463',
+  backgroundColor: '6b6463',
+  shadowColor: '#000',
+  shadowOffset: { width: 1, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 3,
+  elevation: 5,
+  marginLeft: normalize(10),
+},
+secondBorder: {
+  flex: 1,
+  borderWidth: normalize(1),
+  borderColor: "#a78e63",
+  backgroundColor: "#a78e63",
+},
+thirdBorder: {
+  flex: 1,
+  borderWidth: normalize(1.5),
+  borderColor: "#8f7549",
+  borderRadius: normalize(1.5),
+},
+selectorPane: {
+    flex: 1,
+    backgroundColor: '#d2a679',
+    borderWidth: normalize(1),
+    borderColor: '#6b6463',
+    paddingVertical: normalize(4),
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
 
 });
