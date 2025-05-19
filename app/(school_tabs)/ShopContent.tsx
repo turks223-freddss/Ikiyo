@@ -131,8 +131,8 @@ const ShopScreen = () => {
               >
                 {item ? (
                   <>
-                    <Image source={item.image} style={styles.itemImage} />
                     <Text style={styles.itemText}>{item.name}</Text>
+                    <Image source={item.image} style={styles.itemImage} />
                     <TouchableOpacity
                       style={styles.buyButton}
                       onPress={() => {
@@ -301,6 +301,7 @@ const styles = StyleSheet.create({
     flex: 8,
     backgroundColor: '#fff7db',
     padding: normalize(3),
+    paddingHorizontal: normalize(10),
     borderRadius: normalize(10),
     borderWidth: normalize(1),
     borderColor: '#8a6e43',
