@@ -22,6 +22,7 @@ import Settings from "../contents/ProfileContent/Settings";
 import FriendList from "../contents/Friends/friendlist";
 import FriendRequest from "../contents/Friends/friendrequest";
 import ChatScreen from "../contents/Friends/chat";
+import RoomMainPage from "./RoomMainPage";
 import { normalize } from '../../assets/normalize';
 
 
@@ -62,11 +63,17 @@ export default function Home() {
       flex: 1,
       width: width,
       height: height,
-      backgroundColor: "black",
       justifyContent: "flex-start",
       alignItems: "flex-start",
       paddingLeft: normalize(2),
       paddingTop: normalize(4),
+    },
+    room: {
+      position: 'absolute',
+      height: "100%",
+      width: "100%",
+      bottom: 0,
+      flex: 1,
     },
     profileCardContainer: {
       flexDirection: "row",
@@ -119,6 +126,9 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={styles.room}>
+        <RoomMainPage/>
+      </View>
       <View style={styles.container}>
         {/* Profile Card Container */}
         <View style={{ 
@@ -199,7 +209,7 @@ export default function Home() {
           <View style={styles.bottomButtons}>
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/editProfile")}
+                onPress={() => router.push("/RoomMainPage")}
                 icon={<Image source={EditRoomIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
                 size={normalize(30)}
               />
