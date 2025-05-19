@@ -275,7 +275,7 @@ export default function Home() {
           >
           </OverlayWindow>
         )}
-
+        
         {overlays.overlayprofile && (
           <OverlayWindow 
           visible={true} 

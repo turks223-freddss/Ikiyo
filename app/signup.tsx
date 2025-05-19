@@ -1,6 +1,8 @@
-import { View, Text, Button, StyleSheet, TextInput, Alert } from "react-native";
+import { View, Text, Button, StyleSheet, TextInput, Alert,ImageBackground,TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { SignupSign } from "../assets/images/authentication";
+import { normalize } from "../assets/normalize";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -46,49 +48,72 @@ export default function SignupScreen() {
 
 
   };
-  return (
+
+   return (
     <View style={styles.container}>
-      {/* Title & Subtext */}
-      <Text style={styles.title}>Create a New Account</Text>
-      <Text style={styles.subtext}>Become a member</Text>
+      <ImageBackground
+        source={SignupSign}
+        style={styles.signboard}
+        resizeMode="contain"
+      >
+        <View style={styles.arrange}>
+        <Text style={styles.title}>Create a New Account</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          placeholderTextColor="#5a3e2b"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#5a3e2b"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#5a3e2b"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          placeholderTextColor="#5a3e2b"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
 
-      {/* Input Fields */}
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSignup}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Signing Up..." : "Sign Up"}
+            </Text>
+          </TouchableOpacity>
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <Button title={loading ? "Signing Up..." : "Sign Up"} onPress={handleSignup} disabled={loading} />
-        <View style={styles.space} />
-        <Button title="Login" onPress={() => router.push("/login")} />
-      </View>
+          <TouchableOpacity
+            style={[styles.button, styles.secondaryButton]}
+            onPress={() => router.push("/login")}
+          >
+            <Text style={[styles.buttonText, styles.secondaryButtonText]}>
+              Log In
+            </Text>
+          </TouchableOpacity>
+        </View>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -98,35 +123,73 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#e7d5b7", // parchment tone
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 5,
+  signboard: {
+    marginTop: normalize(20),
+    width: normalize(250),
+    height: normalize(400),
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  subtext: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 20,
+  title: {
+    fontSize: normalize(10),
+    fontWeight: "bold",
+    color: "#4a2f1b",
+    textAlign: "center",
+    fontFamily: "serif",
+    marginBottom: normalize(1),
   },
   input: {
-    width: "80%",
-    height: 40,
-    borderColor: "#ccc",
+    width: "55%",
+    height: normalize(15),
+    borderColor: "#7c5a3a",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: "#fff",
+    marginBottom: normalize(4),
+    backgroundColor: "#fff8f0",
+    color: "#3e2a1e",
+    fontSize: normalize(6),
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
+    justifyContent: "space-between",
+    width: "25%",
+    marginTop: normalize(2),
   },
-  space: {
-    width: 10, // Horizontal spacing between buttons
+  button: {
+    flex: 1,
+    backgroundColor: "#a86e3b",
+    paddingVertical: normalize(4),
+    borderRadius: 6,
+    alignItems: "center",
+    marginHorizontal: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 1, height: 1 },
+    shadowRadius: 2,
+    elevation: 2,
   },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: normalize(6),
+    fontFamily: "serif",
+  },
+  secondaryButton: {
+    backgroundColor: "#fff8f0",
+    borderWidth: 1,
+    borderColor: "#a86e3b",
+  },
+  secondaryButtonText: {
+    color: "#a86e3b",
+  },
+  arrange:{
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: normalize(28),
+  }
 });
