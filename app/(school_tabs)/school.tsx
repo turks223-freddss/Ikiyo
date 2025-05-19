@@ -194,7 +194,7 @@ export default function Home() {
           <View style={styles.bottomButtons}>
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/edit")}
+                onPress={() => router.push("/editProfile")}
                 icon={<Image source={EditRoomIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
                 size={normalize(30)}
               />
