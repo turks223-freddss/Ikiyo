@@ -7,6 +7,7 @@ import ProfileCard from "../assets/ProfileCard";
 import FeatureButton from "../assets/FeatureButton";
 import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
+
 import EventsContent from "../assets/Events";
 import AdContent from "../contents/AdContent";
 
@@ -20,7 +21,6 @@ import {
   ShopIcon,
   TaskIcon,
 } from "../../assets/images/homeIcons";
-
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask";
@@ -30,26 +30,16 @@ import Settings from "../contents/ProfileContent/Settings";
 import FriendList from "../contents/Friends/friendlist";
 import FriendRequest from "../contents/Friends/friendrequest";
 import ChatScreen from "../contents/Friends/chat";
+import { normalize } from '../../assets/normalize';
 
-// Use your scale hook here:
-import { useScale } from "../../assets/usescale";
 
 export default function Home() {
   const router = useRouter();
   const { width, height } = Dimensions.get("window");
-  const { scaleSize } = useScale();
-
-  const [view, setView] = useState<"friendlist" | "chat">("friendlist");
+  const [view, setView] = useState<'friendlist' | 'chat'>('friendlist');
   const [selectedUserID, setSelectedUserID] = useState<string | null>(null);
-
-  // Overlay visibility state
-  const [overlays, setOverlays] = useState<{
-    overlayad: boolean;
-    overlayevent: boolean;
-    overlayfriend: boolean;
-    overlaytask: boolean;
-    overlayprofile: boolean;
-  }>({
+  // Overlay state management
+  const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
     overlayad: false,
     overlayevent: false,
     overlayfriend: false,
@@ -57,80 +47,111 @@ export default function Home() {
     overlayprofile: false,
   });
 
-  const toggleOverlay = (name: keyof typeof overlays) => {
-    setOverlays((prev) => ({ ...prev, [name]: !prev[name] }));
+  // Function to toggle overlay visibility by name
+  const toggleOverlay = (name: string) => {
+    setOverlays((prevOverlays) => ({
+      ...prevOverlays,
+      [name]: !prevOverlays[name],
+    }));
   };
 
-  const closeOverlay = (name: keyof typeof overlays) => {
-    setOverlays((prev) => ({ ...prev, [name]: false }));
+  // Function to close the overlay
+  const closeOverlay = (name: string) => {
+    setOverlays((prevOverlays) => ({
+      ...prevOverlays,
+      [name]: false,
+    }));
   };
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      width,
-      height,
+      width: width,
+      height: height,
       backgroundColor: "black",
       justifyContent: "flex-start",
       alignItems: "flex-start",
-      paddingLeft: scaleSize(2),
-      paddingTop: scaleSize(4),
+      paddingLeft: normalize(2),
+      paddingTop: normalize(4),
     },
     profileCardContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginTop: scaleSize(2),
-      marginLeft: scaleSize(2),
+      marginTop: normalize(2),
+      marginLeft: normalize(2),
     },
     bottomContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "flex-end",
-      paddingHorizontal: scaleSize(4),
+      paddingHorizontal: normalize(4),
       marginTop: "auto",
       width: "100%",
-      paddingRight: scaleSize(12),
+      paddingRight: normalize(12),
     },
     bottomButtons: {
       flexDirection: "row",
-      gap: scaleSize(5),
+      gap: normalize(5), // Works in React Native 0.71+
     },
     buttonRow: {
       flexDirection: "row",
+      justifyContent: "center", 
+    },
+    overlay: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
       justifyContent: "center",
+      alignItems: "center",
+    },
+    overlayWindow: {
+      width: "80%",
+      height: "90%",
+      backgroundColor: "rgba(255, 201, 172, 0.9)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 20,
+      borderRadius: 10,
+    },
+    closeButton: {
+      marginTop: 20,
+      color: "blue",
+      textDecorationLine: "underline",
     },
   });
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <View style={styles.container}>
-        {/* Profile Card */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            width: "100%",
-            paddingHorizontal: scaleSize(10),
-            marginTop: scaleSize(4),
-          }}
-        >
+        {/* Profile Card Container */}
+        <View style={{ 
+          flexDirection: "row", 
+          justifyContent: "space-between", 
+          alignItems: "flex-start", 
+          width: "100%",
+          paddingHorizontal: normalize(10), 
+          marginTop: normalize(4), 
+        }}>
           <ProfileCard
             imageUri="https://www.w3schools.com/w3images/avatar2.png"
             username="John Doe"
             hashtag="#231"
-            onPress={() => toggleOverlay("overlayprofile")}
+            onPress={() => toggleOverlay("overlayprofile")} 
           />
+
           <View style={{ alignItems: "flex-end", gap: 10 }}>
             <CurrencyDisplay
-              icon={<Image source={HeartIcon} style={{ width: scaleSize(15), height: scaleSize(15) }} />}
+              icon={<Image source={HeartIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
               currencyAmount={420}
-              size={scaleSize(5)}
+              size={normalize(5)}
             />
             <CurrencyDisplay
-              icon={<Image source={IkicoinIcon} style={{ width: scaleSize(15), height: scaleSize(15) }} />}
+              icon={<Image source={IkicoinIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
               currencyAmount={690}
-              size={scaleSize(5)}
+              size={normalize(5)}
             />
           </View>
         </View>
@@ -141,138 +162,153 @@ export default function Home() {
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => toggleOverlay("overlayevent")}
-                icon={<Ionicons name="megaphone-outline" size={scaleSize(20)} color="black" />}
-                size={scaleSize(45)}
+                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => toggleOverlay("overlayfriend")}
-                icon={<Image source={FriendlistIcon} style={{ width: scaleSize(30), height: scaleSize(25) }} />}
-                size={scaleSize(45)}
+                onPress={() => toggleOverlay("overlayfriend")} 
+                icon={<Image source={FriendlistIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("../maps")}
-                icon={<Image source={MapsIcon} style={{ width: scaleSize(30), height: scaleSize(25) }} />}
-                size={scaleSize(45)}
+                icon={<Image source={MapsIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/ShopContent")}
-                icon={<Image source={ShopIcon} style={{ width: scaleSize(30), height: scaleSize(25) }} />}
-                size={scaleSize(45)}
+                icon={<Image source={ShopIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
+                size={normalize(20)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => toggleOverlay("overlayad")}
-                icon={<Ionicons name="cart-outline" size={scaleSize(20)} color="black" />}
-                size={scaleSize(45)}
+                onPress={() => toggleOverlay("overlayad")} // Trigger overlay toggle
+                icon={<Ionicons name="cart-outline" size={normalize(10)} color="black" />}
+                size={normalize(20)}
               />
             </View>
           </View>
 
+          {/* Main Action Buttons */}
           <View style={styles.bottomButtons}>
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/edit")}
-                icon={<Image source={EditRoomIcon} style={{ width: scaleSize(40), height: scaleSize(35) }} />}
-                size={scaleSize(65)}
+                icon={<Image source={EditRoomIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                size={normalize(30)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/Avatar")}
-                icon={<Image source={AvatarIcon} style={{ width: scaleSize(45), height: scaleSize(35) }} />}
-                size={scaleSize(65)}
+                icon={<Image source={AvatarIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                size={normalize(30)}
               />
             </View>
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => toggleOverlay("overlaytask")}
-                icon={<Image source={TaskIcon} style={{ width: scaleSize(40), height: scaleSize(35) }} />}
-                size={scaleSize(65)}
+                onPress={() => toggleOverlay("overlaytask")} 
+                icon={<Image source={TaskIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                size={normalize(30)}
               />
             </View>
           </View>
         </View>
 
-        {/* Overlays */}
+        {/* Overlay Logic */}
         {overlays.overlayad && (
-          <OverlayWindow visible onClose={() => toggleOverlay("overlayad")} tabs={1} tab1={<AdContent />} />
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayad")} 
+          tabs={1} 
+          tab1={<AdContent/>}>
+          </OverlayWindow>
         )}
 
         {overlays.overlayevent && (
-          <OverlayWindow visible onClose={() => toggleOverlay("overlayevent")} tabs={1} tab1={<EventsContent />} />
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayevent")}
+          tabs={1}
+          tab1={<EventsContent/>}
+          >
+          </OverlayWindow>
         )}
 
         {overlays.overlaytask && (
-          <OverlayWindow
-            visible
-            onClose={() => toggleOverlay("overlaytask")}
-            tabs={3}
-            tab1={<DailyTask />}
-            tab1icon={AvatarIcon}
-            tab1label="Daily Task"
-            tab2={<MyJournal />}
-            tab2icon={AvatarIcon}
-            tab2label="My Task"
-            tab3={<PartnerJournal />}
-            tab3icon={AvatarIcon}
-            tab3label="Partner Task"
-          />
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlaytask")}
+          tabs={3}
+          tab1={<DailyTask/>}
+          tab1icon={AvatarIcon}
+          tab1label={"Daily Task"}
+          tab2={<MyJournal/>}
+          tab2icon={AvatarIcon}
+          tab2label={"My Task"}
+          tab3={<PartnerJournal/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Partner Task"}
+          >
+          </OverlayWindow>
         )}
 
         {overlays.overlayfriend && (
-          <OverlayWindow
-            visible
-            onClose={() => toggleOverlay("overlayfriend")}
-            tabs={2}
-            tab1={
-              view === "friendlist" ? (
-                <FriendList
-                  onOpenChat={(userID: string) => {
-                    setSelectedUserID(userID);
-                    setView("chat");
-                  }}
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayfriend")}
+          tabs={2}
+          tab1={
+            view === 'friendlist' 
+              ? <FriendList onOpenChat={(userID: string) => {
+                  setSelectedUserID(userID);
+                  setView('chat');
+                }} />
+              : <ChatScreen 
+                  onBack={() => setView('friendlist')} 
+                  userID={selectedUserID ?? ""} 
                 />
-              ) : (
-                <ChatScreen onBack={() => setView("friendlist")} userID={selectedUserID ?? ""} />
-              )
-            }
-            tab1icon={AvatarIcon}
-            tab1label="Friendlist"
-            tab2={<FriendRequest userID="321" />}
-            tab2icon={AvatarIcon}
-            tab2label="Friend Requests"
-          />
+          }
+          tab1icon={AvatarIcon}
+          tab1label={"Friendlist"}
+          tab2={<FriendRequest userID="321"/>}
+          tab2icon={AvatarIcon}
+          tab2label={"Friend Request"}
+          >
+          </OverlayWindow>
         )}
 
         {overlays.overlayprofile && (
-          <OverlayWindow
-            visible
-            onClose={() => toggleOverlay("overlayprofile")}
-            tabs={3}
-            tab1={<MainProfile userid={321}/>}
-            tab1label="Profile"
-            tab1icon={AvatarIcon}
-            tab2={<PartnerProfile id ={321} />}
-            tab2label="Partner Profile"
-            tab2icon={AvatarIcon}
-            tab3={<Settings />}
-            tab3label="Settings"
-            tab3icon={AvatarIcon}
-          />
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayprofile")}
+          tabs={3}
+          tab1={<MainProfile userid = {321} />}
+          tab1icon={AvatarIcon}
+          tab1label={"My Profile"}
+          tab2={<PartnerProfile id={321}/>}
+          tab2icon={AvatarIcon}
+          tab2label={"Partner Profile"}
+          tab3={<Settings/>}
+          tab3icon={AvatarIcon}
+          tab3label={"Settings"}
+          >
+          </OverlayWindow>
         )}
+
       </View>
     </View>
   );
