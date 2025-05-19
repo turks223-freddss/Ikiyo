@@ -9,6 +9,8 @@ import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
 import AdContent from "../contents/AdContent"; 
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
+import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
+import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
@@ -181,7 +183,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => toggleOverlay("overlayad")} // Trigger overlay toggle
+                onPress={() => router.push("/testroom")} // Trigger overlay toggle
                 icon={<Ionicons name="cart-outline" size={normalize(10)} color="black" />}
                 size={normalize(20)}
               />
@@ -242,14 +244,11 @@ export default function Home() {
           onClose={() => toggleOverlay("overlaytask")}
           tabs={3}
           tab1={<DailyTask/>}
-          tab1icon={AvatarIcon}
-          tab1label={"Daily Task"}
+          tab1icon={DailyTaskIcon}
           tab2={<MyJournal/>}
-          tab2icon={AvatarIcon}
-          tab2label={"My Task"}
+          tab2icon={EditTaskIcon}
           tab3={<PartnerJournal/>}
-          tab3icon={AvatarIcon}
-          tab3label={"Partner Task"}
+          tab3icon={PartnerTaskIcon}
           >
           </OverlayWindow>
         )}
@@ -271,10 +270,8 @@ export default function Home() {
                 />
           }
           tab1icon={AvatarIcon}
-          tab1label={"Friendlist"}
           tab2={<FriendRequest userID="321"/>}
           tab2icon={AvatarIcon}
-          tab2label={"Friend Request"}
           >
           </OverlayWindow>
         )}
@@ -286,13 +283,10 @@ export default function Home() {
           tabs={3}
           tab1={<MainProfile userid = {321} />}
           tab1icon={AvatarIcon}
-          tab1label={"My Profile"}
           tab2={<PartnerProfile id={321}/>}
-          tab2icon={AvatarIcon}
-          tab2label={"Partner Profile"}
+          tab2icon={PartnerProfileIcon}
           tab3={<Settings/>}
-          tab3icon={AvatarIcon}
-          tab3label={"Settings"}
+          tab3icon={SettingsIcon}
           >
           </OverlayWindow>
         )}
