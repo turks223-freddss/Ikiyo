@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
-import { ShopBackground } from "../../assets/images/shopIcons"
+import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../assets/images/shopIcons"
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
@@ -20,6 +20,7 @@ const isTablet = width > 1080;
 
 const selectors = [
   'Hats',
+  'Eyes',
   'Face Accessories',
   'Facial Expression',
   'Upperwear',
@@ -37,18 +38,20 @@ const items = [
   { id: 7, name: 'Fedora', category: 'Hats', price: 90, image: require('../../assets/images/homeIcons/avatar.png') },
   { id: 8, name: 'Eye Patch', category: 'Face Accessories', price: 60, image: require('../../assets/images/homeIcons/avatar.png') },
   { id: 9, name: 'Angry Face', category: 'Facial Expression', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
+  { id: 10, name: 'Angry Eyes', category: 'Eyes', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
 ];
 
-type SelectorTabs = 'Hats' | 'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
+type SelectorTabs = 'Hats' | 'Eyes' | 'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
 const ITEMS_PER_PAGE = 6;
 
 const selectorIcons: { [key in SelectorTabs]: any } = {
-  Hats: HeartIcon,
-  'Face Accessories': HeartIcon,
-  'Facial Expression': HeartIcon,
-  Upperwear: HeartIcon,
-  Lowerwear: HeartIcon,
-  Shoes: HeartIcon,
+  Hats: HatsIcon,
+  Eyes: EyesIcon,
+  'Face Accessories': FaceAccIcon,
+  'Facial Expression': FaceExIcon,
+  Upperwear: UpperIcon,
+  Lowerwear: LowerIcon,
+  Shoes: ShoesIcon,
 };
 
 const ShopScreen = () => {
@@ -121,7 +124,7 @@ const ShopScreen = () => {
                       }}
                     >
                       <Image
-                        source={selectorIcons[selectedTab as keyof typeof selectorIcons]}
+                        source={selectorIcons[tab as keyof typeof selectorIcons]}
                         style={styles.selectorIcon}
                       />
                     </TouchableOpacity>
@@ -298,10 +301,6 @@ const styles = StyleSheet.create({
   selectorButtonActive: {
     backgroundColor: '#a37b44',
     borderColor: '#5e4021',
-  },
-  selectorText: {
-    fontSize: normalize(4),
-    color: '#3a2e1f',
   },
   selectorTextActive: {
     color: '#fff',

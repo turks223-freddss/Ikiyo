@@ -8,9 +8,11 @@ import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
 import AdContent from "../contents/AdContent"; 
-import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
-import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
-import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
+import MapsContent from "../contents/MapsContent"; 
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons";
+import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons";
+import { ProfileIcon, SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons";
+import { FriendListIcon, FriendRequestIcon } from "../../assets/images/friendlistIcons";
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask";
@@ -27,6 +29,7 @@ export default function Home() {
   const router = useRouter();
   const { width, height } = Dimensions.get("window");
   const [view, setView] = useState<'friendlist' | 'chat'>('friendlist');
+  const [selectedMap, setSelectedMap] = useState<string | undefined>(undefined);
   const [selectedUserID, setSelectedUserID] = useState<string | null>(null);
   // Overlay state management
   const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
@@ -35,6 +38,7 @@ export default function Home() {
     overlayfriend: false,
     overlaytask: false,
     overlayprofile: false,
+    overlaymaps: false,
   });
 
   // Function to toggle overlay visibility by name
@@ -167,7 +171,8 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("../maps")}
+                /*onPress={() => router.push("../maps")} */
+                onPress={() => toggleOverlay("overlaymaps")} 
                 icon={<Image source={MapsIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
                 size={normalize(20)}
               />
@@ -269,9 +274,9 @@ export default function Home() {
                   userID={selectedUserID ?? ""} 
                 />
           }
-          tab1icon={AvatarIcon}
+          tab1icon={FriendListIcon}
           tab2={<FriendRequest userID="321"/>}
-          tab2icon={AvatarIcon}
+          tab2icon={FriendRequestIcon}
           >
           </OverlayWindow>
         )}
@@ -282,13 +287,24 @@ export default function Home() {
           onClose={() => toggleOverlay("overlayprofile")}
           tabs={3}
           tab1={<MainProfile userid = {321} />}
-          tab1icon={AvatarIcon}
+          tab1icon={ProfileIcon}
           tab2={<PartnerProfile id={321}/>}
           tab2icon={PartnerProfileIcon}
           tab3={<Settings/>}
           tab3icon={SettingsIcon}
           >
           </OverlayWindow>
+        )}
+
+        {overlays.overlaymaps && (
+        <OverlayWindow
+          visible={true}
+          onClose={() => toggleOverlay("overlaymaps")}
+          tabs={1}
+          tab1={<MapsContent location="school" />}
+          width={normalize(200)}    // optional custom width
+          height={normalize(150)}   // optional custom height
+        />
         )}
 
       </View>

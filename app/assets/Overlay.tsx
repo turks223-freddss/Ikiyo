@@ -20,6 +20,8 @@ interface OverlayWindowProps {
   tab1icon?: any; // Can be image source
   tab2icon?: any;
   tab3icon?: any;
+  width?: number;   // optional width
+  height?: number;  // optional height
 }
 
 const OverlayWindow: React.FC<OverlayWindowProps> = ({
@@ -32,8 +34,15 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
   tab1icon,
   tab2icon,
   tab3icon,
+  width,
+  height,
 }) => {
-  const { width, height } = Dimensions.get("window");
+  const windowDimensions = Dimensions.get("window");
+
+  // Use provided width/height or fallback to window size
+  const containerWidth = width ?? windowDimensions.width * 0.85;
+  const containerHeight = height ?? windowDimensions.height * 0.9;
+
   const [selectedTab, setSelectedTab] = useState<number>(1);
 
   if (!visible) return null;
@@ -50,10 +59,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
     }
   };
 
-  const renderTabButton = (
-    index: number,
-    icon?: any
-  ) => (
+  const renderTabButton = (index: number, icon?: any) => (
     <TouchableOpacity
       key={index}
       onPress={() => setSelectedTab(index)}
@@ -73,7 +79,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
           <View
             style={[
               styles.window,
-              { width: width * 0.85, height: height * 0.9 },
+              { width: containerWidth, height: containerHeight },
             ]}
           >
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -92,12 +98,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
                   </View>
                 </View>
               )}
-              <View
-                style={[
-                  styles.innerWindow,
-                  tabs === 1 && { width: "100%" },
-                ]}
-              >
+              <View style={[styles.innerWindow, tabs === 1 && { width: "100%" }]}>
                 {renderContent()}
               </View>
             </View>
