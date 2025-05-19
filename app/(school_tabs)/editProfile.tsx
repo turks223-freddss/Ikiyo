@@ -7,10 +7,12 @@ import {
   Image,
   useWindowDimensions,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import { normalize } from "../../assets/normalize";
 import { DailyTaskIcon } from "../../assets/images/TaskIcons";
 import { Ionicons } from '@expo/vector-icons';
+import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../assets/images/shopIcons"
 
 type InventoryItem = {
   id: string;
@@ -20,13 +22,22 @@ type InventoryItem = {
   isPlaceholder?: boolean;
 };
 
-const filters = ['All', 'Hats', 'Shirts', 'Pants', 'Shoes'];
+const filters = [
+  { label: 'All', icon: HatsIcon},
+  { label: 'Hats', icon: HatsIcon },
+  { label: 'Eyes', icon: EyesIcon },
+  { label: 'Face Accessories', icon: FaceAccIcon },
+  { label: 'Face Expression', icon: FaceExIcon },
+  { label: 'Upper', icon: UpperIcon },
+  { label: 'Lower', icon: LowerIcon },
+  { label: 'Shoes', icon: ShoesIcon },
+];
 
 const inventoryItems: InventoryItem[] = Array.from({ length: 30 }, (_, i) => ({
   id: i.toString(),
   name: `Item ${i + 1}`,
   icon: DailyTaskIcon,
-  category: filters[i % filters.length],
+  category: filters[i % filters.length].label,
 }));
 
 const ITEMS_PER_PAGE = 9;
@@ -72,46 +83,46 @@ const InventoryCustomizationOverlay = () => {
 
   return (
     <View style={styles.outerContainer}>
-      {/* Top bar with back button and title */}
+      {/* Top bar */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Ionicons name="arrow-back" size={normalize(10)} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>Edit Avatar</Text>
-        <View style={{ width: normalize(30) }} /> {/* placeholder for spacing */}
+        <View style={{ width: normalize(30) }} />
       </View>
 
       {/* Main content */}
       <View style={[styles.container, { flexDirection: width < 768 ? 'column' : 'row' }]}>
-        {/* Filters on the left */}
-        <View style={styles.filterBox}>
-          {filters.map((filter) => (
-            <TouchableOpacity
-              key={filter}
-              style={[
-                styles.filterButton,
-                selectedFilter === filter && styles.filterButtonSelected,
-              ]}
-              onPress={() => {
-                setSelectedFilter(filter);
-                setCurrentPage(0);
-              }}
-            >
-              <Text
-                style={[
-                  styles.filterText,
-                  selectedFilter === filter && styles.filterTextSelected,
-                ]}
-              >
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        {/* Filter area */}
+        <View style={styles.outerBorder}>
+          <View style={styles.secondBorder}>
+            <View style={styles.thirdBorder}>
+              <View style={styles.filterBox}>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+                  {filters.map(({ label, icon }) => (
+                    <TouchableOpacity
+                      key={label}
+                      style={[
+                        styles.filterButton,
+                        selectedFilter === label && styles.filterButtonSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedFilter(label);
+                        setCurrentPage(0);
+                      }}
+                    >
+                      <Image source={icon} style={styles.filterIconImage} />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* Box container for grid + pagination */}
+        {/* Grid + Pagination */}
         <View style={styles.gridBox}>
-          {/* Item grid */}
           <View style={styles.gridWrapper}>
             <FlatList
               data={paginatedItems}
@@ -143,38 +154,33 @@ const InventoryCustomizationOverlay = () => {
               onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
               disabled={currentPage === 0}
             >
-              <Ionicons name="chevron-back-circle" size={normalize(12)} color="#fff" />
+              <Ionicons name="chevron-back-circle" size={normalize(12)} color="#a37b44" />
             </TouchableOpacity>
             <Text style={styles.pageText}>{`${currentPage + 1} / ${totalPages}`}</Text>
             <TouchableOpacity
               onPress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
               disabled={currentPage >= totalPages - 1}
             >
-              <Ionicons name="chevron-forward-circle" size={normalize(12)} color="#fff" />
+              <Ionicons name="chevron-forward-circle" size={normalize(12)} color="#a37b44" />
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.avatarcontainer}>
-              
-        </View>
+
+        {/* Avatar Display Placeholder */}
+        <View style={styles.avatarcontainer} />
       </View>
-
-        
-
     </View>
-
-    
   );
 };
 
 export default InventoryCustomizationOverlay;
 
 const styles = StyleSheet.create({
-    avatarcontainer: {
-        backgroundColor: 'white',
-        marginHorizontal: normalize(15),
-        flex: 3,
-    },
+  avatarcontainer: {
+    backgroundColor: 'white',
+    marginHorizontal: normalize(15),
+    flex: 3,
+  },
   outerContainer: {
     flex: 1,
     backgroundColor: '#1f1f1f',
@@ -188,59 +194,102 @@ const styles = StyleSheet.create({
     paddingHorizontal: normalize(10),
   },
   backButton: {
-  width: normalize(15),
-  height: normalize(15),
-  borderRadius: normalize(15),
-  backgroundColor: '#3a2e1f', // Optional: give it a background color so the circle is visible
-  alignItems: 'center',
-  justifyContent: 'center',
-},
+    width: normalize(15),
+    height: normalize(15),
+    borderRadius: normalize(15),
+    backgroundColor: '#3a2e1f',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   title: {
     color: '#fff',
     fontSize: normalize(8),
     fontWeight: 'bold',
   },
-
   container: {
     flex: 1,
     padding: normalize(4),
   },
+  outerBorder: {
+    flex: .6,
+    borderRadius: normalize(3),
+    borderWidth: normalize(1.7),
+    borderColor: '#6b6463',
+    backgroundColor: '#6b6463',
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    marginLeft: normalize(15),
+    marginVertical: normalize(15),
+    zIndex:1,
+  },
+  secondBorder: {
+    flex: 1,
+    borderWidth: normalize(1),
+    borderColor: "#a78e63",
+    backgroundColor: "#a78e63",
+  },
+  thirdBorder: {
+    flex: 1,
+    borderWidth: normalize(1.5),
+    borderColor: "#8f7549",
+    borderRadius: normalize(1.5),
+  },
   filterBox: {
-    width: normalize(40),
-    marginRight: normalize(10),
-    flexWrap: 'wrap',
+    flex: 1,
+    backgroundColor: '#d2a679',
+    borderWidth: normalize(1),
+    borderColor: '#6b6463',
+    paddingVertical: normalize(4),
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  filterScroll: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: normalize(5),
   },
   filterButton: {
-    backgroundColor: '#3a2e1f',
-    paddingHorizontal: normalize(10),
-    paddingVertical: normalize(6),
-    borderRadius: normalize(10),
+    padding: normalize(4),
+    backgroundColor: '#cdb892',
+    borderRadius: normalize(6),
+    borderWidth: normalize(1),
+    borderColor: '#8a6e43',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   filterButtonSelected: {
     backgroundColor: '#ecc96b',
   },
-  filterText: {
-    color: '#fff',
-    fontSize: normalize(6),
+  filterIconImage: {
+    width: normalize(12),
+    height: normalize(12),
+    resizeMode: 'contain',
   },
-  filterTextSelected: {
-    color: '#000',
-    fontWeight: 'bold',
-  },
-
   gridBox: {
     flex: 2,
-    backgroundColor: '#2a2215',
+    backgroundColor: '#fff7db',
     borderRadius: normalize(12),
     padding: normalize(8),
-    justifyContent: 'space-between', // ✅ add this
-},
-
-    gridWrapper: {
+    zIndex: 3,
+    borderWidth: normalize(1.7),
+    borderColor: '#6b6463',
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    justifyContent: 'space-between',
+  },
+  gridWrapper: {
     alignItems: 'center',
-    flexGrow: 0, // ✅ prevent over-expansion
-},
-
+    flexGrow: 0,
+  },
   grid: {
     justifyContent: 'center',
   },
@@ -265,16 +314,14 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   pagination: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: normalize(10),
-  marginTop: normalize(6),
-  marginBottom: normalize(6), // ✅ optional for spacing
-},
-
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: normalize(10),
+    marginBottom: normalize(5),
+  },
   pageText: {
-    color: '#fff',
+    color: '#a37b44',
     fontSize: normalize(5),
   },
 });
