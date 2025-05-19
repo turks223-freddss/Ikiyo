@@ -8,9 +8,10 @@ import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
 import AdContent from "../contents/AdContent"; 
-import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
-import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
-import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons";
+import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons";
+import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons";
+import { FriendListIcon, FriendRequestIcon } from "../../assets/images/friendlistIcons";
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask";
@@ -269,9 +270,9 @@ export default function Home() {
                   userID={selectedUserID ?? ""} 
                 />
           }
-          tab1icon={AvatarIcon}
+          tab1icon={FriendListIcon}
           tab2={<FriendRequest userID="321"/>}
-          tab2icon={AvatarIcon}
+          tab2icon={FriendRequestIcon}
           >
           </OverlayWindow>
         )}
