@@ -103,14 +103,6 @@ const ShopScreen = () => {
               }}
             >
               <Image source={selectorIcons[selectedTab as keyof typeof selectorIcons]} style={styles.selectorIcon} />
-              <Text
-                style={[
-                  styles.selectorText,
-                  selectedTab === tab && styles.selectorTextActive,
-                ]}
-              >
-                {tab}
-              </Text>
             </TouchableOpacity>
             
           ))}
@@ -271,6 +263,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
+    marginLeft: normalize(10),
   },
   selectorContent: {
     alignItems: 'center',
@@ -279,25 +272,25 @@ const styles = StyleSheet.create({
   selectorButton: {
     flexDirection: 'row',
     paddingVertical: normalize(3),
-    paddingHorizontal: normalize(6),
     backgroundColor: '#cdb892',
     borderRadius: normalize(6),
     borderWidth: normalize(1),
     borderColor: '#8a6e43',
-    width: '100%',
+    width: '90%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   selectorIcon: {
     width: normalize(12),
     height: normalize(12),
-    marginRight: normalize(6),
+    paddingHorizontal: normalize(4),
   },
   selectorButtonActive: {
     backgroundColor: '#a37b44',
     borderColor: '#5e4021',
   },
   selectorText: {
-    fontSize: normalize(5),
+    fontSize: normalize(4),
     color: '#3a2e1f',
   },
   selectorTextActive: {
@@ -305,7 +298,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   leftPane: {
-    flex: 2,
+    flex: 8,
     backgroundColor: '#fff7db',
     padding: normalize(3),
     borderRadius: normalize(10),
@@ -313,13 +306,15 @@ const styles = StyleSheet.create({
     borderColor: '#8a6e43',
     elevation: 4,
     flexDirection: 'column',
+    marginHorizontal: normalize(10),
     justifyContent: 'space-between',
   },
   rightPane: {
-    flex: 1,
+    flex: 4,
     backgroundColor: '#fff7db',
     borderRadius: normalize(10),
     borderWidth: normalize(1),
+    marginRight: normalize(10),
     borderColor: '#8a6e43',
     padding: normalize(3),
     alignItems: 'center',
@@ -343,6 +338,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginHorizontal: normalize(4),
   },
   itemCard: {
     width: (width * 0.66 - normalize(100)) / 3,
