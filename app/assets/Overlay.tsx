@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Dimensions,
   TouchableWithoutFeedback,
-  Text,
   Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,11 +18,8 @@ interface OverlayWindowProps {
   tab2?: React.ReactNode;
   tab3?: React.ReactNode;
   tab1icon?: any; // Can be image source
-  tab1label?: string;
   tab2icon?: any;
-  tab2label?: string;
   tab3icon?: any;
-  tab3label?: string;
 }
 
 const OverlayWindow: React.FC<OverlayWindowProps> = ({
@@ -34,11 +30,8 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
   tab2,
   tab3,
   tab1icon,
-  tab1label,
   tab2icon,
-  tab2label,
   tab3icon,
-  tab3label,
 }) => {
   const { width, height } = Dimensions.get("window");
   const [selectedTab, setSelectedTab] = useState<number>(1);
@@ -59,8 +52,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
 
   const renderTabButton = (
     index: number,
-    icon?: any, // Can be an image source or custom icon
-    label?: string
+    icon?: any
   ) => (
     <TouchableOpacity
       key={index}
@@ -70,9 +62,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
         selectedTab === index && styles.selectedTabButton,
       ]}
     >
-      {/* Render image as icon */}
       {icon && <Image source={icon} style={styles.iconImage} />}
-      <Text style={styles.tabText}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -96,16 +86,16 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
               {tabs > 1 && (tab1icon || tab2icon || tab3icon) && (
                 <View style={styles.tabSelector}>
                   <View>
-                    {renderTabButton(1, tab1icon, tab1label)}
-                    {tabs >= 2 && renderTabButton(2, tab2icon, tab2label)}
-                    {tabs === 3 && renderTabButton(3, tab3icon, tab3label)}
+                    {renderTabButton(1, tab1icon)}
+                    {tabs >= 2 && renderTabButton(2, tab2icon)}
+                    {tabs === 3 && renderTabButton(3, tab3icon)}
                   </View>
                 </View>
               )}
               <View
                 style={[
                   styles.innerWindow,
-                  tabs === 1 && { width: "100%" }, // Expand if no selector
+                  tabs === 1 && { width: "100%" },
                 ]}
               >
                 {renderContent()}
@@ -157,17 +147,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tabSelector: {
-    paddingTop: 30,
-    paddingHorizontal: 8,
+    paddingTop: normalize(10),
+    paddingRight: normalize(3),
     justifyContent: "flex-start",
   },
   tabButton: {
     width: "100%",
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    marginBottom: 12,
+    paddingVertical: normalize(2),
+    paddingHorizontal: normalize(1),
+    marginBottom: normalize(2),
     borderRadius: 10,
-    marginLeft: 15,
+    marginLeft: normalize(4),
     backgroundColor: "#f8d7c4",
     alignItems: "center",
     justifyContent: "center",
@@ -175,15 +165,9 @@ const styles = StyleSheet.create({
   selectedTabButton: {
     backgroundColor: "#f29773",
   },
-  tabText: {
-    fontSize: 12,
-    marginTop: 4,
-    textAlign: "center",
-    color: "#000",
-  },
   iconImage: {
-    width: 24,
-    height: 24,
+    width: normalize(15),
+    height: normalize(15),
   },
   innerWindow: {
     backgroundColor: "rgba(255, 201, 172, 1)",
