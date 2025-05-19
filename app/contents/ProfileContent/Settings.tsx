@@ -9,6 +9,7 @@ import {
   PixelRatio,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
+import { useMusic } from "../../assets/utils/musiccontext";
 
 const useNormalize = () => {
   const { width } = useWindowDimensions();
@@ -29,7 +30,7 @@ const Settings = () => {
   const normalize = useNormalize();
 
   const [soundVolume, setSoundVolume] = useState(0.5);
-  const [musicVolume, setMusicVolume] = useState(0.5);
+  const { musicVolume, setMusicVolume } = useMusic();
   const [connectedAccounts, setConnectedAccounts] = useState({
     googlePlay: true,
     gmail: true,
@@ -73,7 +74,7 @@ const Settings = () => {
             <Slider
               style={styles.slider}
               value={musicVolume}
-              onValueChange={setMusicVolume}
+              onSlidingComplete={setMusicVolume}
               minimumValue={0}
               maximumValue={1}
               step={0.01}
