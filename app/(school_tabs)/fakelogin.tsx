@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Sign } from "../../assets/images/authentication";
+import { LoginWallpaper, Sign } from "../../assets/images/authentication"; // ✅ Include your background
 import { normalize } from "../../assets/normalize";
 
 export default function LoginScreen() {
@@ -18,56 +18,61 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
-        <View style={styles.arrange}>
+    <ImageBackground source={LoginWallpaper} style={styles.backgroundImage} resizeMode="contain">
+        <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
+          <View style={styles.arrange}>
             <Text style={styles.title}>Welcome to iKiyo</Text>
 
             <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#5a3e2b"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#5a3e2b"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
 
             <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#5a3e2b"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#5a3e2b"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
             />
 
             <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.button} onPress={() => {}}>
+              <TouchableOpacity style={styles.button} onPress={() => {}}>
                 <Text style={styles.buttonText}>Log In</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={[styles.button, styles.secondaryButton]}
                 onPress={() => router.push("/fakesignup")}
-            >
+              >
                 <Text style={[styles.buttonText, styles.secondaryButtonText]}>Sign Up</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
             </View>
-        </View>
-      </ImageBackground>
+          </View>
+        </ImageBackground>
+      
+    </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    width: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#e7d5b7", // light parchment or wooden backdrop
-    paddingHorizontal: 20,
   },
   signboard: {
     width: normalize(350),
+    marginLeft: normalize(10),
     height: normalize(250),
     justifyContent: "center",
     alignItems: "center",
@@ -77,19 +82,19 @@ const styles = StyleSheet.create({
     fontSize: normalize(16),
     fontWeight: "bold",
     marginBottom: normalize(2),
-    color: "#4a2f1b", // deep brown like carved wood
+    color: "#4a2f1b",
     textAlign: "center",
     fontFamily: "serif",
   },
   input: {
     width: "65%",
     height: normalize(20),
-    borderColor: "#7c5a3a", // mid-tone brown
+    borderColor: "#7c5a3a",
     borderWidth: 1,
     borderRadius: 6,
     paddingHorizontal: 10,
     marginBottom: normalize(4),
-    backgroundColor: "#fff8f0", // soft cream for handwritten look
+    backgroundColor: "#fff8f0",
     color: "#3e2a1e",
     fontSize: normalize(8),
   },
@@ -100,7 +105,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    backgroundColor: "#a86e3b", // wood-toned button
+    backgroundColor: "#a86e3b",
     paddingVertical: normalize(4),
     borderRadius: 6,
     alignItems: "center",
@@ -126,8 +131,8 @@ const styles = StyleSheet.create({
     color: "#a86e3b",
   },
   arrange: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     marginBottom: normalize(7),
-  }
+  },
 });

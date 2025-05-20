@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,11 +10,13 @@ import {
   TouchableOpacity,
   ImageBackground,
   ActivityIndicator,
+  Animated,
+
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
-import { ShopBackground } from "../../assets/images/shopIcons"
+import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../assets/images/shopIcons"
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CurrencyDisplay from "../assets/CurrencyContainer";
@@ -52,29 +55,19 @@ const selectors = [
   'Shoes',
 ];
 
-// const items = [
-//   { id: 1, name: 'Hat of Wisdom', category: 'Hats', price: 100, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 2, name: 'Cool Shades', category: 'Face Accessories', price: 150, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 3, name: 'Smile', category: 'Facial Expression', price: 120, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 4, name: 'Iron Shirt', category: 'Upperwear', price: 200, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 5, name: 'Leather Pants', category: 'Lowerwear', price: 180, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 6, name: 'Combat Boots', category: 'Shoes', price: 130, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 7, name: 'Fedora', category: 'Hats', price: 90, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 8, name: 'Eye Patch', category: 'Face Accessories', price: 60, image: require('../../assets/images/homeIcons/avatar.png') },
-//   { id: 9, name: 'Angry Face', category: 'Facial Expression', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
-// ];
+
 
 type SelectorTabs = 'Hat' |'Eyes' |'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
 const ITEMS_PER_PAGE = 6;
 
 const selectorIcons: { [key in SelectorTabs]: any } = {
-  Hat: HeartIcon,
-  Eyes: HeartIcon,
-  'Face Accessories': HeartIcon,
-  'Facial Expression': HeartIcon,
-  Upperwear: HeartIcon,
-  Lowerwear: HeartIcon,
-  Shoes: HeartIcon,
+  Hats: HatsIcon,
+  Eyes: EyesIcon,
+  'Face Accessories': FaceAccIcon,
+  'Facial Expression': FaceExIcon,
+  Upperwear: UpperIcon,
+  Lowerwear: LowerIcon,
+  Shoes: ShoesIcon,
 };
 
 const ShopScreen = () => {
@@ -105,6 +98,23 @@ const ShopScreen = () => {
     Lowerwear?: string;
     Shoes?: string;
   }>({});
+
+  const [selectedShop, setSelectedShop] = useState<'avatar' | 'room'>('avatar');
+  const shopIndicator = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(shopIndicator, {
+      toValue: selectedShop === 'avatar' ? 0 : 1,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }, [selectedShop]);
+
+  const indicatorTranslate = shopIndicator.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, normalize(75)], // adjust based on width of each tab
+  });
+
 
   const goToPreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -241,8 +251,7 @@ const fetchOwnedItems = async () => {
 
   return (
     <View style={styles.screen}>
-      {/* Top Bar */}
-      <View style={styles.topBar}>
+      <View style={styles.shopTabWrapper}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="arrow-back" size={normalize(10)} color="#3a2e1f" />
@@ -250,9 +259,43 @@ const fetchOwnedItems = async () => {
         </TouchableOpacity>
         <View style={styles.shopTitleWrapper}>
           <View style={styles.shopTitleBackground}>
-            <Text style={styles.topBarTitle}>Shop</Text>
-            <View style={styles.shopTitleShadow} />
+        
+        <View style={styles.shopTabBackground}>
+          <Animated.View
+            style={[styles.shopTabIndicator, { transform: [{ translateX: indicatorTranslate }] }]}
+          />
+          
+          <TouchableOpacity
+            style={styles.shopTabButton}
+            onPress={() => setSelectedShop('avatar')}
+          >
+            <Animated.View
+              style={[
+                styles.shopTitleShadow,
+                { transform: [{ translateX: indicatorTranslate }] }
+              ]}
+            />
+            <Text style={[styles.shopTabText, selectedShop === 'avatar' && styles.activeTabText]}>
+              Avatar Shop
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.shopTabButton}
+            onPress={() => setSelectedShop('room')}
+          >
+            <Text style={[styles.shopTabText, selectedShop === 'room' && styles.activeTabText]}>
+              Room Shop
+            </Text>
+            
+          </TouchableOpacity>
+          
+            </View>
           </View>
+          
+        </View>
+        <View style={styles.currencyContainer}>
+          <Text style={styles.activeTabText}>321</Text>
+          <Image source={IkicoinIcon} style={styles.currencyOwned} />
         </View>
         <CurrencyDisplay
           icon={<Image source={IkicoinIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
@@ -260,14 +303,17 @@ const fetchOwnedItems = async () => {
           size={normalize(5)}
         />
 
-        <View style={styles.topBarSpacer} />
       </View>
+
       <ImageBackground
         source={ ShopBackground} 
         style={styles.screen}
         resizeMode="cover" 
       >
-      {/* Main Shop UI */}
+        {selectedShop === 'avatar' ? (
+          // Avatar item selectors and grid
+          <>
+            {/* Main Shop UI */}
       <View style={styles.container}>
         {/* Selector Tabs */}
         <View style={styles.outerBorder}>
@@ -294,7 +340,7 @@ const fetchOwnedItems = async () => {
                       }}
                     >
                       <Image
-                        source={selectorIcons[selectedTab as keyof typeof selectorIcons]}
+                        source={selectorIcons[tab as keyof typeof selectorIcons]}
                         style={styles.selectorIcon}
                       />
                     </TouchableOpacity>
@@ -417,12 +463,43 @@ const fetchOwnedItems = async () => {
            />}
         </View>
       </View>
+          </>
+        ) : (
+          // Placeholder for Room Shop items (you can populate this later)
+          <View style={styles.roomShopPlaceholder}>
+            <Text style={styles.placeholderText}>Room Shop Coming Soon</Text>
+          </View>
+        )}
+
+      
       </ImageBackground>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  currencyContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: normalize(4),
+  paddingVertical: normalize(4),
+  backgroundColor: '#fff7db', // Soft background (customize as needed)
+  borderRadius: normalize(20), // Oblong shape
+  borderWidth: 2,
+  borderColor: '#a78e63',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 1,
+  elevation: 2,
+},
+
+currencyOwned: {
+  width: normalize(12),
+  height: normalize(12),
+  resizeMode: 'contain',
+},
+
   screen: {
     flex: 1,
   },
@@ -487,10 +564,6 @@ const styles = StyleSheet.create({
   selectorButtonActive: {
     backgroundColor: '#a37b44',
     borderColor: '#5e4021',
-  },
-  selectorText: {
-    fontSize: normalize(4),
-    color: '#3a2e1f',
   },
   selectorTextActive: {
     color: '#fff',
@@ -595,7 +668,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: normalize(25),
+    marginTop: normalize(20),
     gap: normalize(2),
   },
   paginationButton: {
@@ -660,9 +733,9 @@ shopTitleBackground: {
 shopTitleShadow: {
   position: 'absolute',
   bottom: normalize(0),
-  left: normalize(.5),
-  right: normalize(.5),
-  height: normalize(10),
+  left: normalize(3.7),
+  right: normalize(5),
+  height: normalize(8),
   backgroundColor: 'rgba(0, 0, 0, 0.25)',
   borderTopLeftRadius: normalize(20),
   borderTopRightRadius: normalize(20),
@@ -708,6 +781,55 @@ selectorPane: {
     shadowRadius: 3,
     elevation: 5,
   },
+  shopTabWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: normalize(2),
+    backgroundColor: '#bfa76f',
+    borderBottomWidth: normalize(0.5),
+    borderColor: '#7a5e3a',
+    elevation: 4,
+},
+shopTabBackground: {
+  flexDirection: 'row',
+  width: normalize(150),
+  height: normalize(15),
+  backgroundColor: '#ece4d9',
+  borderRadius: normalize(10),
+  position: 'relative',
+},
+shopTabIndicator: {
+  position: 'absolute',
+  height: '100%',
+  width: normalize(75),
+  backgroundColor: '#d9c3a1',
+  borderRadius: normalize(10),
+  zIndex: 0,
+},
+shopTabButton: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1,
+},
+shopTabText: {
+  fontSize: normalize(7),
+  color: '#5e4c35',
+},
+activeTabText: {
+  fontWeight: 'bold',
+  color: '#2e1f0d',
+},
+roomShopPlaceholder: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: normalize(10),
+},
+placeholderText: {
+  fontSize: normalize(6.5),
+  color: '#999',
+},
 
 });
 
