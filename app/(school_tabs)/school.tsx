@@ -270,7 +270,7 @@ export default function Home() {
                 />
           }
           tab1icon={AvatarIcon}
-          tab2={<FriendRequest userID="321"/>}
+          tab2={<FriendRequest userID={1}/>}
           tab2icon={AvatarIcon}
           >
           </OverlayWindow>

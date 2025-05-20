@@ -352,7 +352,8 @@ export default function Home() {
           tabs={2}
           tab1={
             view === 'friendlist' 
-              ? <FriendList onOpenChat={(userID: string) => {
+              ? <FriendList userID={user?.userID}
+              onOpenChat={(userID: string) => {
                   setSelectedUserID(userID);
                   setView('chat');
                 }} />
@@ -362,7 +363,7 @@ export default function Home() {
                 />
           }
           tab1icon={AvatarIcon}
-          tab2={<FriendRequest userID="321"/>}
+          tab2={<FriendRequest userID={user?.userID}/>}
           tab2icon={AvatarIcon}
           >
           </OverlayWindow>
