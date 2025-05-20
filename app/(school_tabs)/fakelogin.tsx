@@ -18,7 +18,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-    <ImageBackground source={LoginWallpaper} style={styles.backgroundImage} resizeMode="cover">
+    <ImageBackground source={LoginWallpaper} style={styles.backgroundImage} resizeMode="contain">
         <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
           <View style={styles.arrange}>
             <Text style={styles.title}>Welcome to iKiyo</Text>

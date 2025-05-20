@@ -13,6 +13,7 @@ import { normalize } from "../../assets/normalize";
 import { DailyTaskIcon } from "../../assets/images/TaskIcons";
 import { Ionicons } from '@expo/vector-icons';
 import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../assets/images/shopIcons"
+import { useNavigation } from '@react-navigation/native';
 
 type InventoryItem = {
   id: string;
@@ -52,7 +53,8 @@ const InventoryCustomizationOverlay = () => {
     selectedFilter === 'All'
       ? inventoryItems
       : inventoryItems.filter((item) => item.category === selectedFilter);
-
+  
+  const navigation = useNavigation();
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
   const lastPageCount = filteredItems.length % ITEMS_PER_PAGE || ITEMS_PER_PAGE;
   const placeholdersNeeded = ITEMS_PER_PAGE - lastPageCount;
@@ -85,7 +87,7 @@ const InventoryCustomizationOverlay = () => {
     <View style={styles.outerContainer}>
       {/* Top bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={normalize(10)} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>Edit Avatar</Text>

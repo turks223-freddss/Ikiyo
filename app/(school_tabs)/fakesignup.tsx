@@ -24,7 +24,7 @@ export default function SignupScreen() {
       <ImageBackground
         source={LoginWallpaper}
         style = {styles.backgroundImage}
-        resizeMode="cover"
+        resizeMode="contain"
       >
       <ImageBackground
         source={SignupSign}
