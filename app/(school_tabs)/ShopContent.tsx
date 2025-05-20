@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -8,19 +9,44 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  ActivityIndicator,
   Animated,
+
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../assets/normalize';
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
 import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../assets/images/shopIcons"
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import CurrencyDisplay from "../assets/CurrencyContainer";
+import { default as AvatarDisplay } from "../assets/avatar/avatarComponentShop";
 
 const { width } = Dimensions.get('window');
 const isTablet = width > 1080;
 
+interface Item {
+  item_id: number;
+  item_name: string;
+  store_image: string;
+  avatar_image: string;
+  price: number;
+  category: string;
+  
+}
+interface UserData {
+  userID: number;
+  username: string;
+  email: string;
+  password: string;
+  gold: number;
+  ruby: number;
+  description: string | null;
+  buddy: number| null;
+}
+
 const selectors = [
-  'Hats',
+  'Hat',
   'Eyes',
   'Face Accessories',
   'Facial Expression',
@@ -29,20 +55,9 @@ const selectors = [
   'Shoes',
 ];
 
-const items = [
-  { id: 1, name: 'Hat of Wisdom', category: 'Hats', price: 100, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 2, name: 'Cool Shades', category: 'Face Accessories', price: 150, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 3, name: 'Smile', category: 'Facial Expression', price: 120, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 4, name: 'Iron Shirt', category: 'Upperwear', price: 200, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 5, name: 'Leather Pants', category: 'Lowerwear', price: 180, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 6, name: 'Combat Boots', category: 'Shoes', price: 130, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 7, name: 'Fedora', category: 'Hats', price: 90, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 8, name: 'Eye Patch', category: 'Face Accessories', price: 60, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 9, name: 'Angry Face', category: 'Facial Expression', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
-  { id: 10, name: 'Angry Eyes', category: 'Eyes', price: 70, image: require('../../assets/images/homeIcons/avatar.png') },
-];
 
-type SelectorTabs = 'Hats' | 'Eyes' | 'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
+
+type SelectorTabs = 'Hat' |'Eyes' |'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
 const ITEMS_PER_PAGE = 6;
 
 const selectorIcons: { [key in SelectorTabs]: any } = {
@@ -60,12 +75,29 @@ const ShopScreen = () => {
   const [selectedTab, setSelectedTab] = useState('Hats');
   const [currentPage, setCurrentPage] = useState(1);
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
+  const [items, setItems] = useState<Item[]>([]); // Store fetched items
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{
+          userID: number;
+        } | null>(null);
+    const [userData, setUserData] = useState<UserData | null>(null);
 
   const filteredItems = items.filter(item => item.category === selectedTab);
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const itemsToDisplay = filteredItems.slice(startIndex, endIndex);
+  const [ownedItemIds, setOwnedItemIds] = useState<number[]>([]);
+  
+  const [avatarPreview, setAvatarPreview] = useState<{
+    Hat?: string;
+    Eyes?: string;
+    'Face Accessories'?: string;
+    'Facial Expression'?: string;
+    Upperwear?: string;
+    Lowerwear?: string;
+    Shoes?: string;
+  }>({});
 
   const [selectedShop, setSelectedShop] = useState<'avatar' | 'room'>('avatar');
   const shopIndicator = useRef(new Animated.Value(0)).current;
@@ -91,6 +123,131 @@ const ShopScreen = () => {
   const goToNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch('http://192.168.1.5:8081/api/items/');
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBuyItem = async (item: Item) => {
+  if (!user || !user.userID) return;
+
+  try {
+    const response = await fetch("http://192.168.1.5:8081/api/buy-item/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userID: user.userID,
+        item_id: item.item_id,
+        price: item.price,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert(errorData.detail || "Purchase failed.");
+      return;
+    }
+
+    const data = await response.json();
+    alert(data.message || "Item purchased!");
+    await fetchOwnedItems();
+    // Update local gold/ruby after successful purchase
+    setUserData((prev) =>
+      prev ? { ...prev, gold: prev.gold - item.price } : prev
+    );
+
+  } catch (error) {
+    console.error("Error buying item:", error);
+    alert("Something went wrong while purchasing.");
+  }
+};
+
+const fetchOwnedItems = async () => {
+  if (!user || !user.userID) return;
+
+  try {
+    const response = await fetch("http://192.168.1.5:8081/api/user-inventory/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userID: user.userID }),
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch inventory");
+
+    const data = await response.json();
+    setOwnedItemIds(data.owned_items); // Store owned item IDs
+  } catch (error) {
+    console.error("Error fetching owned items:", error);
+  }
+};
+
+
+
+  useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const userData = await AsyncStorage.getItem("user");
+          if (userData) {
+            const parsedUser = JSON.parse(userData);
+            if (typeof parsedUser === "number") {
+              setUser({ userID: parsedUser }); // Convert number to object
+            } else {
+              setUser(parsedUser);
+            }
+          }
+        } catch (error) {
+          console.error("Error retrieving user data:", error);
+        }
+      };
+      // #jandkjasdakdj
+      fetchUserData();
+    }, []);
+  
+    useEffect(() => {
+        if (!user || !user.userID) return; // Prevent empty request
+        // console.log("Current user:", user); // Debugging step
+        
+    
+        const fetchUserData = () => {
+          fetch("http://192.168.1.5:8081/api/user/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userID: user.userID }),
+          })
+            .then(async (response) => {
+              const text = await response.text(); // Read raw response
+              return JSON.parse(text);
+            })
+            .then((data) => {
+              setUserData(data);
+            })
+            .catch((error) => console.error("Error fetching user data:", error));
+        };
+        // Initial fetch when user changes
+        fetchUserData();
+        console.log("hello entered") 
+    }, [user]); // Runs when `user` changes
+
+  useEffect(() => {
+    if (!user || !user.userID) return;
+    fetchOwnedItems();
+    fetchItems();
+  }, [user]);
+
 
   return (
     <View style={styles.screen}>
@@ -140,6 +297,11 @@ const ShopScreen = () => {
           <Text style={styles.activeTabText}>321</Text>
           <Image source={IkicoinIcon} style={styles.currencyOwned} />
         </View>
+        <CurrencyDisplay
+          icon={<Image source={IkicoinIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
+          currencyAmount={userData?.gold??0}
+          size={normalize(5)}
+        />
 
       </View>
 
@@ -196,15 +358,19 @@ const ShopScreen = () => {
           <View style={styles.gridContainer}>
             {[...itemsToDisplay, ...Array(ITEMS_PER_PAGE - itemsToDisplay.length).fill(null)].map((item, index) => (
               <TouchableOpacity
-                key={item ? item.id : `placeholder-${index}`}
+                key={item ? item.item_id : `placeholder-${index}`}
                 style={[
                   styles.itemCard,
-                  item && item.id === activeItemId && styles.itemCardActive,
+                  item && item.item_id === activeItemId && styles.itemCardActive,
                 ]}
                 onPress={() => {
                   if (item) {
-                    setActiveItemId(item.id); // Set the clicked item as active
+                    setActiveItemId(item.item_id); // Set the clicked item as active
                     console.log(`Pressed ${item.name}`);
+                    setAvatarPreview((prev) => ({
+                      ...prev,
+                      [item.category]: item.avatar_image,
+                    }));
                   }
                 }}
                 activeOpacity={item ? 0.7 : 1}
@@ -212,18 +378,26 @@ const ShopScreen = () => {
                 {item ? (
                   <>
                     <Text style={styles.itemText}>{item.name}</Text>
-                    <Image source={item.image} style={styles.itemImage} />
+                    <Image source={{ uri: item.store_image }} style={styles.itemImage} />
                     <TouchableOpacity
-                      style={styles.buyButton}
-                      onPress={() => {
-                        console.log(`Buying ${item.name} for ${item.price} Ikicoins`);
-                        // Add your buying logic here
-                      }}
-                      activeOpacity={0.7}
+                      style={[
+                        styles.buyButton,
+                        ownedItemIds.includes(item.item_id) && { backgroundColor: '#ccc' }
+                      ]}
+                      onPress={() => !ownedItemIds.includes(item.item_id) && handleBuyItem(item)}
+                      disabled={ownedItemIds.includes(item.item_id)}
+                      activeOpacity={ownedItemIds.includes(item.item_id) ? 1 : 0.7}
                     >
                       <View style={styles.priceContainer}>
-                        <Text style={styles.buyButtonText}>{item.price}</Text>
-                        <Image source={IkicoinIcon} style={styles.coinIcon} />
+                        <Text style={[
+                          styles.buyButtonText,
+                          ownedItemIds.includes(item.item_id) && { color: '#888' }
+                        ]}>
+                          {ownedItemIds.includes(item.item_id) ? "Owned" : item.price}
+                        </Text>
+                        {!ownedItemIds.includes(item.item_id) && (
+                          <Image source={IkicoinIcon} style={styles.coinIcon} />
+                        )}
                       </View>
                     </TouchableOpacity>
 
@@ -277,12 +451,16 @@ const ShopScreen = () => {
 
         {/* Avatar Preview */}
         <View style={styles.rightPane}>
-          <Text style={styles.title}>Your Avatar</Text>
-          <Image
-            source={require('../../assets/images/homeIcons/avatar.png')}
-            style={styles.avatarImage}
-            resizeMode="contain"
-          />
+          {/* <Text style={styles.title}>Your Avatar</Text> */}
+          {user?.userID !== undefined && <AvatarDisplay userID={user.userID}
+            hat={avatarPreview.Hat}
+            eyes={avatarPreview.Eyes}
+            faceAccessories={avatarPreview["Face Accessories"]}
+            facialExpression={avatarPreview["Facial Expression"]}
+            upperwear={avatarPreview.Upperwear}
+            lowerwear={avatarPreview.Lowerwear}
+            shoes={avatarPreview.Shoes}
+           />}
         </View>
       </View>
           </>

@@ -85,7 +85,8 @@ class PartnerRequest(models.Model):
 class Item(models.Model):
     item_id = models.AutoField(primary_key=True)
     item_name = models.CharField(max_length=255)
-    image = models.CharField(max_length=255, blank=True, null=True)  # Store file path or URL
+    store_image = models.CharField(max_length=255, blank=True, null=True) 
+    avatar_image = models.CharField(max_length=255, blank=True, null=True)  
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=100)
     part = models.CharField(max_length=100, blank=True, null=True)  # Can be null

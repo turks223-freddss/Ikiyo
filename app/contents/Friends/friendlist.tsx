@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import {
   View,
   Text,
@@ -16,41 +16,79 @@ import {
 } from '../../../assets/images/homeIcons';
 
 type Friend = {
-  id: string;
+  // id: string;
   name: string;
-  hashtag: string;
-  isOnline: boolean;
-  avatarUrl?: string;
+  // hashtag: string;
+  // isOnline: boolean;
+  // avatarUrl?: string;
 };
 
 type FriendListProps = {
+  userID?: number;
   onOpenChat: (userID: string) => void;  // callback to open chat view
 };
 
-const mockFriends: Friend[] = [
-  { id: '1', name: 'Alice', hashtag: '#1234', isOnline: true },
-  { id: '2', name: 'Bob', hashtag: '#5678', isOnline: false },
-  { id: '3', name: 'Charlie', hashtag: '#9012', isOnline: true },
-  { id: '4', name: 'Diana', hashtag: '#3456', isOnline: false },
-  { id: '5', name: 'Eve', hashtag: '#7890', isOnline: true },
-];
+// const mockFriends: Friend[] = [
+//   { id: '1', name: 'Alice', hashtag: '#1234', isOnline: true },
+//   { id: '2', name: 'Bob', hashtag: '#5678', isOnline: false },
+//   { id: '3', name: 'Charlie', hashtag: '#9012', isOnline: true },
+//   { id: '4', name: 'Diana', hashtag: '#3456', isOnline: false },
+//   { id: '5', name: 'Eve', hashtag: '#7890', isOnline: true },
+// ];
 
-const FriendList = ({ onOpenChat }: FriendListProps) => {
+const FriendList = ({ userID,onOpenChat }: FriendListProps) => {
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        const response = await fetch('http://192.168.1.5:8081/api/friend-action/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'view_friends',
+            userID: userID,
+          }),
+        });
+
+        const data = await response.json();
+
+        const formattedFriends = data.friends.map((username: string, index: number) => ({
+          name: username,
+          hashtag: '#0000', // Placeholder unless backend includes this
+          isOnline: false,  // Placeholder unless backend includes this
+        }));
+
+        setFriends(formattedFriends);
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFriends();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Friends</Text>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {mockFriends.map((friend) => (
-          <View key={friend.id} style={styles.card}>
+        {friends.map((friend,index) => (
+          // <View key={friend.id} style={styles.card}>
+          <View key={index} style={styles.card}>
             <View style={styles.infoContainer}>
-              <Image
+              {/* <Image
                 source={friend.avatarUrl ? { uri: friend.avatarUrl } : AvatarIcon}
                 style={styles.avatar}
-              />
+              /> */}
               <View style={styles.textContainer}>
                 <Text style={styles.name}>{friend.name}</Text>
-                <Text style={styles.hashtag}>{friend.hashtag}</Text>
-                <View style={styles.statusContainer}>
+                {/* <Text style={styles.hashtag}>{friend.id}</Text> */}
+                {/* <View style={styles.statusContainer}>
                   <View
                     style={[
                       styles.statusDot,
@@ -65,13 +103,13 @@ const FriendList = ({ onOpenChat }: FriendListProps) => {
                   >
                     {friend.isOnline ? 'Online' : 'Offline'}
                   </Text>
-                </View>
+                </View> */}
               </View>
             </View>
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => onOpenChat(friend.id)}
+                onPress={() => onOpenChat("1")} //not yet for trial only
               >
                 <Image source={MapsIcon} style={styles.icon} />
               </TouchableOpacity>

@@ -8,7 +8,9 @@ import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
 import AdContent from "../contents/AdContent"; 
-import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon } from "../../assets/images/homeIcons"
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
+import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
+import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
@@ -43,6 +45,16 @@ export default function Home() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [test,setTest] = useState("test");
+  const [view, setView] = useState<'friendlist' | 'chat'>('friendlist');
+    const [selectedUserID, setSelectedUserID] = useState<string | null>(null);
+    // Overlay state management
+    const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
+      overlayad: false,
+      overlayevent: false,
+      overlayfriend: false,
+      overlaytask: false,
+      overlayprofile: false,
+    });
 
   useEffect(() => {
       const fetchUserData = async () => {
@@ -103,11 +115,6 @@ export default function Home() {
         
     }, [user]); // Runs when `user` changes
 
-  // Overlay state management
-  const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
-    overlayad: false,
-    overlayevent: false,
-  });
 
   // Function to toggle overlay visibility by name
   const toggleOverlay = (name: string) => {
@@ -192,8 +199,8 @@ export default function Home() {
 
   console.log("Inside render, test =", test);
   console.log("buddy:",userData?.buddy)
-  console.log("buddy:",userData?.username)
-  console.log("buddy:",userData?.description)
+  console.log("username:",userData?.username)
+  console.log("description:",userData?.description)
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -241,7 +248,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("/friendlist")}
+                onPress={() => toggleOverlay("overlayfriend")}
                 icon={<Image source={FriendlistIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
                 size={normalize(20)}
               />
@@ -326,17 +333,42 @@ export default function Home() {
           onClose={() => toggleOverlay("overlaytask")}
           tabs={3}
           tab1={<DailyTask/>}
-          tab1icon={AvatarIcon}
-          tab1label={"Daily Task"}
+          tab1icon={DailyTaskIcon}
+        
           tab2={<MyJournal/>}
-          tab2icon={AvatarIcon}
-          tab2label={"My Task"}
+          tab2icon={EditTaskIcon}
+          
           tab3={<PartnerJournal/>}
-          tab3icon={AvatarIcon}
-          tab3label={"Partner Task"}
+          tab3icon={PartnerTaskIcon}
+         
           >
           </OverlayWindow>
         )}
+
+        {overlays.overlayfriend && (
+          <OverlayWindow 
+          visible={true} 
+          onClose={() => toggleOverlay("overlayfriend")}
+          tabs={2}
+          tab1={
+            view === 'friendlist' 
+              ? <FriendList userID={user?.userID}
+              onOpenChat={(userID: string) => {
+                  setSelectedUserID(userID);
+                  setView('chat');
+                }} />
+              : <ChatScreen 
+                  onBack={() => setView('friendlist')} 
+                  userID={selectedUserID ?? ""} 
+                />
+          }
+          tab1icon={AvatarIcon}
+          tab2={<FriendRequest userID={user?.userID}/>}
+          tab2icon={AvatarIcon}
+          >
+          </OverlayWindow>
+        )}
+
         {overlays.overlayprofile && (
           
           <OverlayWindow 
@@ -353,14 +385,14 @@ export default function Home() {
 
           </MainProfile>}
           tab1icon={AvatarIcon}
-          tab1label={"Profile"}
+         
           tab2={<PartnerProfile id={userData!.userID}
           partner_id={userData?.buddy ?? undefined}/>}
-          tab2icon={AvatarIcon}
-          tab2label={"Partner Profile"}
+          tab2icon={PartnerProfileIcon}
+         
           tab3={<Settings/>}
-          tab3icon={AvatarIcon}
-          tab3label={"Settings"}
+          tab3icon={SettingsIcon}
+       
           >
           </OverlayWindow>
         )}

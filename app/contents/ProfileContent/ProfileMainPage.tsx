@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -50,6 +50,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedUsername, setEditedUsername] = useState(username || '');
   const [editedDescription, setEditedDescription] = useState(description || '');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   const handleSave = async () => {
   try {
@@ -74,14 +79,52 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     // Optionally update displayed values
     setIsEditing(false);
     console.log('Update success:', data);
+    eventBus.emit("UserUpdate");
+    eventBus.emit("refreshHome");
   } catch (error) {
     console.error('Error updating user:', error);
     alert('An error occurred while updating.');
   }
 };
 
+const handleDelete = async () => {
+  try {
+    const response = await fetch(`http://192.168.1.5:8081/api/buddy/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action:"remove_buddy",
+        user_id: partner,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || 'Failed to remove buddy.');
+      return;
+    }
+
+    // Optionally update displayed values
+    setIsEditing(false);
+    console.log('Update success:', data);
+    eventBus.emit("UserUpdate");
+    eventBus.emit("refreshHome");
+  } catch (error) {
+    console.error('Error removing buddy:', error);
+    alert('An error occurred while updating.');
+  }
+};
+
+useEffect(() => {
+  setEditedUsername(username || '');
+  setEditedDescription(description || '');
+}, [username, description]);
+
   return (
-    <View style={styles.container}>
+    <View key ={refreshKey} style={styles.container}>
       {/* Left Side */}
       <View style={styles.leftContainer}>
         <View style={styles.mainImageContainer}>
@@ -120,16 +163,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           <View style={dynamicStyles.editButtonContainer}>
           <TouchableOpacity
             style={variant === 2 ? dynamicStyles.deleteButton : dynamicStyles.editButton}
-            onPress={() => {
+            onPress={async () => {
               if (variant === 1) {
                  if (isEditing) {
-                    handleSave();
-                    eventBus.emit("UserUpdate");
-                    eventBus.emit("refreshHome");
+                    await handleSave();
+                    refresh();
                   } else {
                     setIsEditing(true);
                   }
               } else {
+                handleDelete();
                 console.log('Delete button pressed');
               }
             }}

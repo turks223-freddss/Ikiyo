@@ -9,7 +9,10 @@ import {
   PixelRatio,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { useMusic } from "../../assets/utils/musiccontext";
+
 
 const useNormalize = () => {
   const { width } = useWindowDimensions();
@@ -28,7 +31,7 @@ const Settings = () => {
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 1200;
   const normalize = useNormalize();
-
+  const router = useRouter();
   const [soundVolume, setSoundVolume] = useState(0.5);
   const { musicVolume, setMusicVolume } = useMusic();
   const [connectedAccounts, setConnectedAccounts] = useState({
@@ -36,6 +39,11 @@ const Settings = () => {
     gmail: true,
     facebook: false,
   });
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("user"); // Clear user data
+    router.replace("/login"); // Redirect to login screen
+  };
 
   const styles = getStyles(normalize, isSmallScreen);
 
@@ -110,7 +118,7 @@ const Settings = () => {
         <TouchableOpacity style={[styles.button, styles.secondaryButton]}>
           <Text style={styles.secondaryText}>Privacy Policy</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.logoutButton]}>
+        <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>

@@ -1,7 +1,9 @@
-import { View, Text, Button, StyleSheet, TextInput, Alert } from "react-native";
+import { View, Text, Button, StyleSheet, TextInput, Alert, TouchableOpacity, ImageBackground, } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Sign } from "../assets/images/authentication";
+import { normalize } from "../assets/normalize";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -38,30 +40,42 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to iKiyo</Text>
+      <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
+        <View style={styles.arrange}>
+            <Text style={styles.title}>Welcome to iKiyo</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="default"
-        autoCapitalize="none"
-      />
+            <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#5a3e2b"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+            <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#5a3e2b"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            />
 
-      <View style={styles.buttonRow}>
-        <Button title="Log In" onPress={handleLogin} />
-        <View style={styles.space} />
-        <Button title="Sign Up" onPress={() => router.push("/signup")} />
-      </View>
+            <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Log In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.button, styles.secondaryButton]}
+                onPress={() => router.push("/signup")}
+            >
+                <Text style={[styles.buttonText, styles.secondaryButtonText]}>Sign Up</Text>
+            </TouchableOpacity>
+            </View>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -71,30 +85,71 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#e7d5b7", // light parchment or wooden backdrop
     paddingHorizontal: 20,
   },
+  signboard: {
+    width: normalize(350),
+    height: normalize(250),
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
   title: {
-    fontSize: 24,
+    fontSize: normalize(16),
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: normalize(2),
+    color: "#4a2f1b", // deep brown like carved wood
+    textAlign: "center",
+    fontFamily: "serif",
   },
   input: {
-    width: "35%",
-    height: 40,
-    borderColor: "#ccc",
+    width: "65%",
+    height: normalize(20),
+    borderColor: "#7c5a3a", // mid-tone brown
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: "#fff",
+    marginBottom: normalize(4),
+    backgroundColor: "#fff8f0", // soft cream for handwritten look
+    color: "#3e2a1e",
+    fontSize: normalize(8),
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
+    justifyContent: "space-between",
+    width: "25%",
   },
-  space: {
-    width: 25, // Horizontal spacing between buttons
+  button: {
+    flex: 1,
+    backgroundColor: "#a86e3b", // wood-toned button
+    paddingVertical: normalize(4),
+    borderRadius: 6,
+    alignItems: "center",
+    marginHorizontal: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 1, height: 1 },
+    shadowRadius: 2,
+    elevation: 2,
   },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: normalize(6),
+    fontFamily: "serif",
+  },
+  secondaryButton: {
+    backgroundColor: "#fff8f0",
+    borderWidth: 1,
+    borderColor: "#a86e3b",
+  },
+  secondaryButtonText: {
+    color: "#a86e3b",
+  },
+  arrange: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: normalize(7),
+  }
 });

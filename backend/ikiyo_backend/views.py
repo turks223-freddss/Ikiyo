@@ -536,6 +536,7 @@ class FriendActionView(APIView):
     def post(self, request):
         action = request.data.get('action')
         user_id = request.data.get('userID')
+        print("Incoming action:", request.data.get('action'))
 
         if not user_id:
             return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -579,19 +580,21 @@ class FriendActionView(APIView):
             friend_request.delete()
             return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
 
-        # ===== VIEW FRIENDS =====
-        elif action == 'view_friends':
+       # ===== VIEW FRIENDS =====
+        elif action == 'friends':
             friends = FriendList.objects.filter(
                 Q(from_user=user) | Q(to_user=user),
                 accepted=True
             )
-            friend_usernames = []
+            friend_data = []
             for friend in friends:
-                if friend.from_user == user:
-                    friend_usernames.append(friend.to_user.username)
-                else:
-                    friend_usernames.append(friend.from_user.username)
-            return Response({"friends": friend_usernames}, status=status.HTTP_200_OK)
+                other_user = friend.to_user if friend.from_user == user else friend.from_user
+                serialized_user = UserSerializer(other_user).data
+                friend_data.append(serialized_user)
+            
+            return Response({"friends": friend_data}, status=status.HTTP_200_OK)
+                
+        
          # ===== VIEW FRIENDS_REQUEST =====
         elif action == 'view_friend_requests':
             requests = FriendRequest.objects.filter(to_user=user)
@@ -604,10 +607,22 @@ class FriendActionView(APIView):
                     "created_at": fr.created_at
                 })
             return Response({"friend_requests": request_list}, status=status.HTTP_200_OK)
+        # ===== SEARCH USER =====
+        elif action == "search":
+            query = request.data.get('query')
+
+            if not query:
+                return Response({"error": "Search query is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            users = User.objects.filter(
+                (Q(userID__icontains=query) | Q(username__icontains=query)) & ~Q(userID=user.userID)
+            ).values('userID', 'username')
+
+            return Response({"results": list(users)}, status=status.HTTP_200_OK)
 
         else:
-            return Response({"error": "Invalid action. Use 'add_friend', 'decline_friend', 'remove_request', 'accept_friend', or 'view_friends'."}, status=status.HTTP_400_BAD_REQUEST)
-
+            print(f"Unknown action received: '{action}'")
+            return Response({"error": f"Invalid action '{action}'."}, status=status.HTTP_400_BAD_REQUEST)
 
 class ChatView(APIView):
     def post(self, request):
@@ -727,6 +742,18 @@ class FriendActionView(APIView):
                     "created_at": fr.created_at
                 })
             return Response({"friend_requests": request_list}, status=status.HTTP_200_OK)
+        # ===== SEARCH USER =====
+        elif action == 'search_user':
+            query = request.data.get('query')
+
+            if not query:
+                return Response({"error": "Search query is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            users = User.objects.filter(
+                Q(userID__icontains=query) | Q(username__icontains=query)
+            ).values('userID', 'username')
+
+            return Response({"results": list(users)}, status=status.HTTP_200_OK)
 
         else:
             return Response({"error": "Invalid action. Use 'add_friend', 'decline_friend', 'remove_request', 'accept_friend', or 'view_friends'."}, status=status.HTTP_400_BAD_REQUEST)
