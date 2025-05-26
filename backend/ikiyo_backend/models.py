@@ -9,6 +9,7 @@ class User(models.Model):
     gold = models.IntegerField(default=0)  # Default value is 0
     rubby = models.IntegerField(default=0)  # Default value is 0
     description = models.CharField(max_length=300, blank=True, null=True)  # Can be empty
+    status = models.CharField(max_length=20, default='offline')  # 👈 new field
     
     buddy = models.OneToOneField(
         'self',
@@ -170,6 +171,7 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f"Request from {self.from_user} to {self.to_user}"
+
 
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)

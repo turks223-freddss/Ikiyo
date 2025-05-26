@@ -2,7 +2,7 @@ import { View, Text, Button, StyleSheet, TextInput, Alert, TouchableOpacity, Ima
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Sign } from "../assets/images/authentication";
+import { Sign, LoginWallpaper } from "../assets/images/authentication";
 import { normalize } from "../assets/normalize";
 
 export default function LoginScreen() {
@@ -40,47 +40,52 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
-        <View style={styles.arrange}>
-            <Text style={styles.title}>Welcome to iKiyo</Text>
+      <ImageBackground source={LoginWallpaper} style={styles.backgroundImage} resizeMode="contain">
+        <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
+          <View style={styles.arrange}>
+              <Text style={styles.title}>Welcome to iKiyo</Text>
 
-            <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#5a3e2b"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            />
+              <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#5a3e2b"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              />
 
-            <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#5a3e2b"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            />
+              <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#5a3e2b"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              />
 
-            <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Log In</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[styles.button, styles.secondaryButton]}
-                onPress={() => router.push("/signup")}
-            >
-                <Text style={[styles.buttonText, styles.secondaryButtonText]}>Sign Up</Text>
-            </TouchableOpacity>
-            </View>
-        </View>
+              <View style={styles.buttonRow}>
+              <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                  <Text style={styles.buttonText}>Log In</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[styles.button, styles.secondaryButton]}
+                  onPress={() => router.push("/signup")}
+              >
+                  <Text style={[styles.buttonText, styles.secondaryButtonText]}>Sign Up</Text>
+              </TouchableOpacity>
+              </View>
+          </View>
+        </ImageBackground>
       </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    width: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: "center",

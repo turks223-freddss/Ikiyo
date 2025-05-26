@@ -1,7 +1,7 @@
 import { View, Text, Button, StyleSheet, TextInput, Alert,ImageBackground,TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { SignupSign } from "../assets/images/authentication";
+import { SignupSign, LoginWallpaper } from "../assets/images/authentication";
 import { normalize } from "../assets/normalize";
 
 export default function SignupScreen() {
@@ -51,6 +51,11 @@ export default function SignupScreen() {
 
    return (
     <View style={styles.container}>
+       <ImageBackground
+          source={LoginWallpaper}
+          style = {styles.backgroundImage}
+          resizeMode="contain"
+        >
       <ImageBackground
         source={SignupSign}
         style={styles.signboard}
@@ -114,11 +119,15 @@ export default function SignupScreen() {
         </View>
         </View>
       </ImageBackground>
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+   backgroundImage: {
+    width: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: "center",

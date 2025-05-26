@@ -61,7 +61,7 @@ type SelectorTabs = 'Hat' |'Eyes' |'Face Accessories' | 'Facial Expression' | 'U
 const ITEMS_PER_PAGE = 6;
 
 const selectorIcons: { [key in SelectorTabs]: any } = {
-  Hats: HatsIcon,
+  Hat: HatsIcon,
   Eyes: EyesIcon,
   'Face Accessories': FaceAccIcon,
   'Facial Expression': FaceExIcon,
@@ -294,14 +294,9 @@ const fetchOwnedItems = async () => {
           
         </View>
         <View style={styles.currencyContainer}>
-          <Text style={styles.activeTabText}>321</Text>
+          <Text style={styles.activeTabText}>{userData?.gold??0}</Text>
           <Image source={IkicoinIcon} style={styles.currencyOwned} />
         </View>
-        <CurrencyDisplay
-          icon={<Image source={IkicoinIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
-          currencyAmount={userData?.gold??0}
-          size={normalize(5)}
-        />
 
       </View>
 
