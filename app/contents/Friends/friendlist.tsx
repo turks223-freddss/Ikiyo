@@ -16,10 +16,10 @@ import {
 } from '../../../assets/images/homeIcons';
 
 type Friend = {
-  // id: string;
+  id: string;
   name: string;
   // hashtag: string;
-  // isOnline: boolean;
+  status: string
   // avatarUrl?: string;
 };
 
@@ -56,10 +56,10 @@ const FriendList = ({ userID,onOpenChat }: FriendListProps) => {
 
         const data = await response.json();
 
-        const formattedFriends = data.friends.map((username: string, index: number) => ({
-          name: username,
-          hashtag: '#0000', // Placeholder unless backend includes this
-          isOnline: false,  // Placeholder unless backend includes this
+        const formattedFriends = data.friends.map((friend: any) => ({
+          id: friend.userID,
+          name: friend.username,
+          status: friend.status,
         }));
 
         setFriends(formattedFriends);
@@ -77,9 +77,9 @@ const FriendList = ({ userID,onOpenChat }: FriendListProps) => {
     <View style={styles.container}>
       <Text style={styles.title}>Friends</Text>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {friends.map((friend,index) => (
+        {friends.map((friend) => (
           // <View key={friend.id} style={styles.card}>
-          <View key={index} style={styles.card}>
+          <View key={friend.id} style={styles.card}>
             <View style={styles.infoContainer}>
               {/* <Image
                 source={friend.avatarUrl ? { uri: friend.avatarUrl } : AvatarIcon}
@@ -87,23 +87,23 @@ const FriendList = ({ userID,onOpenChat }: FriendListProps) => {
               /> */}
               <View style={styles.textContainer}>
                 <Text style={styles.name}>{friend.name}</Text>
-                {/* <Text style={styles.hashtag}>{friend.id}</Text> */}
-                {/* <View style={styles.statusContainer}>
+                <Text style={styles.hashtag}>#{friend.id}</Text>
+                <View style={styles.statusContainer}>
                   <View
                     style={[
                       styles.statusDot,
-                      { backgroundColor: friend.isOnline ? 'green' : 'gray' },
+                      { backgroundColor: friend.status === 'online' ? 'green' : 'gray' },
                     ]}
                   />
                   <Text
                     style={[
                       styles.status,
-                      { color: friend.isOnline ? 'green' : 'gray' },
+                      { color: friend.status === 'online' ? 'green' : 'gray' },
                     ]}
                   >
-                    {friend.isOnline ? 'Online' : 'Offline'}
+                    {friend.status === 'online' ? 'Online' : 'Offline'}
                   </Text>
-                </View> */}
+                </View>
               </View>
             </View>
             <View style={styles.actions}>
