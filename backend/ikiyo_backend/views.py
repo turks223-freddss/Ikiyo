@@ -723,13 +723,22 @@ class FriendActionView(APIView):
                 Q(from_user=user) | Q(to_user=user),
                 accepted=True
             )
-            friend_usernames = []
+            friend_data = []
             for friend in friends:
                 if friend.from_user == user:
-                    friend_usernames.append(friend.to_user.username)
+                    other_user = friend.to_user
                 else:
-                    friend_usernames.append(friend.from_user.username)
-            return Response({"friends": friend_usernames}, status=status.HTTP_200_OK)
+                    other_user = friend.from_user
+
+                friend_data.append({
+                    'userID': other_user.userID,
+                    'username': other_user.username,
+                    'status': other_user.status
+                })
+
+            return Response({"friends": friend_data}, status=status.HTTP_200_OK)
+         
+         
          # ===== VIEW FRIENDS_REQUEST =====
         elif action == 'view_friend_requests':
             requests = FriendRequest.objects.filter(to_user=user)

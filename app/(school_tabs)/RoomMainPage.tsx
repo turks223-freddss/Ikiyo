@@ -1,56 +1,93 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { router } from "expo-router";
 import Room from '../assets/RoomComponents/Room';
 import FeatureButton from '../assets/FeatureButton'
 import { Ionicons } from "@expo/vector-icons";
 import { normalize } from '../../assets/normalize';
+import eventBus from '../assets/utils/eventBus';
 
 const RoomMainPage = () => {
+
+  /* 
+    NOTE TO DEV:
+      Fix the condition `!isInventoryOpen` for the buttons, since it is messy.
+  */
+
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+   useEffect(() => {
+    const handleOpenInventory = () => {
+      setIsInventoryOpen(true);
+    };
+
+    const handleCloseInventory = () => {
+      setIsInventoryOpen(false);
+    }
+
+    eventBus.on("openInventory", handleOpenInventory);
+    eventBus.on("closeInventory", handleCloseInventory);
+
+    return () => {
+      eventBus.off("openInventory", handleOpenInventory);
+      eventBus.off("closeInventory", handleCloseInventory);
+    };
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.room}> 
         <Room/>
       </View>
         <View style={styles.navBar}>
+          { !isInventoryOpen && (
           <FeatureButton
               style={styles.button}
               onPress={() => router.push("/school")}
               icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
               size={normalize(20)}
-            />  
+            />
+          )}
         </View>
         <View style={styles.toolBar}>
+          { !isInventoryOpen && (
+            <FeatureButton
+              style={styles.button}
+              onPress={() => eventBus.emit("openInventory")}
+              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+              size={normalize(20)}
+            />
+          )}
+          { !isInventoryOpen && (
+            <FeatureButton
+                style={styles.button}
+                onPress={() => console.log('yes')}
+                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+                size={normalize(20)}
+              />
+          )}
+          { !isInventoryOpen && (
+            <FeatureButton
+              style={styles.button}
+              onPress={() => console.log('yes')}
+              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+              size={normalize(20)}
+            />
+          )}
+          { !isInventoryOpen && (
+            <FeatureButton
+              style={styles.button}
+              onPress={() => console.log('yes')}
+              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+              size={normalize(20)}
+            />
+          )}
+          { !isInventoryOpen && (
           <FeatureButton
               style={styles.button}
               onPress={() => console.log('yes')}
               icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
               size={normalize(20)}
             />
-          <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
-          <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
-          <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
-          <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
+          )}
         </View>
     </View>
   );
