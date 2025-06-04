@@ -120,7 +120,8 @@ const AvatarSkiaDisplay: React.FC<AvatarSkiaDisplayProps> = ({
         </Group>
         <SkImage image={hatImage} x={-5} y={-10} width={220} height={250} />
         <SkImage image={eyesImage} x={-6.5} y={-12.5} width={220} height={250} />
-        <SkImage image={upperwearImage} x={-5} y={-11} width={220} height={250} />
+        <SkImage image={upperwearImage} x={-12} y={-18} width={230} height={260} />
+        <SkImage image={lowerwearImage} x={-3} y={-17} width={210} height={270} />
       </Canvas>
     </View>
   );

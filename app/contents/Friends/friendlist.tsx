@@ -16,7 +16,7 @@ import {
 } from '../../../assets/images/homeIcons';
 
 type Friend = {
-  id: string;
+  id: number;
   name: string;
   // hashtag: string;
   status: string
@@ -25,7 +25,7 @@ type Friend = {
 
 type FriendListProps = {
   userID?: number;
-  onOpenChat: (userID: string) => void;  // callback to open chat view
+  onOpenChat: (userID: number, FriendID: number ) => void;  // callback to open chat view
 };
 
 // const mockFriends: Friend[] = [
@@ -109,7 +109,7 @@ const FriendList = ({ userID,onOpenChat }: FriendListProps) => {
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => onOpenChat("1")} //not yet for trial only
+                onPress={() => onOpenChat(userID!, friend.id)} //not yet for trial only
               >
                 <Image source={MapsIcon} style={styles.icon} />
               </TouchableOpacity>

@@ -46,7 +46,7 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [test,setTest] = useState("test");
   const [view, setView] = useState<'friendlist' | 'chat'>('friendlist');
-    const [selectedUserID, setSelectedUserID] = useState<string | null>(null);
+    const [selectedUserID, setSelectedUserID] = useState<number | null>(null);
     // Overlay state management
     const [overlays, setOverlays] = useState<{ [key: string]: boolean }>({
       overlayad: false,
@@ -353,13 +353,15 @@ export default function Home() {
           tab1={
             view === 'friendlist' 
               ? <FriendList userID={user?.userID}
-              onOpenChat={(userID: string) => {
-                  setSelectedUserID(userID);
+              onOpenChat={(userID: number, friendID: number) => {
+                  console.log("Opening chat with userID:", userID, "friendID:", friendID);
+                  setSelectedUserID(friendID);
                   setView('chat');
                 }} />
               : <ChatScreen 
                   onBack={() => setView('friendlist')} 
-                  userID={selectedUserID ?? ""} 
+                  userID={user?.userID ?? 0}
+                  friendID={selectedUserID ?? 0} 
                 />
           }
           tab1icon={AvatarIcon}

@@ -810,6 +810,29 @@ class ChatView(APIView):
 
             serializer = MessageSerializer(messages, many=True)
             return Response({"messages": serializer.data}, status=status.HTTP_200_OK)
+        
+        elif action == 'get_friend_data':
+            friend_id = request.data.get('friend_id')
+            if not friend_id:
+                return Response({"error": "friend_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            friend = get_object_or_404(User, userID=friend_id)
+
+            # Check if they are friends
+            is_friend = FriendList.objects.filter(
+                (Q(from_user=user, to_user=friend) | Q(from_user=friend, to_user=user)),
+                accepted=True
+            ).exists()
+
+            if not is_friend:
+                return Response({"error": "You can only view data of friends."}, status=status.HTTP_403_FORBIDDEN)
+
+            friend_data = {
+                "userID": friend.userID,
+                "username": friend.username,
+                "status": friend.status
+            }
+            return Response({"friend_data": friend_data}, status=status.HTTP_200_OK)
 
         else:
             return Response({"error": "Invalid action. Use 'send_message' or 'get_messages'."}, status=status.HTTP_400_BAD_REQUEST)

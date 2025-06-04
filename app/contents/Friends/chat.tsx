@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,59 +14,150 @@ import { normalize } from "../../../assets/normalize";
 
 type Props = {
   onBack: () => void;
-  userID: string;
+  friendID: number; //for firend
+  userID:number
 };
 
 type Message = {
-  id: string;
-  text: string;
-  sender: "me" | "friend";
+  id: number;
+  sender: number
+  recipient: number
+  content: string
+  timestamp: string
+  is_read: boolean
 };
 
-export default function ChatScreen({ onBack }: Props) {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "1", text: "Hello! How are you?", sender: "friend" },
-    { id: "2", text: "Hi! I'm good, thanks. And you?", sender: "me" },
-  ]);
+type chatPartner =  {
+  name: string
+  id: number
+  status: string
+}
+
+export default function ChatScreen({ onBack, userID, friendID }: Props) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatPartner, setchatPartner] = useState<chatPartner | null>(null);
   const [input, setInput] = useState("");
   const flatListRef = useRef<FlatList>(null);
 
-  // Chat partner info for header
-  const chatPartner = {
-    name: "Jane Doe",
-    tag: "#1234",
-    profilePic: require("../../../assets/images/homeIcons/avatar.png"),
-    online: true,
-  };
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const newMessage: Message = {
-      id: (messages.length + 1).toString(),
-      text: input.trim(),
-      sender: "me",
+  const CHAT_API_URL = "http://192.168.1.5:8081/api/chat/"; 
+  
+  useEffect(() => {
+    fetchMessages();
+    fetchPartner();
+  }, []);
+
+  useEffect(() => {
+    if (chatPartner) {
+      console.log("Chat Partner Data:", chatPartner);
+    }
+  }, [chatPartner]);
+
+  const fetchPartner = async () => {
+    const requestBody = {
+      action: "get_friend_data",
+      userID: userID,
+      friend_id: friendID,
     };
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+
+    // Log the request body to see what data is being passed
+    console.log("Request Body:", requestBody);
+    try {
+      const response = await fetch(CHAT_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "get_friend_data",
+          userID: userID,
+          friend_id: friendID,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Full Partner Response:", data);
+      if (response.ok) {
+        // Assuming the response contains the partner's data
+        setchatPartner({
+          name: data.friend_data.username,
+          id: data.friend_data.userID,
+          status: data.friend_data.status,
+        });
+      } else {
+        console.warn("Fetch partner data failed:", data.error);
+        if (data.error === "You can only view data of friends") {
+          alert("You can only chat with users who are your friends.");}
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("An error occurred while fetching friend data. Please try again.");
+    }
   };
 
-  const renderMessage = ({ item }: { item: Message }) => {
-    const isMe = item.sender === "me";
-    return (
-      <View
-        style={[
-          styles.messageBubble,
-          isMe ? styles.myMessage : styles.friendMessage,
-        ]}
-      >
-        <Text style={isMe ? styles.myMessageText : styles.friendMessageText}>
-          {item.text}
-        </Text>
-      </View>
-    );
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(CHAT_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "get_messages",
+          userID: userID,
+          friend_id: friendID,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        const transformed = data.messages.map((msg: any, index: number) => ({
+          id: msg.id, // Assuming msg.id is already a number
+          sender: msg.sender, // msg.sender should be a number, not a string
+          recipient: msg.recipient, // msg.recipient should also be a number
+          content: msg.content, // msg.content is the message body
+          timestamp: msg.timestamp || new Date().toISOString(), // Use timestamp if available, else use current time
+          is_read: msg.is_read !== undefined ? msg.is_read : false, // Default to false if not available
+        }));
+        setMessages(transformed);
+        // Wait a moment to ensure FlatList has rendered
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 100); // 100ms delay works well for most cases
+      } else {
+        console.warn("Fetch messages failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+  
+    try {
+      const response = await fetch(CHAT_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "send_message",
+          userID: userID,
+          recipient_id: friendID,
+          content: input,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setInput(""); // Clear the input after sending
+        await fetchMessages(); // Fetch updated messages
+      }else{
+        console.warn("Send failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Send error:", error);
+    }
   };
 
   return (
@@ -81,21 +172,21 @@ export default function ChatScreen({ onBack }: Props) {
         </TouchableOpacity>
 
         <View style={styles.chatPartnerInfo}>
-          <Image source={chatPartner.profilePic} style={styles.profilePic} />
+          {/* <Image source={chatPartner.profilePic} style={styles.profilePic} /> */}
           <View style={styles.nameStatus}>
             <Text style={styles.partnerName}>
-              {chatPartner.name}{" "}
-              <Text style={styles.partnerTag}>{chatPartner.tag}</Text>
+              {chatPartner?.name}{" "}
+              <Text style={styles.partnerTag}>#{chatPartner?.id}</Text>
             </Text>
             <View style={styles.statusContainer}>
               <View
                 style={[
                   styles.statusDot,
-                  { backgroundColor: chatPartner.online ? "#4CAF50" : "#888" },
+                  { backgroundColor: chatPartner?.status === "online" ? "#4CAF50" : "#888" },
                 ]}
               />
               <Text style={styles.statusText}>
-                {chatPartner.online ? "Online" : "Offline"}
+                {chatPartner?.status}
               </Text>
             </View>
           </View>
@@ -103,18 +194,31 @@ export default function ChatScreen({ onBack }: Props) {
 
         <View style={{ width: normalize(20) }} />
       </View>
-
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-        contentContainerStyle={styles.messageList}
-        onContentSizeChange={() =>
-          flatListRef.current?.scrollToEnd({ animated: true })
-        }
-      />
-
+      <View style={{ flex: 1 }}>
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id.toString()}
+          style={{flex:1}}
+          contentContainerStyle={styles.messageList}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.messageBubble,
+                item.sender === userID ? styles.myMessage : styles.friendMessage,
+              ]}
+            >
+              <Text style={styles.myMessageText}>{item.content}</Text>
+            </View>
+          )}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: true })
+          }
+          onLayout={() =>
+            flatListRef.current?.scrollToEnd({ animated: false })
+          }
+        />
+      </View>
       <View style={styles.inputContainer}>
         <TouchableOpacity
           style={styles.imageButton}
@@ -221,6 +325,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(4),
   },
   messageList: {
+    flexGrow:1,
     paddingBottom: normalize(8),
     marginLeft: normalize(4),
     marginRight: normalize(4),
