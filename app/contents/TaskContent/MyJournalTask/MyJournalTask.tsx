@@ -20,8 +20,9 @@ import {
 } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from 'expo-router';
-import eventBus from "../../../assets/utils/eventBus"
-
+import eventBus from "../../../assets/utils/eventBus";
+import { Ionicons } from "@expo/vector-icons";
+import { normalize } from '@/assets/normalize';
 
 type TaskData = {
     id: number;
@@ -105,25 +106,34 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
             }),
             });
 
+            if (response.status === 404) {
+                // No tasks found, but not an error
+                setTaskList([]);
+                return;
+            }
+
             if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
             if (data && data.tasks_assigned_to_user) {
                 setTaskList(data.tasks_assigned_to_user);
                 if (selectedTask) {
-                      const updated = data.tasks_assigned_to_user.find((t:TaskData) => t.id === selectedTask.id);
-                      if (updated) {
+                    const updated = data.tasks_assigned_to_user.find((t: TaskData) => t.id === selectedTask.id);
+                    if (updated) {
                         setSelectedTask(updated); // this is a new object ref
-                      }
                     }
+                }
+            } else {
+                setTaskList([]); // No tasks in response
             }
         } catch (error) {
             console.error("Error fetching tasks:", error);
+            // Only alert for real errors, not for empty task list
             Alert.alert("Error", "Failed to load tasks. Please try again later.");
         }
-        };
+    };
     
     useEffect(() => {
         fetchTasks();
@@ -158,31 +168,43 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
             <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
                 {/* Left: Task List */}
                 <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
-                <FlatList
-                    data={taskList}
-                    keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles.taskList}
-                    renderItem={({ item }) => (
-                        <TaskCard
-                            questImage={require('../../../../assets/images/homeIcons/task.png')}
-                            titleName={item.task_title}
-                            rewardImage={require('../../../../assets/images/homeIcons/ikicoin.png')}
-                            status = {item.status}
-                            userID={user!.userID}
-                            task_id={item.id}
-                            isSelf={1}
-                            reward={item.reward}
-                            onPress={() => {
+                  <View style={{ flex: 1, justifyContent: 'space-between' }}>
+                    <View style={{ flex: 1 }}>
+                      {taskList.length === 0 ? (
+                        <View style={{ padding: 20, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+                          <Text style={{ color: '#888', fontSize: normalize(8), textAlign: 'center' }}>
+                            You currently do not have any tasks!
+                          </Text>
+                        </View>
+                      ) : (
+                        <FlatList
+                          data={taskList}
+                          keyExtractor={(item) => item.id.toString()}
+                          contentContainerStyle={styles.taskList}
+                          renderItem={({ item }) => (
+                            <TaskCard
+                              questImage={require('../../../../assets/images/homeIcons/task.png')}
+                              titleName={item.task_title}
+                              rewardImage={require('../../../../assets/images/homeIcons/ikicoin.png')}
+                              status={item.status}
+                              userID={user!.userID}
+                              task_id={item.id}
+                              isSelf={1}
+                              reward={item.reward}
+                              onPress={() => {
                                 setSelectedTask(item);
                                 setIsSubmitting(false);
-                            }}
-                            onClaimed={() =>{fetchTasks();
+                              }}
+                              onClaimed={() => {
+                                fetchTasks();
                                 eventBus.emit("goldUpdate");
-                                // eventBus.emit("refreshHome");
-                            }} // ✅ This triggers refresh
+                              }}
+                            />
+                          )}
                         />
-                    )}
-                />
+                      )}
+                    </View>
+                  </View>
                 </View>
 
                 {/* Right: Task Details */}

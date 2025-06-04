@@ -190,7 +190,7 @@ export default function Home() {
           tab1icon={DailyTaskIcon}
           tab2={<DailyTask/>}
           tab2icon={EditTaskIcon}
-          tab3={<PartnerJournal/>}
+          tab3={<DailyTask/>}
           tab3icon={PartnerTaskIcon}
           >
           </OverlayWindow>
