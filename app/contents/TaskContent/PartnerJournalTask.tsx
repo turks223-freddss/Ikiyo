@@ -165,7 +165,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                         reward={item.reward}
                         isSelf={0}
                         onPress={() => {
-                          setSelectedTask(item);
+                          setSelectedTask({...item});
                           setIsEditing(false);
                           setIsAddingTask(false);
                         }}
@@ -178,10 +178,9 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 <TouchableOpacity
                   style={styles.addTaskButton}
                   onPress={() => {
-                    setSelectedTask({...item});
+                    setSelectedTask(null);
                     setIsEditing(false);
-                    setIsAddingTask(false);
-
+                    setIsAddingTask(true);
                   }}
                 >
                   <Ionicons name="add" size={normalize(10)} color="#fff" />
