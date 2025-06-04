@@ -14,7 +14,7 @@ import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../../assets/im
 import { ProfileIcon, SettingsIcon, PartnerProfileIcon } from "../../../assets/images/ProfileIcons";
 import { FriendListIcon, FriendRequestIcon } from "../../../assets/images/friendlistIcons";
 import DailyTask from "../../contents/TaskContent/DailyTask";
-import MyJournal from "../../contents/TaskContent/MyJournalTask";
+import MyJournal from "../../contents/TaskContent/MyJournalTask/MyJournalTask";
 import PartnerJournal from "../../contents/TaskContent/PartnerJournalTask";
 import MainProfile from "../../contents/ProfileContent/ProfileMainPage";
 import PartnerProfile from "../../contents/ProfileContent/PartnerProfileHelper";
@@ -188,7 +188,7 @@ export default function Home() {
           tabs={3}
           tab1={<DailyTask/>}
           tab1icon={DailyTaskIcon}
-          tab2={<MyJournal/>}
+          tab2={<DailyTask/>}
           tab2icon={EditTaskIcon}
           tab3={<PartnerJournal/>}
           tab3icon={PartnerTaskIcon}

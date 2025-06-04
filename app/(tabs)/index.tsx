@@ -12,7 +12,7 @@ import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsI
 import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
 import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
-import MyJournal from "../contents/TaskContent/MyJournalTask";
+import MyJournal from "../contents/TaskContent/MyJournalTask/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
 import MainProfile from "../contents/ProfileContent/ProfileMainPage"
 import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper"
@@ -24,7 +24,7 @@ import FriendRequest from "../contents/Friends/friendrequest"
 import ChatScreen from "../contents/Friends/chat";
 import { normalize } from '../../assets/normalize';
 import RewardPopup from '../assets/Modals/RewardModal/Reward';
-
+import ToastModal from "../assets/Modals/ToastModal/ToastModal";
 
 interface UserData {
   userID: number;
@@ -38,6 +38,7 @@ interface UserData {
 }
 
 export default function Home() {
+  const [profileTab, setProfileTab] = useState(1);
   const router = useRouter();
   const { width, height } = Dimensions.get("window");
   const [user, setUser] = useState<{
@@ -56,6 +57,15 @@ export default function Home() {
       overlaytask: false,
       overlayprofile: false,
     });
+
+  const openPartnerProfile = () => {
+    setProfileTab(2); // Set to tab 2 (partner profile)
+    setOverlays((prev) => ({
+      ...prev,
+      overlayprofile: true,
+      overlaytask: false, // Optionally close the task overlay
+    }));
+  };
 
   useEffect(() => {
       const fetchUserData = async () => {
@@ -225,7 +235,13 @@ export default function Home() {
             imageUri="https://www.w3schools.com/w3images/avatar2.png"
             username={userData?.username}
             hashtag={`#${userData?.userID}`}
-            onPress={() => toggleOverlay("overlayprofile")} 
+            onPress={() => {
+              setProfileTab(1);
+              setOverlays((prev) => ({
+                ...prev,
+                overlayprofile: true,
+              }));
+            }}
           />
 
           <View style={{ alignItems: "flex-end", gap: 10 }}>
@@ -313,14 +329,20 @@ export default function Home() {
             </View>
           </View>
         </View>
-        <RewardPopup
+        <ToastModal
           visible={rewardVisible}
-          onClose={() => setRewardVisible(false)}
-          onGet={() => {
+          title="Claim Rewards"
+          message="Action completed!"
+          onConfirm={() => {
             // handle reward claim logic here
             setRewardVisible(false);
           }}
-          rewardAmount={rewardAmount}
+          onCancel={() => {
+            // handle reward claim logic here
+            setRewardVisible(false);
+          }}
+          confirmText="Yes"
+          cancelText="No"
         />
         {/* Overlay Logic */}
         {overlays.overlayad && (
@@ -350,7 +372,7 @@ export default function Home() {
           tab1={<DailyTask/>}
           tab1icon={DailyTaskIcon}
         
-          tab2={<MyJournal/>}
+          tab2={<MyJournal userData = {userData} openPartnerProfile={openPartnerProfile} />}
           tab2icon={EditTaskIcon}
           
           tab3={<PartnerJournal/>}
@@ -391,6 +413,7 @@ export default function Home() {
           <OverlayWindow 
           visible={true} 
           onClose={() => toggleOverlay("overlayprofile")}
+          initialTab={profileTab}
           tabs={3}
           tab1={<MainProfile userid={userData!.userID}
           username={userData?.username}
