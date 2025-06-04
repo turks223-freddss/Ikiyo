@@ -10,72 +10,51 @@ import {
 
 interface DraggableProps {
   imageSource: ImageSourcePropType;
-  currentPosition: { x: number; y: number };  // Use currentPosition instead of initialPosition
+  currentPosition: { x: number; y: number };
   cellSize: { width: number; height: number };
   gridSize: { width: number; height: number };
-  itemDimensions: {width: number, height: number};
+  itemDimensions: { width: number; height: number };
   gridDimensions: { width: number; height: number };
   state: string;
   onDrop: (position: { x: number; y: number }) => void;
+  occupiedGridCells: { col: number; row: number }[];
+  allowOverlap: boolean;
 }
 
 const Draggable: React.FC<DraggableProps> = ({
   imageSource,
-  currentPosition,  // Accept current position from parent
+  currentPosition,
   cellSize,
   gridSize,
   itemDimensions,
   gridDimensions,
   state,
   onDrop,
+  occupiedGridCells,
+  allowOverlap
 }) => {
-  let position = useRef(new Animated.ValueXY(currentPosition)).current;
+  const position = useRef(new Animated.ValueXY(currentPosition)).current;
+  const [draggingPos, setDraggingPos] = useState<{ x: number; y: number } | null>(null);
 
-  let [draggingPos, setDraggingPos] = useState<{ x: number; y: number } | null>(null);
-
-  let draggingRef = useRef<{ x: number; y: number }>({ x: currentPosition.x, y: currentPosition.y });
+  const offsetY = state === 'floor' ? gridDimensions.height * 0.6 : 0;
 
   useEffect(() => {
-    position.setValue(currentPosition);  // Sync the position with the state
+    position.setValue(currentPosition);
   }, [currentPosition]);
 
-  const originalHeight = useRef(gridDimensions.height); // Save full height once
-  let offsetY = 0;
-
-    useEffect(() => {
-    console.log(state);
-
-    if (state === 'wall') {
-        const wallHeight = originalHeight.current * 0.6;
-
-        gridDimensions = {
-        width: gridDimensions.width,
-        height: wallHeight
-        };
-        cellSize = {
-        width: cellSize.width,
-        height: wallHeight / 6
-        };
-        offsetY = 0; // wall starts at the top
-    } else if (state === 'floor') {
-        const floorHeight = originalHeight.current * 0.4;
-
-        gridDimensions = {
-        width: gridDimensions.width,
-        height: floorHeight
-        };
-        cellSize = {
-        width: cellSize.width,
-        height: floorHeight / 4
-        };
-        offsetY = originalHeight.current * 0.6; // floor starts after wall ends
+  const isGridCellOccupied = (startCol: number, startRow: number): boolean => {
+    if (allowOverlap) return false;
+    for (let dx = 0; dx < itemDimensions.width; dx++) {
+      for (let dy = 0; dy < itemDimensions.height; dy++) {
+        const col = startCol + dx;
+        const row = startRow + dy;
+        if (occupiedGridCells.some(cell => cell.col === col && cell.row === row)) {
+          return true;
+        }
+      }
     }
-    console.log(offsetY)
-    console.log(gridDimensions)
-    }, [state]);
-
-  useEffect(() => {
-  }, [position]);
+    return false;
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -83,50 +62,72 @@ const Draggable: React.FC<DraggableProps> = ({
       onPanResponderGrant: () => {
         position.setOffset({ x: currentPosition.x, y: currentPosition.y });
         position.setValue({ x: 0, y: 0 });
-        setDraggingPos(null);
       },
       onPanResponderMove: (e, gesture) => {
+        const moveX = currentPosition.x + gesture.dx;
+        const moveY = currentPosition.y + gesture.dy;
+
+        const col = Math.round(moveX / cellSize.width);
+        const row = Math.round((moveY - offsetY) / cellSize.height);
+
+        const maxCol = Math.floor(
+          (gridDimensions.width - itemDimensions.width * cellSize.width) / cellSize.width
+        );
+        const maxRow = Math.floor(
+          (gridDimensions.height - offsetY - itemDimensions.height * cellSize.height) /
+            cellSize.height
+        );
+
+        const clampedCol = Math.min(Math.max(0, col), maxCol);
+        const clampedRow = Math.min(Math.max(0, row), maxRow);
+
+        const snapX = clampedCol * cellSize.width;
+        const snapY = clampedRow * cellSize.height + offsetY;
+
+        if (!isGridCellOccupied(clampedCol, clampedRow)) {
+          setDraggingPos({ x: snapX, y: snapY });
+        } else {
+          setDraggingPos(null);
+        }
+
         position.setValue({ x: gesture.dx, y: gesture.dy });
-
-        let moveX = currentPosition.x + gesture.dx;
-        let moveY = currentPosition.y + gesture.dy;
-
-        // Snap to grid logic
-        let snapX = Math.round(moveX / cellSize.width) * cellSize.width;
-        let snapY = Math.round(moveY / cellSize.height) * cellSize.height;
-
-        const maxX = gridDimensions.width - gridSize.width * cellSize.width;
-        const maxY = offsetY + (gridDimensions.height - gridSize.height * cellSize.height);
-
-        snapX = Math.min(Math.max(0, snapX), maxX);
-        snapY = Math.min(Math.max(offsetY, snapY), maxY);
-
-        draggingRef.current = { x: snapX, y: snapY };
-        setDraggingPos({ x: snapX, y: snapY });
       },
       onPanResponderRelease: (e, gesture) => {
         position.flattenOffset();
 
-        let finalX = currentPosition.x + gesture.dx;
-        let finalY = currentPosition.y + gesture.dy;
+        const moveX = currentPosition.x + gesture.dx;
+        const moveY = currentPosition.y + gesture.dy;
 
-        let snappedX = Math.round(finalX / cellSize.width) * cellSize.width;
-        let snappedY = Math.round(finalY / cellSize.height) * cellSize.height;
+        const col = Math.round(moveX / cellSize.width);
+        const row = Math.round((moveY - offsetY) / cellSize.height);
 
-        const maxX = gridDimensions.width - gridSize.width * cellSize.width;
-        const maxY = offsetY + (gridDimensions.height - gridSize.height * cellSize.height);
+        const maxCol = Math.floor(
+          (gridDimensions.width - itemDimensions.width * cellSize.width) / cellSize.width
+        );
+        const maxRow = Math.floor(
+          (gridDimensions.height - offsetY - itemDimensions.height * cellSize.height) /
+            cellSize.height
+        );
 
-        snappedX = Math.min(Math.max(0, snappedX), maxX);
-        snappedY = Math.min(Math.max(offsetY, snappedY), maxY);
+        const clampedCol = Math.min(Math.max(0, col), maxCol);
+        const clampedRow = Math.min(Math.max(0, row), maxRow);
 
-        // Update position after drop
-        Animated.spring(position, {
-          toValue: { x: snappedX, y: snappedY },
-          useNativeDriver: true,
-        }).start();
+        const snapX = clampedCol * cellSize.width;
+        const snapY = clampedRow * cellSize.height + offsetY;
 
-        // Notify parent about the new position
-        onDrop({ x: snappedX, y: snappedY });
+        if (isGridCellOccupied(clampedCol, clampedRow)) {
+
+          Animated.spring(position, {
+            toValue: { x: currentPosition.x, y: currentPosition.y },
+            useNativeDriver: true,
+          }).start();
+        } else {
+          Animated.spring(position, {
+            toValue: { x: snapX, y: snapY },
+            useNativeDriver: true,
+          }).start();
+          onDrop({ x: snapX, y: snapY });
+        }
       },
     })
   ).current;
@@ -136,17 +137,26 @@ const Draggable: React.FC<DraggableProps> = ({
       {draggingPos && (
         <View
           pointerEvents="none"
-          style={[styles.snapHighlight, {
-            width: (gridSize.width * cellSize.width) * itemDimensions.width,
-            height: (gridSize.height * cellSize.height) * itemDimensions.height,
-            left: draggingPos.x,
-            top: draggingPos.y,
-            position: 'absolute',
-          }]}
+          style={[
+            styles.snapHighlight,
+            {
+              width: cellSize.width * itemDimensions.width,
+              height: cellSize.height * itemDimensions.height,
+              left: draggingPos.x,
+              top: draggingPos.y,
+              position: 'absolute',
+            },
+          ]}
         />
       )}
       <Animated.View {...panResponder.panHandlers} style={[position.getLayout(), styles.draggable]}>
-        <Image source={imageSource} style={{ width: (gridSize.width * cellSize.width) * itemDimensions.width, height: (gridSize.height * cellSize.height) * itemDimensions.height }} />
+        <Image
+          source={imageSource}
+          style={{
+            width: cellSize.width * itemDimensions.width,
+            height: cellSize.height * itemDimensions.height,
+          }}
+        />
       </Animated.View>
     </>
   );
