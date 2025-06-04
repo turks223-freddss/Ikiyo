@@ -1,18 +1,17 @@
-
-import { View, Image, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-import FeatureButton from '../FeatureButton'
+import React, { useState } from 'react';
+import { View, Image, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
+import { HatsIcon } from "../../../assets/images/shopIcons";
 import { Ionicons } from "@expo/vector-icons";
 import { normalize } from '../../../assets/normalize';
 import eventBus from '../utils/eventBus';
 
-import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../../assets/images/shopIcons";
-import { useState, useEffect } from 'react';
+const { width } = Dimensions.get('window');
+const ITEMS_PER_PAGE = 6; 
 
-interface RoomItem{
+interface RoomItem {
   id: number;
   item_name: string;
-  type:string;
+  type: string;
   x: number;
   y: number;
   width: number;
@@ -20,110 +19,121 @@ interface RoomItem{
   state: string;
   allowOverlap: boolean;
   placed: boolean;
-  image: string;
-
+  image: any;
 }
 
+const FILTERS = [
+  { label: "Wallpapers", value: "Wallpapers" },
+  { label: "Flooring", value: "Flooring" },
+  { label: "Floor Items", value: "Floor Items" },
+  { label: "Wall Items", value: "Wall Items" },
+];
+
 const Inventory: React.FC = () => {
-    
-  const [selectedFilter, setSelectedFilter] = useState<string>('All');
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [items, setItems] = useState<RoomItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedFilter, setSelectedFilter] = useState<string>("Wallpapers");
 
-  // const items = [
-  //   { id: 5, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 2}},
-  //   { id: 6, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-  //   { id: 7, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 2, height: 1}},
-  //   { id: 8, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 2, height: 2}},
-  //   { id: 9, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-  //   { id: 10, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-  //   { id: 11, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-  //   { id: 12, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-    
-  // ]
-  const remainder = items.length % 3;
-  const placeholdersCount = remainder === 0 ? 0 : 3 - remainder;
+  // Placeholder items for testing (change types to test filtering)
+  const [items] = useState<RoomItem[]>([
+    { id: 1, item_name: "Classic Wallpaper", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 2, item_name: "Modern Wallpaper", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 3, item_name: "Wood Flooring", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 4, item_name: "Tile Flooring", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 5, item_name: "Sofa", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 6, item_name: "Table", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 7, item_name: "Painting", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 8, item_name: "Clock", type: "Wall Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 9, item_name: "Lamp", type: "Floor Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+    { id: 10, item_name: "Shelf", type: "Wall Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  ]);
 
-  const placeholders = new Array(placeholdersCount).fill(null);
-  const filters = [
-    { label: 'All', icon: HatsIcon},
-    { label: 'Hats', icon: HatsIcon },
-    { label: 'Eyes', icon: EyesIcon },
-    { label: 'Face Accessories', icon: FaceAccIcon },
-    { label: 'Face Expression', icon: FaceExIcon },
-    { label: 'Upper', icon: UpperIcon },
-    { label: 'Lower', icon: LowerIcon },
-    { label: 'Shoes', icon: ShoesIcon },
-  ];
+  // Filter logic
+  const filteredItems = items.filter(item => item.type === selectedFilter);
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const itemsToDisplay = filteredItems.slice(startIndex, endIndex);
 
-  useEffect(() => {
-    // Fetch room items from API on mount
-    const fetchRoomItems = async () => {
-      try {
-        const response = await fetch('http://192.168.1.5:8081/api/room/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'get_room_items',
-            userID: 2,  // Replace with dynamic userID as needed
-          }),
-        });
+  // Reset to page 1 when filter changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedFilter]);
 
-        const data = await response.json();
-
-        if (response.ok && data.room_items) {
-          setItems(data.room_items);
-        } else {
-          console.error('API Error or no room_items:', data);
-          setItems([]);
-        }
-      } catch (error) {
-        console.error('Fetch room items failed:', error);
-        setItems([]);
-      }
-    };
-
-    fetchRoomItems();
-  }, []);
-  
   return (
     <View style={styles.inventory}>
       <View style={styles.filter}>
         <View style={styles.outerBorder}>
-        <View style={styles.secondBorder}>
-        <View style={styles.thirdBorder}>
-        <View style={styles.filterBox}>
+          <View style={styles.secondBorder}>
+            <View style={styles.thirdBorder}>
+              <View style={styles.filterBox}>
+                {FILTERS.map((filter, idx) => (
+                  <TouchableOpacity
+                    key={filter.value}
+                    style={[
+                      styles.filterButton,
+                      selectedFilter === filter.value && styles.filterButtonActive,
+                    ]}
+                    onPress={() => setSelectedFilter(filter.value)}
+                  >
+                    <Ionicons
+                      name={
+                        filter.value === "Wallpapers" ? "image" :
+                        filter.value === "Flooring" ? "grid" :
+                        filter.value === "Floor Items" ? "cube" :
+                        "images"
+                      }
+                      size={normalize(12)}
+                      color={selectedFilter === filter.value ? "#fff" : "#8a6e43"}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
         </View>
-        </View>
-        </View>
-        </View>
-        {/* You can put anything here: nav, icons, tabs, etc. */}
       </View>
       <View style={styles.view}>
-          
-          <View style={styles.grid}>
-          {items.map((item) => (
-           <FeatureButton
-              key={item.id}
-              style={styles.item}
+        <View style={styles.gridContainer}>
+          {itemsToDisplay.map((item, index) => (
+            <TouchableOpacity
+              key={item.id + '-' + index}
+              style={styles.itemCard}
               onPress={() => eventBus.emit("newItem", item)}
-              size={normalize(20)}
-              icon={
-                <Image
-                  source={{ uri: item.image }}
-                  style={{ resizeMode: 'cover' }}
-                />
-              }
-            />
-
-            ))}
-            {placeholders.map((_, index) => (
-              <View key={`placeholder-${index}`} style={[styles.item, styles.placeholder]} />
-            ))}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.itemText}>{item.item_name}</Text>
+              <Image source={item.image} style={styles.itemImage} />
+            </TouchableOpacity>
+          ))}
+        </View>
+        {/* Pagination */}
+        <View style={styles.paginationWrapper}>
+          <View style={styles.paginationContainer}>
+            <TouchableOpacity
+              onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              style={[
+                styles.paginationButton,
+                currentPage === 1 && styles.disabledButton,
+              ]}
+            >
+              <Ionicons name="chevron-back" size={normalize(10)} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.pageIndicator}>
+              {currentPage} / {totalPages || 1}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              style={[
+                styles.paginationButton,
+                (currentPage === totalPages || totalPages === 0) && styles.disabledButton,
+              ]}
+            >
+              <Ionicons name="chevron-forward" size={normalize(10)} color="#fff" />
+            </TouchableOpacity>
           </View>
+        </View>
       </View>
     </View>
   );
@@ -138,40 +148,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  placeholder:{opacity:0},
   filter: {
     width: '25%',
     height: '80%',
     marginTop: '15%',
-    backgroundColor: 'rgba(255, 200, 200, 0.8)', // example color
-  },
-  view: { 
-    marginTop: '15%',
-    height: '80%',
-    width: '90%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: 10,
-  },
-
-  item: {
-    position: 'relative',
-    width: '30%', // adjust based on number of columns
-    height: '30%',
-    margin: '1.5%',
-    backgroundColor: '#ccc',
-    top: 0,
-    left: 0,
-  },
-
-  button: {
-    position: 'relative',
-    margin: '-90%',
+    backgroundColor: 'rgba(255, 200, 200, 0.8)',
   },
   outerBorder: {
     height: '100%',
@@ -183,7 +164,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
-    zIndex:1,
+    zIndex: 1,
   },
   secondBorder: {
     flex: 1,
@@ -203,11 +184,101 @@ const styles = StyleSheet.create({
     borderWidth: normalize(1),
     borderColor: '#6b6463',
     paddingVertical: normalize(4),
+    paddingHorizontal: normalize(2),
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  filterButton: {
+    width: '90%',
+    backgroundColor: '#fff7db',
+    borderRadius: normalize(8),
+    paddingVertical: normalize(4),
+    marginVertical: normalize(2),
+    alignItems: 'center',
+    flexDirection: 'column',
+    borderWidth: 1,
+    borderColor: '#8a6e43',
+  },
+  filterButtonActive: {
+    backgroundColor: '#a37b44',
+    borderColor: '#a37b44',
+  },
+  filterButtonText: {
+    color: '#8a6e43',
+    fontWeight: 'bold',
+    fontSize: normalize(4),
+  },
+  filterButtonTextActive: {
+    color: '#fff',
+  },
+  view: {
+    marginTop: '15%',
+    height: '80%',
+    width: '90%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginHorizontal: normalize(4),
+    marginTop: normalize(10),
+  },
+  itemCard: {
+    width: "48%",
+    aspectRatio: 2.5,
+    backgroundColor: '#fff',
+    borderRadius: normalize(10),
+    padding: normalize(2),
+    marginBottom: normalize(8),
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    elevation: 3,
+    borderWidth: normalize(1),
+    borderColor: '#8a6e43',
     shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  itemImage: {
+    width: '60%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  itemText: {
+    fontSize: normalize(3),
+    color: '#3a2e1f',
+    textAlign: 'center',
+    marginVertical: normalize(1),
+  },
+  paginationWrapper: {
+    marginTop: 'auto',
+    alignItems: 'center',
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: normalize(4),
+    gap: normalize(2),
+  },
+  paginationButton: {
+    backgroundColor: '#a37b44',
+    padding: normalize(1),
+    borderRadius: normalize(5),
+    borderWidth: normalize(1),
+    borderColor: '#5e4021',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+    borderColor: '#aaa',
+  },
+  pageIndicator: {
+    fontSize: normalize(5),
+    color: '#3a2e1f',
+    fontWeight: 'bold',
+    marginHorizontal: normalize(4),
   },
 });
 
