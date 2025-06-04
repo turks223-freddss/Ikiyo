@@ -302,14 +302,6 @@ const AvatarScreen = () => {
             overrideLowerwear={previewedItem?.part === "Lowerwear" ? previewedItem.avatar_image : undefined}
             overrideShoes={previewedItem?.part === "Shoes" ? previewedItem.avatar_image : undefined}
           />
-          {showSaveButton && previewedItem && (
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={() => handleEquip(previewedItem)}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-          )}
           </View>
         </View>
       </View>
