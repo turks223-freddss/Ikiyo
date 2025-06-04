@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   PixelRatio,
   Alert,
 } from 'react-native';
+import RewardPopup from '../Modals/RewardModal/Reward'; // Import your reward modal
 
 // Normalize function for responsive scaling
 const { width } = Dimensions.get('window');
@@ -43,6 +44,8 @@ const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
   onPress,
   onClaimed
 }) => {
+  const [showReward, setShowReward] = useState(false);
+  const [pendingClaim, setPendingClaim] = useState(false);
 
   const handleClaim = async () => {
     try {
@@ -62,37 +65,50 @@ const MyJournalTaskCard: React.FC<MyJournalTaskCardProps> = ({
         throw new Error("Failed to claim reward");
       }
 
-      Alert.alert("Success", "Reward claimed!");
-      if (onClaimed) onClaimed();
+      setShowReward(true); // Show reward popup
+      // Do NOT call onClaimed here!
     } catch (error) {
       console.error("Claim Error:", error);
       Alert.alert("Error", "Something went wrong while claiming the reward.");
     }
   };
 
+  const handleRewardClaim = () => {
+    setShowReward(false);
+    if (onClaimed) onClaimed(); // Only call onClaimed after user clicks CLAIM
+  };
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <Image source={questImage} style={styles.icon} />
+    <>
+      <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+        <Image source={questImage} style={styles.icon} />
 
-      <View style={styles.middleContainer}>
-        <Text style={styles.cardTitle}>{titleName}</Text>
-        <View style={styles.rewardRow}>
-          <Image source={rewardImage} style={styles.rewardIcon} />
-          <Text style={styles.reward}>{reward}</Text>
+        <View style={styles.middleContainer}>
+          <Text style={styles.cardTitle}>{titleName}</Text>
+          <View style={styles.rewardRow}>
+            <Image source={rewardImage} style={styles.rewardIcon} />
+            <Text style={styles.reward}>{reward}</Text>
+          </View>
         </View>
-      </View>
 
-      {isSelf === 1 && status === "Complete" && (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.claimButton}
-            onPress={handleClaim}
-          >
-            <Text style={styles.buttonText}>Claim</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </TouchableOpacity>
+        {isSelf === 1 && status === "Complete" && (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.claimButton}
+              onPress={handleClaim}
+            >
+              <Text style={styles.buttonText}>Claim</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </TouchableOpacity>
+      <RewardPopup
+        visible={showReward}
+        rewardAmount={reward || 0}
+        onGet={handleRewardClaim}
+        onClose={() => setShowReward(false)}
+      />
+    </>
   );
 };
 
