@@ -18,6 +18,7 @@ import {
     PixelRatio,
     useWindowDimensions,
     Image,
+    Task,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -115,8 +116,15 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 const data = await response.json();
                 if (data && data.tasks_assigned_by_user) {
                     setTaskList(data.tasks_assigned_by_user);
-                } else {
+                    if (selectedTask) {
+                      const updated = data.tasks_assigned_by_user.find((t:TaskData) => t.id === selectedTask.id);
+                      if (updated) {
+                        setSelectedTask(updated); // this is a new object ref
+                      }
+                    }
+                    else {
                     setTaskList([]); // No tasks in response
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching tasks:", error);
@@ -128,57 +136,45 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     }, [user, reloadTrigger]);
 
   return (
-    <View style={styles.container}>
-
+    <View key={componentReloadKey} style={styles.container}>
+  
       <Text style={styles.title}>Partner Journal</Text>
         <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
           <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
-            <View style={{ flex: 1, justifyContent: 'space-between' }}>
-              <View style={{ flex: 1 }}>
-                {taskList.length === 0 ? (
-                  <View style={{ padding: 20, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
-                    <Text style={{ color: '#888', fontSize: normalize(8), textAlign: 'center' }}>
-                      You have yet to assign tasks to your buddy!
-                    </Text>
-                  </View>
-                ) : (
-                  <FlatList
-                    data={taskList}
-                    keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles.taskList}
-                    renderItem={({ item }) => (
-                      <TaskCard
-                        questImage={require('../../../assets/images/homeIcons/task.png')}
-                        titleName={item.task_title}
-                        rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
-                        status={item.status}
-                        userID={user!.userID}
-                        task_id={item.id}
-                        reward={item.reward}
-                        isSelf={0}
-                        onPress={() => {
-                          setSelectedTask(item);
-                          setIsEditing(false);
-                          setIsAddingTask(false);
-                        }}
-                      />
-                    )}
-                  />
-                )}
-              </View>
-              <View style={styles.addTaskWrapper}>
-                <TouchableOpacity
-                  style={styles.addTaskButton}
+            <FlatList
+              data={taskList}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.taskList}
+              renderItem={({ item }) => (
+                <TaskCard
+                  questImage={require('../../../assets/images/homeIcons/task.png')}
+                  titleName={item.task_title}
+                  rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                  status={item.status}
+                  userID={user!.userID}
+                  task_id={item.id}
+                  reward={item.reward}
+                  isSelf={0}
                   onPress={() => {
-                    setSelectedTask(null);
-                    setIsAddingTask(true);
+                    setSelectedTask(item);
+                    setIsEditing(false);
+                    setIsAddingTask(false);
                   }}
-                >
-                  <Ionicons name="add" size={normalize(10)} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            </View>
+                />
+              )}
+            />
+            <View style={styles.addTaskWrapper}>
+              <TouchableOpacity
+                style={styles.addTaskButton}
+                onPress={() => {
+                setSelectedTask(null);
+                setIsAddingTask(true);
+              }}
+            >
+              <Ionicons name="add" size={normalize(18)} color="#fff" />
+            </TouchableOpacity>
           </View>
+        </View>
 
           <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
             {isAddingTask ? (

@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from 'expo-router';
+import eventBus from "../../../assets/utils/eventBus"
 
 
 type TaskData = {
@@ -61,6 +62,12 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     const [taskList, setTaskList] = useState<TaskData[]>([]);
     const { width } = useWindowDimensions();
     const router = useRouter(); // Add this line
+    const [reloadTrigger, setReloadTrigger] = useState(false);
+    const [componentReloadKey, setComponentReloadKey] = useState(0);
+
+    const forceRemountTaskDetail = () => {
+      setComponentReloadKey(prev => prev + 1); // forces remount
+    };
 
     const isSmallScreen = width < 600;
 
@@ -104,7 +111,13 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
             const data = await response.json();
             if (data && data.tasks_assigned_to_user) {
-            setTaskList(data.tasks_assigned_to_user);
+                setTaskList(data.tasks_assigned_to_user);
+                if (selectedTask) {
+                      const updated = data.tasks_assigned_to_user.find((t:TaskData) => t.id === selectedTask.id);
+                      if (updated) {
+                        setSelectedTask(updated); // this is a new object ref
+                      }
+                    }
             }
         } catch (error) {
             console.error("Error fetching tasks:", error);
@@ -114,7 +127,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     
     useEffect(() => {
         fetchTasks();
-    }, [user]);
+    }, [user,reloadTrigger]);
 
     if (!userData || !userData.buddy) {
         return (
@@ -139,7 +152,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     }
 
     return (
-        <View style={styles.container}>
+        <View key={componentReloadKey} style={styles.container}>
             <Text style={styles.title}>My Journal</Text>
 
             <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
@@ -163,7 +176,10 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                                 setSelectedTask(item);
                                 setIsSubmitting(false);
                             }}
-                            onClaimed={fetchTasks} // ✅ This triggers refresh
+                            onClaimed={() =>{fetchTasks();
+                                eventBus.emit("goldUpdate");
+                                // eventBus.emit("refreshHome");
+                            }} // ✅ This triggers refresh
                         />
                     )}
                 />
@@ -173,6 +189,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
                 {selectedTask && (
                     <TaskDetail
+                        key ={componentReloadKey}
                         selectedTask={selectedTask}
                         isSubmitting={isSubmitting}
                         submissionText={submissionText}
@@ -180,6 +197,10 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                         isSelf={1}
                         setIsSubmitting={setIsSubmitting}
                         setSubmissionText={setSubmissionText}
+                        triggerReload = {() => {
+                            setReloadTrigger(prev => !prev);
+                            forceRemountTaskDetail();
+                        }}
                     />
                 )}
             </View>

@@ -40,6 +40,7 @@ type TaskDetailProps = {
   setIsSubmitting: (val: boolean) => void;
   setSubmissionText: (val: string) => void;
   isSelf: 0 | 1;  // New prop to conditionally show/hide the button
+  triggerReload: () => void;
 };
 
 const TaskDetail: React.FC<TaskDetailProps> = ({
@@ -48,6 +49,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   submissionText,
   userID,
   setIsSubmitting,
+  triggerReload,
   setSubmissionText,
   isSelf,
 }) => {
@@ -160,6 +162,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
       setIsSubmitting(false);
       setSubmissionText('');
       setSubmissionImage(null);
+      triggerReload();
     } catch (error) {
       alert("Error submitting task.");
       console.error(error);
