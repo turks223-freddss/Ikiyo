@@ -11,9 +11,51 @@ interface AvatarData {
   right_arm: string;
   left_leg: string;
   right_leg: string;
+  hat?: string | null;
+  eyes?: string | null;
+  face_accessories?: string | null;
+  facial_expression?: string | null;
+  upperwear?: string | null;
+  lowerwear?: string | null;
+  shoes?: string | null;
 }
 
-const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
+interface AvatarSkiaDisplayProps {
+  userID: number;
+  overrideHead?: string;
+  overrideBody?: string;
+  overrideLeftArm?: string;
+  overrideRightArm?: string;
+  overrideLeftLeg?: string;
+  overrideRightLeg?: string;
+  overrideHat?: string;
+  overrideEyes?: string;
+  overrideFaceAccessories?: string;
+  overrideFacialExpression?: string;
+  overrideUpperwear?: string;
+  overrideLowerwear?: string;
+  overrideShoes?: string;
+}
+
+
+
+const AvatarSkiaDisplay = ({ 
+  userID,
+  overrideHead,
+  overrideBody,
+  overrideLeftArm,
+  overrideRightArm,
+  overrideLeftLeg,
+  overrideRightLeg,
+  overrideHat,
+  overrideEyes,
+  overrideFaceAccessories,
+  overrideFacialExpression,
+  overrideUpperwear,
+  overrideLowerwear,
+  overrideShoes,
+
+  }: AvatarSkiaDisplayProps) => {
   const [avatarData, setAvatarData] = useState<AvatarData | null>(null); // Avatar data state
 
   // Fetch the avatar data from the server
@@ -57,15 +99,19 @@ const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
   const headCenterY = 115; // -10 + height / 2 => -10 + 125 = 115
 
   // Ensure useImage is called the same on every render (even when avatarData is null)
-  const headImage = useImage(avatarData?.head || "");
-  const bodyImage = useImage(avatarData?.body || "");
-  const leftArmImage = useImage(avatarData?.left_arm || "");
-  const rightArmImage = useImage(avatarData?.right_arm || "");
-  const leftLegImage = useImage(avatarData?.left_leg || "");
-  const rightLegImage = useImage(avatarData?.right_leg || "");
-  const hatImage = useImage(require("../../../assets/images/Avatar/hat2.png"))
-  const eyesImage = useImage(require("../../../assets/images/Avatar/eye2.png"))
-  const upperImage = useImage(require("../../../assets/images/Avatar/upper1.png"))
+  const headImage = useImage(overrideHead ?? avatarData?.head ?? "");
+  const bodyImage = useImage(overrideBody ?? avatarData?.body ?? "");
+  const leftArmImage = useImage(overrideLeftArm ?? avatarData?.left_arm ?? "");
+  const rightArmImage = useImage(overrideRightArm ?? avatarData?.right_arm ?? "");
+  const leftLegImage = useImage(overrideLeftLeg ?? avatarData?.left_leg ?? "");
+  const rightLegImage = useImage(overrideRightLeg ?? avatarData?.right_leg ?? "");
+  const hatImage = useImage(overrideHat ?? avatarData?.hat ?? "");
+  const eyesImage = useImage(overrideEyes ?? avatarData?.eyes ?? "");
+  const faceAccessoriesImage = useImage(overrideFaceAccessories ?? avatarData?.face_accessories ?? "");
+  const facialExpressionImage = useImage(overrideFacialExpression ?? avatarData?.facial_expression ?? "");
+  const upperwearImage = useImage(overrideUpperwear ?? avatarData?.upperwear ?? "");
+  const lowerwearImage = useImage(overrideLowerwear ?? avatarData?.lowerwear ?? "");
+  const shoesImage = useImage(overrideShoes ?? avatarData?.shoes ?? "");
 
   // Check if all images are loaded by ensuring they are not null
   const ready = headImage && bodyImage && leftArmImage && rightArmImage && leftLegImage && rightLegImage;
@@ -94,9 +140,10 @@ const AvatarSkiaDisplay = ({ userID }: { userID: number }) => {
         >
           <SkImage image={headImage} x={-5} y={-10} width={220} height={250} />
         </Group>
+
         <SkImage image={hatImage} x={-5} y={-10} width={220} height={250} />
         <SkImage image={eyesImage} x={-6.5} y={-12.5} width={220} height={250} />
-        <SkImage image={upperImage} x={-5} y={-11} width={220} height={250} />
+        <SkImage image={upperwearImage} x={-5} y={-11} width={220} height={250} />
       </Canvas>
     </View>
   );
