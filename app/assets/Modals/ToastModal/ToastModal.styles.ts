@@ -94,6 +94,19 @@ cancelButtonText: {
     textShadowOffset: { width: n(1), height: n(1) },
     textShadowRadius: n(1),
 },
+title: {
+    fontSize: n(24),
+    fontWeight: "bold",
+    color: "#fff",
+    textShadowColor: "#7A6B63",
+    textShadowOffset: { width: n(2), height: n(2) },
+    textShadowRadius: n(2),
+    marginBottom: n(10),
+    letterSpacing: 1,
+    textAlign: "center",
+    textTransform: "uppercase",
+    fontFamily: "sans-serif",
+},
 });
 
 export default styles;
