@@ -10,12 +10,6 @@ import { useState } from 'react';
 
 
 const Inventory: React.FC = () => {
-
-    /* NOTE TO DEV:
-        Implement fetching of items/furniture here    
-    */
-
-  
     
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [selectedItem, setSelectedItem] = useState<string | null>(null);

@@ -279,10 +279,12 @@ const fetchOwnedItems = async () => {
   const fetchRoomItems = async () => {
     try {
       // Example endpoint, adjust as needed
-      const response = await fetch('http://10.0.2.2:8000/api/room-items/');
+      const response = await fetch('http://192.168.1.5:8081/api/items/');
       if (!response.ok) throw new Error('Failed to fetch room items');
+      
       const data = await response.json();
-      setRoomItems(data);
+       const filteredRoomItems = data.filter((item:Item) => item.category === "Room");
+      setRoomItems(filteredRoomItems);
     } catch (error) {
       console.error('Error fetching room items:', error);
     }
@@ -559,20 +561,28 @@ const fetchOwnedItems = async () => {
                       <TouchableOpacity
                         style={[
                           styles.buyButton,
-                          ownedItemIds.includes(item.item_id) && { backgroundColor: '#ccc' }
+                          item.category === "Avatar" && ownedItemIds.includes(item.item_id) && { backgroundColor: '#ccc' }
                         ]}
-                        onPress={() => !ownedItemIds.includes(item.item_id) && handleBuyItem(item)}
-                        disabled={ownedItemIds.includes(item.item_id)}
-                        activeOpacity={ownedItemIds.includes(item.item_id) ? 1 : 0.7}
+                        onPress={() =>
+                          !(item.category === "Avatar" && ownedItemIds.includes(item.item_id)) &&
+                          handleBuyItem(item)
+                        }
+                        disabled={item.category === "Avatar" && ownedItemIds.includes(item.item_id)}
+                        activeOpacity={
+                          item.category === "Avatar" && ownedItemIds.includes(item.item_id) ? 1 : 0.7
+                        }
                       >
                         <View style={styles.priceContainer}>
                           <Text style={[
                             styles.buyButtonText,
-                            ownedItemIds.includes(item.item_id) && { color: '#888' }
+                            item.category === "Avatar" && ownedItemIds.includes(item.item_id) && { color: '#888' }
                           ]}>
-                            {ownedItemIds.includes(item.item_id) ? "Owned" : item.price}
+                            {item.category === "Avatar" && ownedItemIds.includes(item.item_id)
+                              ? "Owned"
+                              : item.price}
                           </Text>
-                          {!ownedItemIds.includes(item.item_id) && (
+                          {/* Show coin icon only if NOT an owned Avatar item */}
+                          {!(item.category === "Avatar" && ownedItemIds.includes(item.item_id)) && (
                             <Image source={IkicoinIcon} style={styles.coinIcon} />
                           )}
                         </View>

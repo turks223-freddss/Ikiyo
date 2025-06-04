@@ -29,26 +29,25 @@ const Grid: React.FC = () => {
   const baseCellSize = { width: screenWidth / 20, height: screenHeight / 10 };
   const gridSize = { width: 1, height: 1 };
   const gridDimensions = { width: screenWidth, height: screenHeight };
-  const [items, setItems] = useState(initialItems);
+
+  const [items, setItems] = useState<Item[]>(initialItems);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Set<number>>(new Set());
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [version, setVersion] = useState(0);
 
   const getCellSizeForItem = (item: Item) => {
-    const originalHeight = screenHeight;
     if (item.state === 'wall') {
-      const wallHeight = originalHeight * 0.6;
       return {
         width: baseCellSize.width,
-        height: wallHeight / 6,
+        height: (screenHeight * 0.6) / 6,
       };
     } else if (item.state === 'floor') {
-      const floorHeight = originalHeight * 0.4;
       return {
         width: baseCellSize.width,
-        height: floorHeight / 4,
+        height: (screenHeight * 0.4) / 4,
       };
     }
-
     return baseCellSize;
   };
 
@@ -59,16 +58,10 @@ const Grid: React.FC = () => {
     return { col, row };
   };
 
-  const gridCellToPosition = (cell: { col: number; row: number }, cellSize: { width: number; height: number }, state?: string) => {
-    const offsetY = state === 'floor' ? screenHeight * 0.6 : 0;
-    return { x: cell.col * cellSize.width, y: cell.row * cellSize.height + offsetY };
-  };
-
   const calculateOccupiedGridCells = (items: Item[], excludeId: number) => {
     const occupied: { col: number; row: number }[] = [];
     items.forEach(item => {
       if (item.id === excludeId) return;
-
       const cellSize = getCellSizeForItem(item);
       const { col: startCol, row: startRow } = positionToGridCell({ x: item.x, y: item.y }, cellSize, item.state);
 
@@ -82,28 +75,26 @@ const Grid: React.FC = () => {
   };
 
   const updateItemPosition = (id: number, newPosition: { x: number; y: number }) => {
-    setItems(items =>
-      items.map(item =>
+    setItems(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, x: newPosition.x, y: newPosition.y } : item
       )
     );
     setVersion(v => v + 1);
   };
 
-  useEffect(() => {
-    const addNewItem = (item: Item) => {
-      setItems(prevItems => [...prevItems, item]);
-      eventBus.emit("closeInventory");
-      setVersion(v => v + 1);
-    };
+  const deleteSelectedItems = () => {
+    setItems(prev => prev.filter(item => !selectedItem.has(item.id)));
+    setVersion(v => v + 1);
+  };
 
-    eventBus.on("newItem", addNewItem);
+  const selectedItemHandler = (id: number) => {
+    const newSet = new Set<number>();
+    newSet.add(id);
+    setSelectedItem(newSet);
+  };
 
-    return () => {
-      eventBus.off("newItem", addNewItem);
-    };
-  }, []);
-
+  // Inventory open/close
   useEffect(() => {
     const handleOpenInventory = () => setIsInventoryOpen(true);
     const handleCloseInventory = () => setIsInventoryOpen(false);
@@ -114,6 +105,40 @@ const Grid: React.FC = () => {
     return () => {
       eventBus.off("openInventory", handleOpenInventory);
       eventBus.off("closeInventory", handleCloseInventory);
+    };
+  }, []);
+
+  // Delete Button Toggle
+  useEffect(() => {
+    const toggleDeleteMode = () => {
+      setIsDeleteMode(prev => !prev);
+      setVersion(v => v + 1);
+    };
+
+    eventBus.on("deleteItem", toggleDeleteMode);
+    return () => {
+      eventBus.off("deleteItem", toggleDeleteMode)
+    };
+  }, []);
+
+  // Delete Item
+  useEffect(() => {
+    if (isDeleteMode && selectedItem.size > 0) {
+      deleteSelectedItems();
+    }
+  }, [selectedItem]);
+
+  // Add Item from Inventory
+  useEffect(() => {
+    const addNewItem = (item: Item) => {
+      setItems(prev => [...prev, item]);
+      setVersion(v => v + 1);
+      eventBus.emit("closeInventory");
+    };
+
+    eventBus.on("newItem", addNewItem);
+    return () =>{
+      eventBus.off("newItem", addNewItem)
     };
   }, []);
 
@@ -138,6 +163,8 @@ const Grid: React.FC = () => {
             onDrop={(newPos) => updateItemPosition(item.id, newPos)}
             occupiedGridCells={occupiedGridCells}
             allowOverlap={item.allowOverlap ?? false}
+            onSelect={() => isDeleteMode && selectedItemHandler(item.id)}
+            isDeleteMode={isDeleteMode}
           />
         );
       })}

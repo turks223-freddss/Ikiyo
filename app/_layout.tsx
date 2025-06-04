@@ -16,8 +16,8 @@ export default function RootLayout() {
     <MusicProvider>
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="loading" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="signup" options={{ headerShown: false }} />
+      <Stack.Screen name="LogInPage/login" options={{ headerShown: false }} />
+      <Stack.Screen name="SignUpPage/signup" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="(school_tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="community" options={{ headerShown: false }} />
