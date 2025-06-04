@@ -122,10 +122,10 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                         setSelectedTask(updated); // this is a new object ref
                       }
                     }
-                    else {
+                
+                } else {
                     setTaskList([]); // No tasks in response
-                    }
-                }
+              }
             } catch (error) {
                 console.error("Error fetching tasks:", error);
                 Alert.alert("Error", "Failed to load tasks. Please try again later.");
@@ -141,40 +141,54 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
       <Text style={styles.title}>Partner Journal</Text>
         <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
           <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
-            <FlatList
-              data={taskList}
-              keyExtractor={(item) => item.id.toString()}
-              contentContainerStyle={styles.taskList}
-              renderItem={({ item }) => (
-                <TaskCard
-                  questImage={require('../../../assets/images/homeIcons/task.png')}
-                  titleName={item.task_title}
-                  rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
-                  status={item.status}
-                  userID={user!.userID}
-                  task_id={item.id}
-                  reward={item.reward}
-                  isSelf={0}
+            <View style={{ flex: 1, justifyContent: 'space-between' }}>
+              <View style={{ flex: 1 }}>
+                {taskList.length === 0 ? (
+                  <View style={{ padding: 20, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+                    <Text style={{ color: '#888', fontSize: normalize(8), textAlign: 'center' }}>
+                      You have yet to assign tasks to your buddy!
+                    </Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    data={taskList}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.taskList}
+                    renderItem={({ item }) => (
+                      <TaskCard
+                        questImage={require('../../../assets/images/homeIcons/task.png')}
+                        titleName={item.task_title}
+                        rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                        status={item.status}
+                        userID={user!.userID}
+                        task_id={item.id}
+                        reward={item.reward}
+                        isSelf={0}
+                        onPress={() => {
+                          setSelectedTask(item);
+                          setIsEditing(false);
+                          setIsAddingTask(false);
+                        }}
+                      />
+                    )}
+                  />
+                )}
+              </View>
+              <View style={styles.addTaskWrapper}>
+                <TouchableOpacity
+                  style={styles.addTaskButton}
                   onPress={() => {
-                    setSelectedTask(item);
+                    setSelectedTask({...item});
                     setIsEditing(false);
                     setIsAddingTask(false);
+
                   }}
-                />
-              )}
-            />
-            <View style={styles.addTaskWrapper}>
-              <TouchableOpacity
-                style={styles.addTaskButton}
-                onPress={() => {
-                setSelectedTask(null);
-                setIsAddingTask(true);
-              }}
-            >
-              <Ionicons name="add" size={normalize(18)} color="#fff" />
-            </TouchableOpacity>
+                >
+                  <Ionicons name="add" size={normalize(10)} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
 
           <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
             {isAddingTask ? (
