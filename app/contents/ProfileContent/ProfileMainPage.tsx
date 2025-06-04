@@ -125,6 +125,32 @@ useEffect(() => {
   setEditedDescription(description || '');
 }, [username, description]);
 
+  const [partnerUsername, setPartnerUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPartnerUsername = async () => {
+      if (partner) {
+        try {
+          console.log('Fetching partner username for userID:', partner);
+          const response = await fetch('http://10.0.2.2:8000/api/user/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID: partner }),
+          });
+          const data = await response.json();
+          console.log('Partner fetch response:', data);
+          setPartnerUsername(data.username);
+        } catch (error) {
+          console.error('Error fetching partner username:', error);
+          setPartnerUsername(null);
+        }
+      } else {
+        setPartnerUsername(null);
+      }
+    };
+    fetchPartnerUsername();
+  }, [partner]);
+
   return (
     <View key ={refreshKey} style={styles.container}>
       {/* Left Side */}
@@ -202,7 +228,9 @@ useEffect(() => {
         {/* Additional Info */}
         <View style={dynamicStyles.additionalTexts}>
           <Text style={dynamicStyles.infoLabel}>Date joined: {dateJoined}</Text>
-          <Text style={dynamicStyles.infoLabel}>Partner: {partner}</Text>
+          <Text style={dynamicStyles.infoLabel}>
+            Partner: {partner && partnerUsername ? `${partnerUsername}#${partner}` : 'None'}
+          </Text>
           <Text style={dynamicStyles.infoLabel}>School: {school}</Text>
         </View>
 
