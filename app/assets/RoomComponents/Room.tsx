@@ -18,10 +18,10 @@ interface Item {
 }
 
 const initialItems: Item[] = [
-  { id: 1, x: screenWidth / 20 * 3, y: screenHeight / 10 * 4,   width: 1, height: 1 , state: 'floor', image: "https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
-  { id: 2, x: screenWidth / 20 * 4, y: screenHeight / 10 * 5,   width: 1, height: 1 , state: 'wall', image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
-  { id: 3, x: screenWidth / 20 * 5, y: screenHeight / 10 * 6,   width: 1, height: 1 ,image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
-  { id: 4, x: screenWidth / 20 * 6, y: screenHeight / 10 * 7,   width: 1, height: 1 , allowOverlap: true ,image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png"},
+  { id: 69, x: screenWidth / 20 * 3, y: screenHeight / 10 * 4,   width: 1, height: 1 , state: 'floor', image: "https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
+  { id: 65, x: screenWidth / 20 * 4, y: screenHeight / 10 * 5,   width: 1, height: 1 , state: 'wall', image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
+  { id: 63, x: screenWidth / 20 * 5, y: screenHeight / 10 * 6,   width: 1, height: 1 ,image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
+  { id: 66, x: screenWidth / 20 * 6, y: screenHeight / 10 * 7,   width: 1, height: 1 , allowOverlap: true ,image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png"},
 ];
 
 const Grid: React.FC = () => {
