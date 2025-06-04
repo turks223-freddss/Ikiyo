@@ -6,6 +6,7 @@ import {
   PanResponder,
   StyleSheet,
   View,
+  Pressable,
 } from 'react-native';
 
 interface DraggableProps {
@@ -19,6 +20,8 @@ interface DraggableProps {
   onDrop: (position: { x: number; y: number }) => void;
   occupiedGridCells: { col: number; row: number }[];
   allowOverlap: boolean;
+  isDeleteMode?: boolean;
+  onSelect?: () => void;
 }
 
 const Draggable: React.FC<DraggableProps> = ({
@@ -31,7 +34,9 @@ const Draggable: React.FC<DraggableProps> = ({
   state,
   onDrop,
   occupiedGridCells,
-  allowOverlap
+  allowOverlap,
+  isDeleteMode,
+  onSelect,
 }) => {
   const position = useRef(new Animated.ValueXY(currentPosition)).current;
   const [draggingPos, setDraggingPos] = useState<{ x: number; y: number } | null>(null);
@@ -133,22 +138,45 @@ const Draggable: React.FC<DraggableProps> = ({
   ).current;
 
   return (
-    <>
-      {draggingPos && (
-        <View
-          pointerEvents="none"
+  <>
+    {draggingPos && (
+      <View
+        pointerEvents="none"
+        style={[
+          styles.snapHighlight,
+          {
+            width: cellSize.width * itemDimensions.width,
+            height: cellSize.height * itemDimensions.height,
+            left: draggingPos.x,
+            top: draggingPos.y,
+            position: 'absolute',
+          },
+        ]}
+      />
+    )}
+    {isDeleteMode ? (
+      <Animated.View style={[position.getLayout(), styles.draggable]}>
+        <Pressable
+          onPress={() => {
+            if (isDeleteMode && onSelect) onSelect();
+          }}
           style={[
-            styles.snapHighlight,
             {
               width: cellSize.width * itemDimensions.width,
               height: cellSize.height * itemDimensions.height,
-              left: draggingPos.x,
-              top: draggingPos.y,
-              position: 'absolute',
-            },
+            }
           ]}
-        />
-      )}
+        >
+          <Image
+            source={imageSource}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </Pressable>
+      </Animated.View>
+    ) : (
       <Animated.View {...panResponder.panHandlers} style={[position.getLayout(), styles.draggable]}>
         <Image
           source={imageSource}
@@ -158,8 +186,9 @@ const Draggable: React.FC<DraggableProps> = ({
           }}
         />
       </Animated.View>
-    </>
-  );
+    )}
+  </>
+);
 };
 
 const styles = StyleSheet.create({
@@ -172,6 +201,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 150, 255, 0.7)',
     borderRadius: 4,
   },
+  selectedOutline: {
+  borderWidth: 2,
+  borderColor: 'red',
+  borderRadius: 4,
+},
 });
 
 export default Draggable;
