@@ -18,6 +18,7 @@ import {
     PixelRatio,
     useWindowDimensions,
     Image,
+    Task,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -115,7 +116,13 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 const data = await response.json();
                 if (data && data.tasks_assigned_by_user) {
                     setTaskList(data.tasks_assigned_by_user);
-                } else {
+                    if (selectedTask) {
+                      const updated = data.tasks_assigned_by_user.find((t:TaskData) => t.id === selectedTask.id);
+                      if (updated) {
+                        setSelectedTask(updated); // this is a new object ref
+                      }
+                    }
+                    } else {
                     setTaskList([]); // No tasks in response
                 }
             } catch (error) {
@@ -128,8 +135,8 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     }, [user, reloadTrigger]);
 
   return (
-    <View style={styles.container}>
-
+    <View key={componentReloadKey} style={styles.container}>
+  
       <Text style={styles.title}>Partner Journal</Text>
         <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
           <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
@@ -170,8 +177,9 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 <TouchableOpacity
                   style={styles.addTaskButton}
                   onPress={() => {
-                    setSelectedTask(null);
-                    setIsAddingTask(true);
+                    setSelectedTask({...item});
+                    setIsEditing(false);
+                    setIsAddingTask(false);
                   }}
                 >
                   <Ionicons name="add" size={normalize(10)} color="#fff" />
