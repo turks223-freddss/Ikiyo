@@ -402,7 +402,8 @@ const fetchOwnedItems = async () => {
                 onPress={() => {
                   if (item) {
                     setActiveItemId(item.item_id); // Set the clicked item as active
-                    console.log(`Pressed ${item.name}`);
+                    {console.log('Item:', item)}
+                    console.log(`Pressed ${item.store_image}`);
                     setAvatarPreview((prev) => ({
                       ...prev,
                       [item.part]: item.avatar_image,
@@ -413,8 +414,8 @@ const fetchOwnedItems = async () => {
               >
                 {item ? (
                   <>
-                    <Text style={styles.itemText}>{item.name}</Text>
-                    <Image source={item.store_image } style={styles.itemImage} />
+                    <Text style={styles.itemText}>{item.item_name}</Text>
+                    <Image source={{ uri: item.store_image } } style={styles.itemImage} />
                     <TouchableOpacity
                       style={[
                         styles.buyButton,
