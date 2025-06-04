@@ -15,7 +15,7 @@ const RoomMainPage = () => {
   */
 
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-   useEffect(() => {
+    useEffect(() => {
     const handleOpenInventory = () => {
       setIsInventoryOpen(true);
     };
@@ -41,49 +41,25 @@ const RoomMainPage = () => {
           { !isInventoryOpen && (
           <FeatureButton
               style={styles.button}
-              onPress={() => router.push("/school")}
+              onPress={() => router.push("/HomePage/school")}
               icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
               size={normalize(20)}
             />
           )}
         </View>
         <View style={styles.toolBar}>
+          { isInventoryOpen && (
+            <FeatureButton
+              style={styles.button}
+              onPress={() => eventBus.emit("closeInventory")}
+              icon={<Ionicons name="arrow-back" size={normalize(10)} color="black" />}
+              size={normalize(20)}
+            />
+          )}
           { !isInventoryOpen && (
             <FeatureButton
               style={styles.button}
               onPress={() => eventBus.emit("openInventory")}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
-          )}
-          { !isInventoryOpen && (
-            <FeatureButton
-                style={styles.button}
-                onPress={() => console.log('yes')}
-                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-                size={normalize(20)}
-              />
-          )}
-          { !isInventoryOpen && (
-            <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
-          )}
-          { !isInventoryOpen && (
-            <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-            />
-          )}
-          { !isInventoryOpen && (
-          <FeatureButton
-              style={styles.button}
-              onPress={() => console.log('yes')}
               icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
               size={normalize(20)}
             />

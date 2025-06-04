@@ -1,15 +1,25 @@
-import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 import FeatureButton from '../FeatureButton'
 import { Ionicons } from "@expo/vector-icons";
 import { normalize } from '../../../assets/normalize';
 import eventBus from '../utils/eventBus';
 
+import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../../assets/images/shopIcons";
+import { useState } from 'react';
+
+
 const Inventory: React.FC = () => {
 
     /* NOTE TO DEV:
         Implement fetching of items/furniture here    
     */
+
+  
+    
+  const [selectedFilter, setSelectedFilter] = useState<string>('All');
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const items = [
     { id: 5, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 2}},
@@ -22,26 +32,50 @@ const Inventory: React.FC = () => {
     { id: 12, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
     
   ]
+  const remainder = items.length % 3;
+  const placeholdersCount = remainder === 0 ? 0 : 3 - remainder;
+
+  const placeholders = new Array(placeholdersCount).fill(null);
+  const filters = [
+    { label: 'All', icon: HatsIcon},
+    { label: 'Hats', icon: HatsIcon },
+    { label: 'Eyes', icon: EyesIcon },
+    { label: 'Face Accessories', icon: FaceAccIcon },
+    { label: 'Face Expression', icon: FaceExIcon },
+    { label: 'Upper', icon: UpperIcon },
+    { label: 'Lower', icon: LowerIcon },
+    { label: 'Shoes', icon: ShoesIcon },
+  ];
   
   return (
     <View style={styles.inventory}>
-        <Image source={require('../../../assets/images/jobee_2.jpg')}  style={styles.view}/>
-        <FeatureButton
-            style={styles.button}
-            onPress={() => eventBus.emit("closeInventory")}
-            icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-            size={normalize(20)}
-        />
-        <View style={styles.grid}>
-        {items.map((item) => (
-          <FeatureButton
-              style={styles.item}
-              onPress={() => eventBus.emit("newItem", item)}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-              size={normalize(20)}
-          />
-          ))}
+      <View style={styles.filter}>
+        <View style={styles.outerBorder}>
+        <View style={styles.secondBorder}>
+        <View style={styles.thirdBorder}>
+        <View style={styles.filterBox}>
         </View>
+        </View>
+        </View>
+        </View>
+        {/* You can put anything here: nav, icons, tabs, etc. */}
+      </View>
+      <View style={styles.view}>
+          
+          <View style={styles.grid}>
+          {items.map((item) => (
+            <FeatureButton
+                style={styles.item}
+                onPress={() => eventBus.emit("newItem", item)}
+                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+                size={normalize(20)}
+            />
+            ))}
+            {placeholders.map((_, index) => (
+              <View key={`placeholder-${index}`} style={[styles.item, styles.placeholder]} />
+            ))}
+          </View>
+      </View>
     </View>
   );
 };
@@ -49,15 +83,24 @@ const Inventory: React.FC = () => {
 const styles = StyleSheet.create({
   inventory: {
     zIndex: 10,
+    flexDirection: 'row',
     position: 'absolute',
+    marginLeft: '5%',
     width: '100%',
     height: '100%',
   },
-
+  placeholder:{opacity:0},
+  filter: {
+    width: '25%',
+    height: '80%',
+    marginTop: '15%',
+    backgroundColor: 'rgba(255, 200, 200, 0.8)', // example color
+  },
   view: { 
-    position: 'absolute',
-    height: '100%',
-    width: '100%'
+    marginTop: '15%',
+    height: '80%',
+    width: '90%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 
   grid: {
@@ -69,8 +112,8 @@ const styles = StyleSheet.create({
 
   item: {
     position: 'relative',
-    width: '40%', // adjust based on number of columns
-    aspectRatio: 1,
+    width: '30%', // adjust based on number of columns
+    height: '30%',
     margin: '1.5%',
     backgroundColor: '#ccc',
     top: 0,
@@ -79,7 +122,43 @@ const styles = StyleSheet.create({
 
   button: {
     position: 'relative',
-    margin: 20
+    margin: '-90%',
+  },
+  outerBorder: {
+    height: '100%',
+    borderWidth: normalize(1.7),
+    borderColor: '#6b6463',
+    backgroundColor: '#6b6463',
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    zIndex:1,
+  },
+  secondBorder: {
+    flex: 1,
+    borderWidth: normalize(1),
+    borderColor: "#a78e63",
+    backgroundColor: "#a78e63",
+  },
+  thirdBorder: {
+    flex: 1,
+    borderWidth: normalize(1.5),
+    borderColor: "#8f7549",
+    borderRadius: normalize(1.5),
+  },
+  filterBox: {
+    flex: 1,
+    backgroundColor: '#d2a679',
+    borderWidth: normalize(1),
+    borderColor: '#6b6463',
+    paddingVertical: normalize(4),
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
 });
 
