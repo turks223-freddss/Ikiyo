@@ -285,12 +285,11 @@ const AvatarScreen = () => {
           </View>
           <View style={{
             width: normalize(90),
-            height: normalize(90),
+            height: "110%",
             maxWidth: '100%',
-            maxHeight: '100%',
+            maxHeight: '105%',
             overflow: 'hidden',
             alignItems: 'center',
-            justifyContent: 'center',
           }}>
           <AvatarDisplay
             userID={userID!}
@@ -302,14 +301,6 @@ const AvatarScreen = () => {
             overrideLowerwear={previewedItem?.part === "Lowerwear" ? previewedItem.avatar_image : undefined}
             overrideShoes={previewedItem?.part === "Shoes" ? previewedItem.avatar_image : undefined}
           />
-          {showSaveButton && previewedItem && (
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={() => handleEquip(previewedItem)}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-          )}
           </View>
         </View>
       </View>
@@ -499,8 +490,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: normalize(4),
     width: '100%',
+    marginTop: normalize(5),
     gap: normalize(5),
   },
 });
