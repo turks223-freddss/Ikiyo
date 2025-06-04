@@ -378,7 +378,7 @@ export default function Home() {
           tab2={<MyJournal userData = {userData} openPartnerProfile={openPartnerProfile} />}
           tab2icon={EditTaskIcon}
           
-          tab3={<PartnerJournal/>}
+          tab3={<PartnerJournal userData = {userData} openPartnerProfile={openPartnerProfile}/>}
           tab3icon={PartnerTaskIcon}
           
           >
