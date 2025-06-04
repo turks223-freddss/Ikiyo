@@ -201,17 +201,7 @@ export default function Home() {
           visible={true} 
           onClose={() => toggleOverlay("overlayfriend")}
           tabs={2}
-          tab1={
-            view === 'friendlist' 
-              ? <FriendList onOpenChat={(userID: string) => {
-                  setSelectedUserID(userID);
-                  setView('chat');
-                }} />
-              : <ChatScreen 
-                  onBack={() => setView('friendlist')} 
-                  userID={selectedUserID ?? ""} 
-                />
-          }
+          tab1={<FriendRequest userID={321}/>}
           tab1icon={FriendListIcon}
           tab2={<FriendRequest userID={321}/>}
           tab2icon={FriendRequestIcon}

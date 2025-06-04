@@ -80,7 +80,7 @@ export default function SignupScreen() {
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={() => router.push("/login")}
+            onPress={() => router.push("/LogInPage/login")}
           >
             <Text style={[styles.buttonText, styles.secondaryButtonText]}>
               Log In

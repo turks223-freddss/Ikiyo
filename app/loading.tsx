@@ -7,7 +7,7 @@ export default function LoadingScreen() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/login"); // ✅ Redirects to login after 2 seconds
+      router.replace("/LogInPage/login"); // ✅ Redirects to login after 2 seconds
     }, 5000);
   }, []);
 
