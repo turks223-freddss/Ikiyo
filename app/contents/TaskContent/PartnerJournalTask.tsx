@@ -65,6 +65,11 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     const [reloadTrigger, setReloadTrigger] = useState(false);
     const { width } = useWindowDimensions();
     const isSmallScreen = width < 600;
+    const [componentReloadKey, setComponentReloadKey] = useState(0);
+
+    const forceRemountTaskDetail = () => {
+      setComponentReloadKey(prev => prev + 1); // forces remount
+    };
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -204,13 +209,17 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
           ) : (
             selectedTask && (
               <TaskDetailPT
+                key={componentReloadKey}
                 selectedTask={selectedTask}
                 isEditing={isEditing}
                 submissionText={submissionText}
                 userID={user!.userID}
                 setIsEditing={setIsEditing}
                 setSubmissionText={setSubmissionText}
-                triggerReload={() => setReloadTrigger(prev => !prev)} // 👈 Pass this
+                triggerReload={() => {
+                  setReloadTrigger(prev => !prev); // refetch
+                  forceRemountTaskDetail();        // force re-render
+                }}
                 clearSelectedTask={() => setSelectedTask(null)}
               />
             )
