@@ -115,12 +115,14 @@ export default function Home() {
         // Listen for buddyUpdate event to refresh user data
         eventBus.on("buddyUpdate", fetchUserData);
         eventBus.on("UserUpdate",fetchUserData);
+        eventBus.on("goldUpdate",fetchUserData)
         eventBus.on("refreshHome", refreshWholeScreen); // ⬅️ Add this line
 
         // Cleanup listener on unmount or when user changes
         return () => {
           eventBus.off("buddyUpdate", fetchUserData);
           eventBus.off("UserUpdate",fetchUserData);
+          eventBus.off("goldUpdate",fetchUserData)
           eventBus.off("refreshHome", refreshWholeScreen); // ⬅️ Add this line
   };
         
@@ -218,6 +220,7 @@ export default function Home() {
   console.log("buddy:",userData?.buddy)
   console.log("username:",userData?.username)
   console.log("description:",userData?.description)
+  console.log("gold",userData?.gold )
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
