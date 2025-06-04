@@ -4,10 +4,11 @@ import MapCard from "../assets/mapcard";
 import { FriendListIcon } from "../../assets/images/friendlistIcons";
 import { StyleSheet } from "react-native";
 import { normalize } from '../../assets/normalize';
+import { router } from "expo-router"; // Add this import
 
 
 interface MapsContentProps {
-  location: string; // current location key, e.g., "home", "school"
+  location: string; 
 }
 
 const maps = [
@@ -32,7 +33,7 @@ const maps = [
 ];
 
 export default function MapsContent({ location }: MapsContentProps) {
-  const [selectedMap, setSelectedMap] = useState<string>(location); // default to current location
+  const [selectedMap, setSelectedMap] = useState<string>(location);
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
@@ -47,11 +48,16 @@ export default function MapsContent({ location }: MapsContentProps) {
             icon={item.icon}
             image={item.image}
             isLocked={item.key === "comingSoon"}
-            isSelected={item.key === location} // highlight current location
+            isSelected={item.key === location}
             onPress={() => {
               if (item.key !== "comingSoon") {
                 setSelectedMap(item.key);
-                // Optional: trigger callback or navigation
+                if (item.key === "home") {
+                  router.push("/"); // Go to root
+                } else if (item.key === "school") {
+                  router.push("/(school_tabs)/HomePage/school"); // Go to school route
+                }
+                // Add more routes as needed
               } else {
                 alert("Coming Soon!");
               }

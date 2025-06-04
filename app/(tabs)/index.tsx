@@ -10,7 +10,7 @@ import EventsContent from "../assets/Events"
 import AdContent from "../contents/AdContent"; 
 import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
 import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
-import { SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons"
+import { SettingsIcon, PartnerProfileIcon, ProfileIcon } from "../../assets/images/ProfileIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
 import MyJournal from "../contents/TaskContent/MyJournalTask/MyJournalTask";
 import PartnerJournal from "../contents/TaskContent/PartnerJournalTask"
@@ -25,6 +25,8 @@ import ChatScreen from "../contents/Friends/chat";
 import { normalize } from '../../assets/normalize';
 import RewardPopup from '../assets/Modals/RewardModal/Reward';
 import ToastModal from "../assets/Modals/ToastModal/ToastModal";
+import { FriendRequestIcon } from "@/assets/images/friendlistIcons";
+import MapsContent from "../contents/MapsContent";
 
 interface UserData {
   userID: number;
@@ -56,6 +58,7 @@ export default function Home() {
       overlayfriend: false,
       overlaytask: false,
       overlayprofile: false,
+      overlaymaps: false,
     });
 
   const openPartnerProfile = () => {
@@ -282,7 +285,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => router.push("../maps")}
+                onPress={() => toggleOverlay("overlaymaps")}
                 icon={<Image source={MapsIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
                 size={normalize(20)}
               />
@@ -405,9 +408,9 @@ export default function Home() {
                   friendID={selectedUserID ?? 0} 
                 />
           }
-          tab1icon={AvatarIcon}
+          tab1icon={FriendlistIcon}
           tab2={<FriendRequest userID={user?.userID}/>}
-          tab2icon={AvatarIcon}
+          tab2icon={FriendRequestIcon}
           >
           </OverlayWindow>
         )}
@@ -425,20 +428,27 @@ export default function Home() {
           description={userData?.description ?? ""}
           partner={userData?.buddy ?? undefined}
           >
-          
-
+      
           </MainProfile>}
-          tab1icon={AvatarIcon}
-         
+          tab1icon={ProfileIcon}
           tab2={<PartnerProfile id={userData!.userID}
           partner_id={userData?.buddy ?? undefined}/>}
           tab2icon={PartnerProfileIcon}
-         
           tab3={<Settings/>}
           tab3icon={SettingsIcon}
-       
           >
           </OverlayWindow>
+        )}
+
+        {overlays.overlaymaps && (
+        <OverlayWindow
+          visible={true}
+          onClose={() => toggleOverlay("overlaymaps")}
+          tabs={1}
+          tab1={<MapsContent location="home" />}
+          width={normalize(200)}    // optional custom width
+          height={normalize(150)}   // optional custom height
+        />
         )}
         
 
