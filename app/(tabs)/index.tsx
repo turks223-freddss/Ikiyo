@@ -23,6 +23,7 @@ import FriendList from "../contents/Friends/friendlist";
 import FriendRequest from "../contents/Friends/friendrequest"
 import ChatScreen from "../contents/Friends/chat";
 import { normalize } from '../../assets/normalize';
+import RewardPopup from '../assets/Modals/RewardModal/Reward';
 
 
 interface UserData {
@@ -123,7 +124,13 @@ export default function Home() {
       [name]: !prevOverlays[name],
     }));
   };
-
+  const [rewardVisible, setRewardVisible] = useState(false);
+  const [rewardAmount, setRewardAmount] = useState(30); // or any amount you want
+  
+  const handleShowReward = () => {
+    setRewardAmount(30); // set the reward amount as needed
+    setRewardVisible(true);
+  };
   // Function to close the overlay
   const closeOverlay = (name: string) => {
     setOverlays((prevOverlays) => ({
@@ -272,7 +279,7 @@ export default function Home() {
 
             <View style={styles.buttonRow}>
               <FeatureButton
-                onPress={() => toggleOverlay("overlayad")} // Trigger overlay toggle
+                onPress={handleShowReward} // Trigger overlay toggle
                 icon={<Ionicons name="cart-outline" size={normalize(10)} color="black" />}
                 size={normalize(20)}
               />
@@ -306,7 +313,15 @@ export default function Home() {
             </View>
           </View>
         </View>
-
+        <RewardPopup
+          visible={rewardVisible}
+          onClose={() => setRewardVisible(false)}
+          onGet={() => {
+            // handle reward claim logic here
+            setRewardVisible(false);
+          }}
+          rewardAmount={rewardAmount}
+        />
         {/* Overlay Logic */}
         {overlays.overlayad && (
           <OverlayWindow 
@@ -340,7 +355,7 @@ export default function Home() {
           
           tab3={<PartnerJournal/>}
           tab3icon={PartnerTaskIcon}
-         
+          
           >
           </OverlayWindow>
         )}
