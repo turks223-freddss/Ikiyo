@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     },
     title: {
-    fontSize: normalize(14),
+    fontSize: normalize(6),
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
