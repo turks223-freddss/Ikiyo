@@ -5,11 +5,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Sign, LoginWallpaper } from "../../assets/images/authentication";
 import { normalize } from "../../assets/normalize";
 import styles from "./Login.styles";
+import ToastModal from "../assets/Modals/ToastModal/ToastModal"; // Adjust path if needed
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -19,23 +24,22 @@ export default function LoginScreen() {
         body: JSON.stringify({ email, password }),
       });
 
-       // Log the raw response to see the body
       const responseText = await response.text();
       console.log("Response Text:", responseText);
 
-      const data = JSON.parse(responseText); // Now parse the response text
-
+      const data = JSON.parse(responseText);
 
       if (response.ok) {
-        await AsyncStorage.setItem("user", JSON.stringify(data.user)); // Save user data
-        Alert.alert("Success", "Login successful");
-        router.replace("/"); // Navigate to home
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        router.replace("/");
       } else {
-        Alert.alert("Error", data.error || "Invalid credentials");
+        setToastMessage(data.error || "Invalid credentials");
+        setToastVisible(true);
       }
     } catch (error) {
-      console.error(error); // Log the error message
-      Alert.alert("Error", "Could not connect to server");
+      console.error(error);
+      setToastMessage("Could not connect to server");
+      setToastVisible(true);
     }
   };
 
@@ -45,9 +49,8 @@ export default function LoginScreen() {
         <View style={styles.centerContent}>
           <ImageBackground source={Sign} style={styles.signboard} resizeMode="contain">
             <View style={styles.arrange}>
-                <Text style={styles.title}>Welcome to iKiyo</Text>
-
-                <TextInput
+              <Text style={styles.title}>Welcome to iKiyo</Text>
+              <TextInput
                 style={styles.input}
                 placeholder="Email"
                 placeholderTextColor="#5a3e2b"
@@ -55,32 +58,45 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                />
-
+              />
+              <View style= {styles.inputcontainer}>
                 <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#5a3e2b"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
+                  style={styles.passwordinput}
+                  placeholder="Password"
+                  placeholderTextColor="#5a3e2b"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
                 />
-
-                <View style={styles.buttonRow}>
+                <TouchableOpacity 
+                style={styles.sauron}
+                onPress={() => setShowPassword((prev) => !prev)}
+                >
+                  <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#5a3e2b" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                    <Text style={styles.buttonText}>Log In</Text>
+                  <Text style={styles.buttonText}>Log In</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.button, styles.secondaryButton]}
-                    onPress={() => router.push("/SignUpPage/signup")}
+                  style={[styles.button, styles.secondaryButton]}
+                  onPress={() => router.push("/SignUpPage/signup")}
                 >
-                    <Text style={[styles.buttonText, styles.secondaryButtonText]}>Sign Up</Text>
+                  <Text style={[styles.buttonText, styles.secondaryButtonText]}>Sign Up</Text>
                 </TouchableOpacity>
-                </View>
+              </View>
             </View>
           </ImageBackground>
         </View>
       </ImageBackground>
+      <ToastModal
+        visible={toastVisible}
+        message={toastMessage}
+        onConfirm={() => setToastVisible(false)}
+        confirmText="OK"
+        title="Error"
+      />
     </View>
   );
 }

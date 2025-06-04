@@ -37,6 +37,18 @@ title: {
     fontFamily: "serif",
     marginBottom: normalize(1),
 },
+inputcontainer:{
+    width: "55%",
+    height: normalize(15),
+    marginBottom: normalize(4),
+},
+sauron:{
+    position: "absolute", 
+    right: 10, 
+    top: 0, 
+    height: "100%", 
+    justifyContent: "center" 
+},
 input: {
     width: "55%",
     height: normalize(15),
@@ -49,6 +61,19 @@ input: {
     color: "#3e2a1e",
     fontSize: normalize(6),
 },
+passwordinput: {
+    width: "100%",
+    height: normalize(15),
+    borderColor: "#7c5a3a",
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    marginBottom: normalize(4),
+    backgroundColor: "#fff8f0",
+    color: "#3e2a1e",
+    fontSize: normalize(6),
+},
+
 buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",

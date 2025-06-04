@@ -12,6 +12,7 @@ import {
 import { HeartIcon } from "../../../assets/images/homeIcons";
 import AvatarSkiaDisplay from '../../assets/avatar/avatarComponent';
 import eventBus from "../../assets/utils/eventBus"
+import ToastModal from '../../assets/Modals/ToastModal/ToastModal';
 
 interface ProfilePageProps {
   userid: number;
@@ -39,6 +40,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   variant = 1, 
 }) => {
   const { width } = useWindowDimensions();
+  const [showRemovePartnerToast, setShowRemovePartnerToast] = useState(false);
 
   const normalize = (size: number) => {
     const scale = width / 375;
@@ -165,20 +167,19 @@ useEffect(() => {
             style={variant === 2 ? dynamicStyles.deleteButton : dynamicStyles.editButton}
             onPress={async () => {
               if (variant === 1) {
-                 if (isEditing) {
+                if (isEditing) {
                     await handleSave();
                     refresh();
                   } else {
                     setIsEditing(true);
                   }
               } else {
-                handleDelete();
-                console.log('Delete button pressed');
+                setShowRemovePartnerToast(true);
               }
             }}
           >
             <Text style={dynamicStyles.editButtonText}>
-              {variant === 1 ? (isEditing ? 'Save' : 'Edit') : 'Delete'}
+              {variant === 1 ? (isEditing ? 'Save' : 'Edit') : 'Remove'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -208,6 +209,18 @@ useEffect(() => {
         {/* Edit Button */}
         
       </View>
+      <ToastModal
+        visible={showRemovePartnerToast}
+        title="Remove partner?"
+        message="This action will remove all related partner information including tasks"
+        confirmText="Remove"
+        cancelText="Cancel"
+        onCancel={() => setShowRemovePartnerToast(false)}
+        onConfirm={async () => {
+          setShowRemovePartnerToast(false);
+          await handleDelete();
+        }}
+      />
     </View>
   );
 };
