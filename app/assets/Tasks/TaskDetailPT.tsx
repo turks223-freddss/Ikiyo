@@ -106,13 +106,21 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       });
       console.log(editedTask.image)
       const data = await response.json();
-      if (data.success) {
+      if (response.ok) {
         Alert.alert("Success", "Task updated successfully!");
+        setIsEditing(false);
+        setRemovedAttachment(false);
+        triggerReload();
+        setEditedTask({
+          task_title: selectedTask.task_title || '',
+          task_description: selectedTask.task_description || '',
+          difficulty_level: 'Easy',
+          image: selectedTask.attachment || null,
+        });
       } else {
         Alert.alert("Error", "Failed to update task.");
       }
-      setIsEditing(false);
-      triggerReload();
+
     } catch (error) {
       console.error("Error updating task:", error);
       Alert.alert("Error", "Failed to update task. Please try again later.");
@@ -310,12 +318,14 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                     <Text style={styles.buttonText}>Edit</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: '#f44336' }]}
-                    onPress={() => handledelete()}
-                  >
-                    <Text style={styles.buttonText}>Delete</Text>
-                  </TouchableOpacity>
+                  {selectedTask.status !== 'completed' && (
+                    <TouchableOpacity
+                      style={[styles.button, { backgroundColor: '#f44336' }]}
+                      onPress={() => handledelete()}
+                    >
+                      <Text style={styles.buttonText}>Delete</Text>
+                    </TouchableOpacity>
+                  )}
                   {selectedTask.submission && selectedTask.submission.trim() !== '' && (
                       <TouchableOpacity
                         style={[styles.button, { backgroundColor: '#3F51B5' }]}
