@@ -1,8 +1,8 @@
 import { View, Text, Button, StyleSheet, TextInput, Alert,ImageBackground,TouchableOpacity, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { SignupSign, LoginWallpaper } from "../assets/images/authentication";
-import { normalize } from "../assets/normalize";
+import { SignupSign, LoginWallpaper } from "../../assets/images/authentication";
+import styles from "./SignUp.styles"; 
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function SignupScreen() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://192.168.1.5:8081/api/users/", {
+      const response = await fetch("http://10.0.2.2:8000/api/users/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,89 +124,3 @@ export default function SignupScreen() {
     </View>
   );
 }
-const { width, height } = Dimensions.get('window');
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex:1,
-    resizeMode: 'cover',
-    width: width,
-    zIndex: -1,
-    height: height,
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: "8%",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  signboard: {
-    width: normalize(250),
-    height: normalize(400),
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  title: {
-    fontSize: normalize(10),
-    fontWeight: "bold",
-    color: "#4a2f1b",
-    textAlign: "center",
-    fontFamily: "serif",
-    marginBottom: normalize(1),
-  },
-  input: {
-    width: "55%",
-    height: normalize(15),
-    borderColor: "#7c5a3a",
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    marginBottom: normalize(4),
-    backgroundColor: "#fff8f0",
-    color: "#3e2a1e",
-    fontSize: normalize(6),
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "25%",
-    marginTop: normalize(2),
-  },
-  button: {
-    flex: 1,
-    backgroundColor: "#a86e3b",
-    paddingVertical: normalize(4),
-    borderRadius: 6,
-    alignItems: "center",
-    marginHorizontal: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 1, height: 1 },
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: normalize(6),
-    fontFamily: "serif",
-  },
-  secondaryButton: {
-    backgroundColor: "#fff8f0",
-    borderWidth: 1,
-    borderColor: "#a86e3b",
-  },
-  secondaryButtonText: {
-    color: "#a86e3b",
-  },
-  arrange:{
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: normalize(28),
-  }
-});

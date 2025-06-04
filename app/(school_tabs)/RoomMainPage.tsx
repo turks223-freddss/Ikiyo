@@ -41,7 +41,7 @@ const RoomMainPage = () => {
           { !isInventoryOpen && (
           <FeatureButton
               style={styles.button}
-              onPress={() => router.push("/school")}
+              onPress={() => router.push("/HomePage/school")}
               icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
               size={normalize(20)}
             />
