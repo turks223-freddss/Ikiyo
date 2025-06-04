@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 
 interface DraggableProps {
-  imageSource: ImageSourcePropType;
+  imageSource: string;
   currentPosition: { x: number; y: number };
   cellSize: { width: number; height: number };
   gridSize: { width: number; height: number };
-  itemDimensions: { width: number; height: number };
+  width:number;
+  height:number;
   gridDimensions: { width: number; height: number };
   state: string;
   onDrop: (position: { x: number; y: number }) => void;
@@ -29,7 +30,8 @@ const Draggable: React.FC<DraggableProps> = ({
   currentPosition,
   cellSize,
   gridSize,
-  itemDimensions,
+  width,
+  height,
   gridDimensions,
   state,
   onDrop,
@@ -49,8 +51,8 @@ const Draggable: React.FC<DraggableProps> = ({
 
   const isGridCellOccupied = (startCol: number, startRow: number): boolean => {
     if (allowOverlap) return false;
-    for (let dx = 0; dx < itemDimensions.width; dx++) {
-      for (let dy = 0; dy < itemDimensions.height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      for (let dy = 0; dy <height; dy++) {
         const col = startCol + dx;
         const row = startRow + dy;
         if (occupiedGridCells.some(cell => cell.col === col && cell.row === row)) {
@@ -76,10 +78,10 @@ const Draggable: React.FC<DraggableProps> = ({
         const row = Math.round((moveY - offsetY) / cellSize.height);
 
         const maxCol = Math.floor(
-          (gridDimensions.width - itemDimensions.width * cellSize.width) / cellSize.width
+          (gridDimensions.width - width * cellSize.width) / cellSize.width
         );
         const maxRow = Math.floor(
-          (gridDimensions.height - offsetY - itemDimensions.height * cellSize.height) /
+          (gridDimensions.height - offsetY - height * cellSize.height) /
             cellSize.height
         );
 
@@ -107,10 +109,10 @@ const Draggable: React.FC<DraggableProps> = ({
         const row = Math.round((moveY - offsetY) / cellSize.height);
 
         const maxCol = Math.floor(
-          (gridDimensions.width - itemDimensions.width * cellSize.width) / cellSize.width
+          (gridDimensions.width - width * cellSize.width) / cellSize.width
         );
         const maxRow = Math.floor(
-          (gridDimensions.height - offsetY - itemDimensions.height * cellSize.height) /
+          (gridDimensions.height - offsetY - height * cellSize.height) /
             cellSize.height
         );
 
@@ -145,8 +147,8 @@ const Draggable: React.FC<DraggableProps> = ({
         style={[
           styles.snapHighlight,
           {
-            width: cellSize.width * itemDimensions.width,
-            height: cellSize.height * itemDimensions.height,
+            width: cellSize.width * width,
+            height: cellSize.height * height,
             left: draggingPos.x,
             top: draggingPos.y,
             position: 'absolute',
@@ -162,13 +164,13 @@ const Draggable: React.FC<DraggableProps> = ({
           }}
           style={[
             {
-              width: cellSize.width * itemDimensions.width,
-              height: cellSize.height * itemDimensions.height,
+              width: cellSize.width * width,
+              height: cellSize.height * height,
             }
           ]}
         >
           <Image
-            source={imageSource}
+            source={{uri:imageSource}}
             style={{
               width: '100%',
               height: '100%',
@@ -179,10 +181,10 @@ const Draggable: React.FC<DraggableProps> = ({
     ) : (
       <Animated.View {...panResponder.panHandlers} style={[position.getLayout(), styles.draggable]}>
         <Image
-          source={imageSource}
+          source={{uri:imageSource}}
           style={{
-            width: cellSize.width * itemDimensions.width,
-            height: cellSize.height * itemDimensions.height,
+            width: cellSize.width * width,
+            height: cellSize.height * height,
           }}
         />
       </Animated.View>
