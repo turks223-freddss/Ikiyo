@@ -9,7 +9,7 @@ export default function Maps() {
     return (
         <View style={styles.container}>
         {/* School Button */}
-        <TouchableOpacity style={styles.button} onPress={() => router.push("/(school_tabs)/school")}> 
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/(school_tabs)/HomePage/school")}> 
             <MaterialIcons name="school" size={30} color="white" />
             <Text style={styles.buttonText}>School</Text>
         </TouchableOpacity>

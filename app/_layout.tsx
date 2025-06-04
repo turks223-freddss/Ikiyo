@@ -8,7 +8,7 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    router.replace("/loading"); // ✅ Always start at the loading screen
+    router.replace("/school"); // ✅ Always start at the loading screen
   }, []);
 
   return (
