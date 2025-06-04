@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import TaskCard from '../../assets/Tasks/MyJournalTaskCard';
-import TaskDetail from '../../assets/Tasks/TaskDetail';
+import TaskCard from '../../../assets/Tasks/MyJournalTaskCard';
+import TaskDetail from '../../../assets/Tasks/TaskDetail';
+import styles from './MyJournalTask.styles'
 import {
     View,
     Text,
@@ -18,14 +19,8 @@ import {
     PixelRatio,
 } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from 'expo-router';
 
-const { width, height } = Dimensions.get('window');
-
-const normalize = (size: number) => {
-  const scale = Math.min(width / 375, 1);
-  const newSize = size * scale;
-  return Math.round(PixelRatio.roundToNearestPixel(newSize));
-};
 
 type TaskData = {
     id: number;
@@ -44,14 +39,28 @@ type TaskData = {
     assigned_by: number;
     assigned_to: number;
 };
+type MyJournalProps = {
+    userData: {
+    userID: number;
+    username: string;
+    email: string;
+    password: string;
+    gold: number;
+    ruby: number;
+    description: string | null;
+    buddy: number | null;
+    } | null;
+    openPartnerProfile?: () => void;
+};
 
-const MyJournal: React.FC = () => {
+const MyJournal: React.FC<MyJournalProps> = ({ userData, openPartnerProfile }) => {
 const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionText, setSubmissionText] = useState('');
     const [user, setUser] = useState<{ userID: number } | null>(null);
     const [taskList, setTaskList] = useState<TaskData[]>([]);
     const { width } = useWindowDimensions();
+    const router = useRouter(); // Add this line
 
     const isSmallScreen = width < 600;
 
@@ -78,7 +87,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
         if (!user || !user.userID) return;
 
         try {
-            const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+            const response = await fetch("http://10.0.2.2:8000/api/task-action/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -107,6 +116,28 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
         fetchTasks();
     }, [user]);
 
+    if (!userData || !userData.buddy) {
+        return (
+            <View style={styles.centeredOverlay}>
+                <View style={styles.noBuddyBox}>
+                    <Text style={styles.noBuddyTitle}>NO BUDDY</Text>
+                    <Text style={styles.noBuddySubtitle}>
+                    Add a buddy in the buddy tab of your profile to start creating/doing tasks.
+                    </Text>
+                    <View style={styles.noBuddyButtonRow}>
+                    
+                    <TouchableOpacity
+                        style={styles.noBuddyConfirm}
+                        onPress={openPartnerProfile}
+                    >
+                        <Text style={styles.noBuddyConfirmText}>Go</Text>
+                    </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>My Journal</Text>
@@ -120,9 +151,9 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                     contentContainerStyle={styles.taskList}
                     renderItem={({ item }) => (
                         <TaskCard
-                            questImage={require('../../../assets/images/homeIcons/task.png')}
+                            questImage={require('../../../../assets/images/homeIcons/task.png')}
                             titleName={item.task_title}
-                            rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                            rewardImage={require('../../../../assets/images/homeIcons/ikicoin.png')}
                             status = {item.status}
                             userID={user!.userID}
                             task_id={item.id}
@@ -156,49 +187,5 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: '100%',
-    paddingTop: height * 0.03,
-    paddingHorizontal: width * 0.04,
-    paddingBottom: height * 0.03,
-    justifyContent: 'flex-start',
-  },
-  title: {
-    fontSize: normalize(14),
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: height * 0.01,
-    textTransform: 'uppercase',
-  },
-  content: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: normalize(8),
-  },
-  contentColumn: {
-    flexDirection: 'column',
-  },
-  leftColumn: {
-    width: '40%',  // Adjust to 30% width
-    paddingRight: normalize(4),
-  },
-  rightColumn: {
-    width: '60%',  // Adjust to 70% width
-    paddingLeft: normalize(4),
-    backgroundColor: 'white',
-  },
-  fullWidth: {
-    width: '100%',
-    paddingLeft: 0,
-    paddingRight: 0,
-  },
-  taskList: {
-    paddingBottom: normalize(10),
-  },
-});
 
 export default MyJournal;
