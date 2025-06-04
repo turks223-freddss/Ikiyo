@@ -22,6 +22,7 @@ interface OverlayWindowProps {
   tab3icon?: any;
   width?: number;   // optional width
   height?: number;  // optional height
+  initialTab?: number;
 }
 
 const OverlayWindow: React.FC<OverlayWindowProps> = ({
@@ -36,6 +37,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
   tab3icon,
   width,
   height,
+  initialTab = 1,
 }) => {
   const windowDimensions = Dimensions.get("window");
 
@@ -43,7 +45,7 @@ const OverlayWindow: React.FC<OverlayWindowProps> = ({
   const containerWidth = width ?? windowDimensions.width * 0.85;
   const containerHeight = height ?? windowDimensions.height * 0.9;
 
-  const [selectedTab, setSelectedTab] = useState<number>(1);
+  const [selectedTab, setSelectedTab] = useState<number>(initialTab);
 
   if (!visible) return null;
 
