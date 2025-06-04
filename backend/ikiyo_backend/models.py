@@ -109,7 +109,22 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"{self.owner.username} owns {self.item.item_name}"
-    
+
+class RoomItem(models.Model):
+
+    item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    type = models.CharField(max_length=255)
+    x = models.IntegerField()
+    y = models.IntegerField()
+    width = models.IntegerField()
+    height = models.IntegerField()
+    state = models.CharField(max_length=255)
+    allowOverlap = models.BooleanField(default=False)
+    placed = models.BooleanField(default=False)
+    image = models.CharField(max_length=255, blank=True, null=True) 
+
+    def __str__(self):
+        return f"{self.item.item.item_name}"
 
 
 class Task(models.Model):
@@ -204,4 +219,7 @@ class GameInfo(models.Model):
 
     def __str__(self):
         return self.info_title
+
+
+
     

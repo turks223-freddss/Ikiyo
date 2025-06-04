@@ -1,3 +1,4 @@
+
 import { View, Image, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 import FeatureButton from '../FeatureButton'
@@ -6,26 +7,41 @@ import { normalize } from '../../../assets/normalize';
 import eventBus from '../utils/eventBus';
 
 import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon} from "../../../assets/images/shopIcons";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
+interface RoomItem{
+  id: number;
+  item_name: string;
+  type:string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  state: string;
+  allowOverlap: boolean;
+  placed: boolean;
+  image: string;
+
+}
 
 const Inventory: React.FC = () => {
     
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [items, setItems] = useState<RoomItem[]>([]);
 
-  const items = [
-    { id: 5, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 2}},
-    { id: 6, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-    { id: 7, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 2, height: 1}},
-    { id: 8, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 2, height: 2}},
-    { id: 9, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-    { id: 10, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-    { id: 11, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
-    { id: 12, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
+  // const items = [
+  //   { id: 5, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 2}},
+  //   { id: 6, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
+  //   { id: 7, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 2, height: 1}},
+  //   { id: 8, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 2, height: 2}},
+  //   { id: 9, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
+  //   { id: 10, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
+  //   { id: 11, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
+  //   { id: 12, x: screenWidth/20*7, y: screenHeight/10*8, itemDimensions: {width: 1, height: 1}},
     
-  ]
+  // ]
   const remainder = items.length % 3;
   const placeholdersCount = remainder === 0 ? 0 : 3 - remainder;
 
@@ -40,6 +56,38 @@ const Inventory: React.FC = () => {
     { label: 'Lower', icon: LowerIcon },
     { label: 'Shoes', icon: ShoesIcon },
   ];
+
+  useEffect(() => {
+    // Fetch room items from API on mount
+    const fetchRoomItems = async () => {
+      try {
+        const response = await fetch('http://192.168.1.5:8081/api/room/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'get_room_items',
+            userID: 2,  // Replace with dynamic userID as needed
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.room_items) {
+          setItems(data.room_items);
+        } else {
+          console.error('API Error or no room_items:', data);
+          setItems([]);
+        }
+      } catch (error) {
+        console.error('Fetch room items failed:', error);
+        setItems([]);
+      }
+    };
+
+    fetchRoomItems();
+  }, []);
   
   return (
     <View style={styles.inventory}>
@@ -58,12 +106,19 @@ const Inventory: React.FC = () => {
           
           <View style={styles.grid}>
           {items.map((item) => (
-            <FeatureButton
-                style={styles.item}
-                onPress={() => eventBus.emit("newItem", item)}
-                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
-                size={normalize(20)}
+           <FeatureButton
+              key={item.id}
+              style={styles.item}
+              onPress={() => eventBus.emit("newItem", item)}
+              size={normalize(20)}
+              icon={
+                <Image
+                  source={{ uri: item.image }}
+                  style={{ resizeMode: 'cover' }}
+                />
+              }
             />
+
             ))}
             {placeholders.map((_, index) => (
               <View key={`placeholder-${index}`} style={[styles.item, styles.placeholder]} />
