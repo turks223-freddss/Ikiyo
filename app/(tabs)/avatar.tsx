@@ -285,12 +285,11 @@ const AvatarScreen = () => {
           </View>
           <View style={{
             width: normalize(90),
-            height: normalize(90),
+            height: "110%",
             maxWidth: '100%',
-            maxHeight: '100%',
+            maxHeight: '105%',
             overflow: 'hidden',
             alignItems: 'center',
-            justifyContent: 'center',
           }}>
           <AvatarDisplay
             userID={userID!}
@@ -491,8 +490,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: "20%",
     width: '100%',
+    marginTop: normalize(5),
     gap: normalize(5),
   },
 });
