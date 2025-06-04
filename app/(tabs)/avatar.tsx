@@ -258,7 +258,6 @@ const AvatarScreen = () => {
 
         {/* Avatar Preview */}
         <View style={styles.rightPane}>
-          <Text style={styles.title}>Your Avatar</Text>
           <AvatarDisplay userID={userID!}
             overrideHat = {previewedItem?.part === "Hat" ? previewedItem.avatar_image : undefined}
             overrideEyes = {previewedItem?.part === "Eyes" ? previewedItem.avatar_image : undefined}
@@ -273,16 +272,21 @@ const AvatarScreen = () => {
               style={styles.saveButton}
               onPress={async () => {
                 try {
+
+                  const requestBody = {
+                    userID,
+                    item_type: previewedItem.part.toLowerCase(),
+                    url: previewedItem.avatar_image,
+                  };
+                  console.log('Sending body to API:', requestBody); // ✅ Log body before request
                   const response = await fetch('http://192.168.1.5:8081/api/retrieve-avatar/', {
                     method: 'PUT',
                     headers: {
                       'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                      userID,
-                      item_type: previewedItem.part,
-                      url: previewedItem.avatar_image
-                    }),
+                    body: JSON.stringify(
+                      requestBody
+                    ),
                   });
 
                   if (!response.ok) {
@@ -408,6 +412,7 @@ const styles = StyleSheet.create({
   },
   rightPane: {
     flex: 1,
+    position: 'relative',
     backgroundColor: '#fff7db',
     borderRadius: normalize(10),
     borderWidth: normalize(1),
@@ -525,6 +530,10 @@ const styles = StyleSheet.create({
   },
 
   saveButton: {
+    position: 'absolute',
+    bottom: 15,
+    width: normalize(30),
+    height: normalize(20),
     backgroundColor: '#fdd835',
     padding: normalize(10),
     borderRadius: normalize(5),
@@ -539,7 +548,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#3a2e1f',
     fontWeight: 'bold',
-    fontSize: normalize(10),
+    fontSize: normalize(2),
   },
 });
 
