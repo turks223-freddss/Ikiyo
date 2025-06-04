@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .models import User, Item, Inventory, PartnerRequest,Task, FriendList, FriendRequest, Message, Avatar, GameInfo
-from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSerializer, MessageSerializer, GameInfoSerializer
+from .models import User, Item, Inventory, PartnerRequest,Task, FriendList, FriendRequest, Message, Avatar, GameInfo,RoomItem
+from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSerializer, MessageSerializer, GameInfoSerializer,RoomItemSerializer
 from django.shortcuts import get_object_or_404
 import json
 from django.db.models import Q
@@ -895,8 +895,7 @@ class RetrieveAvatarView(APIView):
             return Response({"error": "Avatar not found for the given userID."}, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
+      
 class GameInfoView(APIView):
     def post(self, request):
         action = request.data.get('action')
@@ -942,3 +941,73 @@ class GameInfoView(APIView):
         else:
             return Response({"error": "Invalid action. Valid actions: display_events, display_announcements, add, edit, delete."},
                             status=status.HTTP_400_BAD_REQUEST)
+            
+class RoomView(APIView):
+    def post(self, request):
+        action = request.data.get('action')
+        user_id = request.data.get('userID')
+        user = get_object_or_404(User, userID=user_id)
+
+        if action == 'get_room_items':
+            room_items = RoomItem.objects.filter(
+                item__owner=user,
+                item__item__category="Room"
+            )
+            serializer = RoomItemSerializer(room_items, many=True)
+            return Response({"room_items": serializer.data}, status=status.HTTP_200_OK)
+        
+        elif action == 'sync_room_items':
+            # Get inventory items with category "Room"
+            room_inventory_items = Inventory.objects.filter(
+                owner=user,
+                item__category="Room"
+            )
+
+            created = 0
+            for inv in room_inventory_items:
+                # Only create if not already linked in RoomItem
+                if not RoomItem.objects.filter(item=inv).exists():
+                    RoomItem.objects.create(
+                        item=inv,
+                        type=inv.item.part,  # you can make this dynamic
+                        x=0,
+                        y=0,
+                        width=1,
+                        height=1,
+                        state="idle",
+                        allowOverlap=False,
+                        placed=False,
+                        image = inv.item.store_image
+                    )
+                    created += 1
+
+            return Response({"message": f"Synced RoomItems. {created} new item(s) created."}, status=status.HTTP_201_CREATED)
+
+        elif action == 'place_room_item':
+            room_item_id = request.data.get('room_item_id')
+            x = request.data.get('x')
+            y = request.data.get('y')
+            width = request.data.get('width')
+            height = request.data.get('height')
+            state = request.data.get('state', '')
+            allow_overlap = request.data.get('allowOverlap', False)
+
+            if not room_item_id:
+                return Response({"error": "room_item_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            room_item = get_object_or_404(RoomItem, id=room_item_id, item__owner=user)
+
+            room_item.x = x or room_item.x
+            room_item.y = y or room_item.y
+            room_item.width = width or room_item.width
+            room_item.height = height or room_item.height
+            room_item.state = state
+            room_item.allowOverlap = allow_overlap
+            room_item.placed = True
+            room_item.save()
+
+            serializer = RoomItemSerializer(room_item)
+            return Response({"message": "Room item placed.", "data": serializer.data}, status=status.HTTP_200_OK)
+
+        else:
+            return Response({"error": "Invalid action. Use 'get_room_items' or 'place_room_item'."}, status=status.HTTP_400_BAD_REQUEST)
