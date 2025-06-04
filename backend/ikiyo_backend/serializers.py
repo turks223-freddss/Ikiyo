@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Item, Task, Message
+from .models import User, Item, Task, Message, GameInfo
 from django.contrib.auth import authenticate
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,7 +40,11 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'sender', 'recipient', 'content', 'timestamp', 'is_read']
     
-    
+
+class GameInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GameInfo
+        fields = '__all__'
     
 #django have make_password() function try to implement later or soon 
 #Change direct comparison to user.check_password(data["password"]) after hashing passwords.

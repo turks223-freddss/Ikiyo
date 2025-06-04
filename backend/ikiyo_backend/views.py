@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from .models import User, Item, Inventory, PartnerRequest,Task, FriendList, FriendRequest, Message, Avatar
-from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSerializer, MessageSerializer
+from .models import User, Item, Inventory, PartnerRequest,Task, FriendList, FriendRequest, Message, Avatar, GameInfo
+from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSerializer, MessageSerializer, GameInfoSerializer
 from django.shortcuts import get_object_or_404
 import json
 from django.db.models import Q
@@ -860,3 +860,50 @@ class RetrieveAvatarView(APIView):
 
         except Avatar.DoesNotExist:
             return Response({"error": "Avatar not found for the given userID."}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+class GameInfoView(APIView):
+    def post(self, request):
+        action = request.data.get('action')
+
+        if action == 'display_events':
+            events = GameInfo.objects.filter(category__iexact='event').order_by('-date')
+            serializer = GameInfoSerializer(events, many=True)
+            return Response({"events": serializer.data}, status=status.HTTP_200_OK)
+
+        elif action == 'display_announcements':
+            announcements = GameInfo.objects.filter(category__iexact='announcement').order_by('-date')
+            serializer = GameInfoSerializer(announcements, many=True)
+            return Response({"announcements": serializer.data}, status=status.HTTP_200_OK)
+
+        elif action == 'add':
+            serializer = GameInfoSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "Game info added.", "data": serializer.data}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif action == 'edit':
+            info_id = request.data.get('info_id')
+            if not info_id:
+                return Response({"error": "info_id is required for editing."}, status=status.HTTP_400_BAD_REQUEST)
+
+            game_info = get_object_or_404(GameInfo, pk=info_id)
+            serializer = GameInfoSerializer(game_info, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "Game info updated.", "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif action == 'delete':
+            info_id = request.data.get('info_id')
+            if not info_id:
+                return Response({"error": "info_id is required for deletion."}, status=status.HTTP_400_BAD_REQUEST)
+
+            game_info = get_object_or_404(GameInfo, pk=info_id)
+            game_info.delete()
+            return Response({"message": "Game info deleted."}, status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Response({"error": "Invalid action. Valid actions: display_events, display_announcements, add, edit, delete."},
+                            status=status.HTTP_400_BAD_REQUEST)

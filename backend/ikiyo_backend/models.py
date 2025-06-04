@@ -185,4 +185,15 @@ class Message(models.Model):
 
     def __str__(self):
         return f'Message from {self.sender} to {self.recipient}'
+
+class GameInfo(models.Model):
+    info_id = models.AutoField(primary_key=True)
+    info_title = models.CharField(max_length=255)
+    banne = models.CharField(max_length=255, blank=True, null=True) 
+    date = models.DateTimeField(auto_now_add=True)
+    category = models.CharField(max_length=100)
+    content = models.TextField()
+
+    def __str__(self):
+        return self.info_title
     
