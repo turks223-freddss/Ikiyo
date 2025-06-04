@@ -57,7 +57,7 @@ export default function Home() {
     // console.log("Current user:", user); // Debugging step
     
 
-    fetch("http://10.0.2.2:8000/api/user/", {
+    fetch("http://192.168.1.5:8081/api/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +99,7 @@ export default function Home() {
   }
   
   try {
-    const response = await fetch(`http://10.0.2.2:8000/api/edit-user/${user.userID}/`, {
+    const response = await fetch(`http://192.168.1.5:8081/api/edit-user/${user.userID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -138,7 +138,7 @@ const handleDescriptionUpdate = async () => {
   }
 
   try {
-    const response = await fetch(`http://10.0.2.2:8000/api/edit-user/${user.userID}/`, {
+    const response = await fetch(`http://192.168.1.5:8081/api/edit-user/${user.userID}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -170,7 +170,7 @@ const handleDescriptionUpdate = async () => {
 
   const listPendingRequests = async (userID:number) => {
     try {
-        const response = await fetch('http://10.0.2.2:8000/api/buddy/', {
+        const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ const handleDescriptionUpdate = async () => {
 
 const sendBuddyRequest = async (userID:number, targetID:number) => {
   try {
-      const response = await fetch('http://10.0.2.2:8000/api/buddy/', {
+      const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -223,7 +223,7 @@ const sendBuddyRequest = async (userID:number, targetID:number) => {
 
 const acceptBuddyRequest = async (userID:number, fromUserID:number) => {
   try {
-      const response = await fetch('http://10.0.2.2:8000/api/buddy/', {
+      const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ const acceptBuddyRequest = async (userID:number, fromUserID:number) => {
 
 const declineBuddyRequest = async (userID:number, fromUserID:number) => {
   try {
-      const response = await fetch('http://10.0.2.2:8000/api/buddy/', {
+      const response = await fetch('http://192.168.1.5:8081/api/buddy/', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',

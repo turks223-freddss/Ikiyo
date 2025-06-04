@@ -166,11 +166,31 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
     }
     setIsLoading(false);
   };
+  const getStatusStyle = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'inprogress':
+        return { backgroundColor: 'gray' };
+      case 'for validation':
+        return { backgroundColor: '#2196F3' };
+      case 'complete':
+        return { backgroundColor: 'green' };
+      default:
+        return { backgroundColor: '#ccc' };
+    }
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.details}>
-        <Text style={styles.detailTitle}>{selectedTask.task_title}</Text>
+        {/* <Text style={styles.detailTitle}>
+          {selectedTask.task_title}</Text>
+        <Text style={styles.detailTitle}>
+          {selectedTask.status}</Text> */}
+         <View style={[styles.statusContainer, getStatusStyle(selectedTask.status)]}>
+            <Text style={styles.statusText}>
+              {selectedTask.task_title} ({selectedTask.status})
+            </Text>
+          </View>
 
         {!isSubmitting ? (
           <>
@@ -256,7 +276,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
       </ScrollView>
 
       {/* Show "Add Submission" button only if isSelf === 1 */}
-      {isSelf === 1 && !isSubmitting && (
+      {isSelf === 1 && !isSubmitting && selectedTask.status.toLowerCase() !== "for validation" &&(
         <View style={styles.fixedButtonContainer}>
           <TouchableOpacity style={styles.smallButton} onPress={() => setIsSubmitting(true)}>
             <Text style={styles.smallButtonText}>Add Submission</Text>
@@ -371,6 +391,20 @@ const styles = StyleSheet.create({
     fontSize: normalize(7),
     fontWeight: 'bold',
   },
+
+  statusContainer: {
+    padding: normalize(6),
+    borderRadius: normalize(6),
+    marginBottom: normalize(8),
+  },
+
+  statusText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: normalize(11),
+  },
+
+
 });
 
 export default TaskDetail;

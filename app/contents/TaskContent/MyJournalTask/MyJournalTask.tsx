@@ -87,7 +87,7 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
         if (!user || !user.userID) return;
 
         try {
-            const response = await fetch("http://10.0.2.2:8000/api/task-action/", {
+            const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

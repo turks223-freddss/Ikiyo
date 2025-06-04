@@ -318,12 +318,14 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                     <Text style={styles.buttonText}>Edit</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: '#f44336' }]}
-                    onPress={() => handledelete()}
-                  >
-                    <Text style={styles.buttonText}>Delete</Text>
-                  </TouchableOpacity>
+                  {selectedTask.status !== 'completed' && (
+                    <TouchableOpacity
+                      style={[styles.button, { backgroundColor: '#f44336' }]}
+                      onPress={() => handledelete()}
+                    >
+                      <Text style={styles.buttonText}>Delete</Text>
+                    </TouchableOpacity>
+                  )}
                   {selectedTask.submission && selectedTask.submission.trim() !== '' && (
                       <TouchableOpacity
                         style={[styles.button, { backgroundColor: '#3F51B5' }]}
