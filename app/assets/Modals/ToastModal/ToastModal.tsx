@@ -10,6 +10,7 @@ interface ToastModalProps {
     confirmText?: string;
     cancelText?: string;
     title?: string;
+    titleColor?: string; 
 }
 
 export default function ToastModal({
@@ -20,12 +21,13 @@ export default function ToastModal({
     confirmText = "Confirm",
     cancelText = "Cancel",
     title,
+    titleColor,
 }: ToastModalProps) {
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
                 <View style={styles.popup}>
-                    {title && <Text style={styles.title}>{title}</Text>}
+                    {title &&  <Text style={[styles.title, titleColor ? { color: titleColor } : null]}>{title}</Text>}
                     <Text style={styles.message}>{message}</Text>
                     <View style={onCancel ? styles.buttonRow : styles.buttonSingle}>
                         {onCancel && (
