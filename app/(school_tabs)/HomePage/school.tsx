@@ -2,28 +2,29 @@ import React, { useState } from "react";
 import { View, Image, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import ProfileCard from "../assets/ProfileCard";
-import FeatureButton from "../assets/FeatureButton";
-import CurrencyDisplay from "../assets/CurrencyContainer";
-import OverlayWindow from "../assets/Overlay";
-import EventsContent from "../assets/Events"  
-import AdContent from "../contents/AdContent"; 
-import MapsContent from "../contents/MapsContent"; 
-import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons";
-import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons";
-import { ProfileIcon, SettingsIcon, PartnerProfileIcon } from "../../assets/images/ProfileIcons";
-import { FriendListIcon, FriendRequestIcon } from "../../assets/images/friendlistIcons";
-import DailyTask from "../contents/TaskContent/DailyTask";
-import MyJournal from "../contents/TaskContent/MyJournalTask";
-import PartnerJournal from "../contents/TaskContent/PartnerJournalTask";
-import MainProfile from "../contents/ProfileContent/ProfileMainPage";
-import PartnerProfile from "../contents/ProfileContent/PartnerProfileHelper";
-import Settings from "../contents/ProfileContent/Settings";
-import FriendList from "../contents/Friends/friendlist";
-import FriendRequest from "../contents/Friends/friendrequest";
-import ChatScreen from "../contents/Friends/chat";
-import RoomMainPage from "./RoomMainPage";
-import { normalize } from '../../assets/normalize';
+import ProfileCard from "../../assets/ProfileCard";
+import FeatureButton from "../../assets/FeatureButton";
+import CurrencyDisplay from "../../assets/CurrencyContainer";
+import OverlayWindow from "../../assets/Overlay";
+import EventsContent from "../../assets/Events"  
+import AdContent from "../../contents/AdContent"; 
+import MapsContent from "../../contents/MapsContent"; 
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../../assets/images/homeIcons";
+import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../../assets/images/TaskIcons";
+import { ProfileIcon, SettingsIcon, PartnerProfileIcon } from "../../../assets/images/ProfileIcons";
+import { FriendListIcon, FriendRequestIcon } from "../../../assets/images/friendlistIcons";
+import DailyTask from "../../contents/TaskContent/DailyTask";
+import MyJournal from "../../contents/TaskContent/MyJournalTask";
+import PartnerJournal from "../../contents/TaskContent/PartnerJournalTask";
+import MainProfile from "../../contents/ProfileContent/ProfileMainPage";
+import PartnerProfile from "../../contents/ProfileContent/PartnerProfileHelper";
+import Settings from "../../contents/ProfileContent/Settings";
+import FriendList from "../../contents/Friends/friendlist";
+import FriendRequest from "../../contents/Friends/friendrequest";
+import ChatScreen from "../../contents/Friends/chat";
+import RoomMainPage from "../RoomMainPage";
+import { normalize } from '../../../assets/normalize';
+import styles from "./HomePage.styles";
 
 
 export default function Home() {
@@ -58,87 +59,14 @@ export default function Home() {
     }));
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      width: width,
-      height: height,
-      justifyContent: "flex-start",
-      alignItems: "flex-start",
-      paddingLeft: normalize(2),
-      paddingTop: normalize(4),
-    },
-    room: {
-      position: 'absolute',
-      height: "100%",
-      width: "100%",
-      bottom: 0,
-      flex: 1,
-    },
-    profileCardContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: normalize(2),
-      marginLeft: normalize(2),
-    },
-    bottomContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-end",
-      paddingHorizontal: normalize(4),
-      marginTop: "auto",
-      width: "100%",
-      paddingRight: normalize(12),
-    },
-    bottomButtons: {
-      flexDirection: "row",
-      gap: normalize(5), // Works in React Native 0.71+
-    },
-    buttonRow: {
-      flexDirection: "row",
-      justifyContent: "center", 
-    },
-    overlay: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    overlayWindow: {
-      width: "80%",
-      height: "90%",
-      backgroundColor: "rgba(255, 201, 172, 0.9)",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 20,
-      borderRadius: 10,
-    },
-    closeButton: {
-      marginTop: 20,
-      color: "blue",
-      textDecorationLine: "underline",
-    },
-  });
-
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <View style={styles.main}>
       <View style={styles.room} pointerEvents="none">
         <RoomMainPage/>
       </View>
       <View style={styles.container}>
         {/* Profile Card Container */}
-        <View style={{ 
-          flexDirection: "row", 
-          justifyContent: "space-between", 
-          alignItems: "flex-start", 
-          width: "100%",
-          paddingHorizontal: normalize(10), 
-          marginTop: normalize(4), 
-        }}>
+        <View style={styles.profileCardContainer}>
           <ProfileCard
             imageUri="https://www.w3schools.com/w3images/avatar2.png"
             username="John Doe"
@@ -148,12 +76,12 @@ export default function Home() {
 
           <View style={{ alignItems: "flex-end", gap: 10 }}>
             <CurrencyDisplay
-              icon={<Image source={HeartIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
+              icon={<Image source={HeartIcon} style={styles.currencyIcon} />} 
               currencyAmount={420}
               size={normalize(5)}
             />
             <CurrencyDisplay
-              icon={<Image source={IkicoinIcon} style={{ width: normalize(15), height:normalize(15)}} />} 
+              icon={<Image source={IkicoinIcon} style={styles.currencyIcon} />} 
               currencyAmount={690}
               size={normalize(5)}
             />
@@ -285,7 +213,7 @@ export default function Home() {
                 />
           }
           tab1icon={FriendListIcon}
-          tab2={<FriendRequest userID="321"/>}
+          tab2={<FriendRequest userID={321}/>}
           tab2icon={FriendRequestIcon}
           >
           </OverlayWindow>
