@@ -9,6 +9,7 @@ from .serializers import UserSerializer, LoginSerializer, ItemSerializer, TaskSe
 from django.shortcuts import get_object_or_404
 import json
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 
 # User ViewSet
@@ -175,7 +176,7 @@ class DisplayInventoryAvatar(APIView):
             user = User.objects.get(userID=user_id)
             # Get inventory items for this user and filter by category 'accessories'
             inventory_items = Inventory.objects.filter(owner=user)
-            accessories_items = [inventory.item for inventory in inventory_items if inventory.item.category.lower() == 'accessories']
+            accessories_items = [inventory.item for inventory in inventory_items if inventory.item.category.lower() == 'avatar']
             
             # Serialize the filtered items
             serializer = ItemSerializer(accessories_items, many=True)
@@ -855,11 +856,45 @@ class RetrieveAvatarView(APIView):
                 "right_arm": avatar.right_arm,
                 "left_leg": avatar.left_leg,
                 "right_leg": avatar.right_leg,
+                "hat": avatar.hat,
+                "eyes": avatar.eyes,
+                "face_accessories": avatar.face_accessories,
+                "facial_expression": avatar.facial_expression,
+                "upperwear": avatar.upperwear,
+                "lowerwear": avatar.lowerwear,
+                "shoes": avatar.shoes,
             }
             return Response(avatar_data, status=status.HTTP_200_OK)
 
         except Avatar.DoesNotExist:
             return Response({"error": "Avatar not found for the given userID."}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request):
+        user_id = request.data.get("userID")
+        item_type = request.data.get("item_type")  # e.g., "hat", "eyes"
+        item_url = request.data.get("url")         # URL of the item image
+
+        if not user_id or not item_type or not item_url:
+            return Response({"error": "userID, item_type, and url are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        valid_fields = [
+            "hat", "eyes", "face_accessories", "facial_expression",
+            "upperwear", "lowerwear", "shoes"
+        ]
+
+        if item_type not in valid_fields:
+            return Response({"error": f"Invalid item_type. Must be one of {valid_fields}."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            avatar = Avatar.objects.get(user__userID=user_id)
+            setattr(avatar, item_type, item_url)
+            avatar.save()
+            return Response({"message": f"{item_type} equipped successfully."}, status=status.HTTP_200_OK)
+
+        except Avatar.DoesNotExist:
+            return Response({"error": "Avatar not found for the given userID."}, status=status.HTTP_404_NOT_FOUND)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         
 class GameInfoView(APIView):
