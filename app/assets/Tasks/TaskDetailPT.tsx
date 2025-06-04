@@ -311,14 +311,16 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       <View style = {styles.bottomButtonContainer}>
          {!isEditing && (
               <View style={styles.buttonRow}>
-                 <TouchableOpacity
-                    style={[styles.button, { backgroundColor: '#4CAF50' }]}
-                    onPress={() => setIsEditing(true)}
-                  >
-                    <Text style={styles.buttonText}>Edit</Text>
-                  </TouchableOpacity>
+                  {selectedTask.status === 'Inprogress' &&(
+                    <TouchableOpacity 
+                      style={[styles.button, { backgroundColor: '#4CAF50' }]}
+                      onPress={() => setIsEditing(true)}
+                    >
+                      <Text style={styles.buttonText}>Edit</Text>
+                    </TouchableOpacity>
+                    )}
 
-                  {selectedTask.status !== 'completed' && (
+                  {selectedTask.status === 'Inprogress' && (
                     <TouchableOpacity
                       style={[styles.button, { backgroundColor: '#f44336' }]}
                       onPress={() => handledelete()}
