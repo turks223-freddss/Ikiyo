@@ -6,3 +6,7 @@ export { default as MapsIcon } from './maps.png';
 export { default as ShopIcon } from './shop.png';
 export { default as HeartIcon } from './hearts.png';
 export { default as IkicoinIcon } from './ikicoin.png';
+export {default as InventoryIcon} from './inventoryIcon.png';
+export {default as HomeMap} from './homeDisplay.png';
+export {default as ComingSoonMap} from './comingSoonDisplay1.png';
+export {default as HomeIcon} from './homeIcon.png';
