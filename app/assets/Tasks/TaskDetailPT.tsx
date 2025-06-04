@@ -14,6 +14,7 @@ import {
   PixelRatio,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import ToastModal from "../Modals/ToastModal/ToastModal"; // Add this import
 
 const { width } = Dimensions.get('window');
 const normalize = (size: number) => {
@@ -62,6 +63,8 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 
   const [viewSubmission, setViewSubmission] = useState(false);
   const [removedAttachment, setRemovedAttachment] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false); // New state for toast
+  const [showDeleteToast, setShowDeleteToast] = useState(false);
 
   useEffect(() => {
     if (isEditing && selectedTask) {
@@ -79,15 +82,6 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       Alert.alert("Validation Error", "Please fill in the title and description.");
       return;
     }
-    console.log(JSON.stringify({
-      action: "edit",
-      task_id: selectedTask.id,
-      userID: userID,
-      task_title: editedTask.task_title,
-      task_description: editedTask.task_description,
-      difficulty_level: editedTask.difficulty_level,
-      attachment: editedTask.image || "",
-    }));
     try {
       const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
         method: "POST",
@@ -101,13 +95,12 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
           task_title: editedTask.task_title,
           task_description: editedTask.task_description,
           difficulty_level: editedTask.difficulty_level,
-          attachment:editedTask.image||"",
+          attachment: editedTask.image || "",
         }),
       });
-      console.log(editedTask.image)
       const data = await response.json();
       if (response.ok) {
-        Alert.alert("Success", "Task updated successfully!");
+        setShowSuccessToast(true); // Show toast
         setIsEditing(false);
         setRemovedAttachment(false);
         triggerReload();
@@ -120,7 +113,6 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
       } else {
         Alert.alert("Error", "Failed to update task.");
       }
-
     } catch (error) {
       console.error("Error updating task:", error);
       Alert.alert("Error", "Failed to update task. Please try again later.");
@@ -129,7 +121,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 
   const handleApprove = async () => {
     try {
-      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+      const response = await fetch("http://10.0.2.2:8000/api/task-action/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -155,7 +147,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 
   const handledelete = async () => {
     try {
-      const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
+      const response = await fetch("http://10.0.2.2:8000/api/task-action/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -167,7 +159,6 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
 
       const data = await response.json();
       if (response.ok) {
-        Alert.alert("Success", "Task Deleted");
         triggerReload();
         clearSelectedTask(); 
       } else {
@@ -323,7 +314,7 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                   {selectedTask.status === 'Inprogress' && (
                     <TouchableOpacity
                       style={[styles.button, { backgroundColor: '#f44336' }]}
-                      onPress={() => handledelete()}
+                      onPress={() => setShowDeleteToast(true)}
                     >
                       <Text style={styles.buttonText}>Delete</Text>
                     </TouchableOpacity>
@@ -368,6 +359,27 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
             )}
 
       </View>
+      <ToastModal
+      visible={showSuccessToast}
+      title="Success"
+      titleColor="#388e3c"
+      message="Task updated successfully!"
+      onConfirm={() => setShowSuccessToast(false)}
+      confirmText="OK"
+    />
+    <ToastModal
+  visible={showDeleteToast}
+  title="Deleting Task"
+  titleColor="#b71c1c"
+  message="Task will be deleted permanently."
+  confirmText="Confirm"
+  cancelText="Cancel"
+  onConfirm={() => {
+    setShowDeleteToast(false);
+    handledelete();
+  }}
+  onCancel={() => setShowDeleteToast(false)}
+/>
     </View>
   );
 

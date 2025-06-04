@@ -15,6 +15,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadToCloudinary } from "../Tasks/CloudinaryUpload"
+import ToastModal from "../Modals/ToastModal/ToastModal"; // Add this import at the top
 
 // Normalize function for responsive scaling
 const { width } = Dimensions.get('window');
@@ -58,6 +59,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
   const [documentUri, setDocumentUri] = useState<string | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false); // Add this state
+  const [showValidationToast, setShowValidationToast] = useState(false); // Add this state
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -115,7 +118,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 
   const handleSubmit = async () => {
     if (!submissionText.trim()) {
-      alert("Please write something before submitting.");
+      setShowValidationToast(true);
       return;
     }
 
@@ -158,7 +161,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 
       if (!response.ok) throw new Error("Submission failed");
 
-      alert("Submission sent!");
+      setShowSuccessToast(true); // Show toast
       setIsSubmitting(false);
       setSubmissionText('');
       setSubmissionImage(null);
@@ -301,6 +304,27 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
           </TouchableOpacity>
         </View>
       )}
+
+      <ToastModal
+        visible={showSuccessToast}
+        title="Success!"
+        titleColor="#388e3c"
+        message="Submission sent!"
+        onConfirm={() => {
+          setShowSuccessToast(false);
+          triggerReload();
+        }}
+        confirmText="OK"
+      />
+
+      <ToastModal
+        visible={showValidationToast}
+        title="Error"
+        titleColor="#b71c1c"
+        message="Please write something before submitting."
+        onConfirm={() => setShowValidationToast(false)}
+        confirmText="OK"
+      />
     </View>
   );
 };
