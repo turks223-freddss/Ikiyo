@@ -132,7 +132,7 @@ useEffect(() => {
       if (partner) {
         try {
           console.log('Fetching partner username for userID:', partner);
-          const response = await fetch('http://10.0.2.2:8000/api/user/', {
+          const response = await fetch('http://192.168.1.5:8081/api/user/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID: partner }),
