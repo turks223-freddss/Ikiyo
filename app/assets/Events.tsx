@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { normalize } from '../../assets/normalize';
 import {
@@ -18,65 +19,79 @@ import {
 
 type Tab = 'events' | 'announcements';
 
-type EventCard = {
-  id: string;
-  title: string;
+type InfoCard = {
+  info_id: string;
+  info_title: string;
+  banne?: string
   date: string;
-  bannerUrl?: string;
-  details: string;
+  category: string,
+  content: string;
 };
 
-const mockEvents: EventCard[] = [
-  {
-    id: '1',
-    title: 'Patch 1.0 - Launch Update',
-    date: '2025-04-01',
-    details:
-      'Welcome to the official launch of our platform! Enjoy brand new features, performance improvements, and bug fixes.',
-  },
-  {
-    id: '2',
-    title: 'Patch 1.1 - Spring Festival',
-    date: '2025-04-15',
-    details:
-      'Celebrate the Spring Festival with limited-time events, quests, and exclusive rewards. Ends May 1!',
-  },
-  {
-    id: '3',
-    title: 'Patch 1.2 - Quality of Life',
-    date: '2025-05-01',
-    details:
-      'This update focuses on quality-of-life improvements such as faster loading, UI tweaks, and bug squashing.',
-  },
-];
-
-const mockAnnouncements: EventCard[] = [
-  {
-    id: 'a1',
-    title: 'Maintenance Notice',
-    date: '2025-05-10',
-    details: 'We will have scheduled maintenance on May 12, 2:00 AM - 4:00 AM UTC.',
-  },
-  {
-    id: 'a2',
-    title: 'Terms of Service Update',
-    date: '2025-05-07',
-    details: 'Our terms of service have been updated. Please review them in the settings menu.',
-  },
-];
 
 const EventsAnnouncementsOverlay = () => {
   const [activeTab, setActiveTab] = useState<Tab>('events');
-  const [selectedEventId, setSelectedEventId] = useState<string>(mockEvents[0].id);
+  const [events, setEvents] = useState<InfoCard[]>([]);
+  const [announcements, setAnnouncements] = useState<InfoCard[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+
   const tabIndicator = useRef(new Animated.Value(0)).current;
 
-  const data = activeTab === 'events' ? mockEvents : mockAnnouncements;
-  const selectedItem = data.find((item) => item.id === selectedEventId);
+  const data: InfoCard[] = activeTab === 'events' ? events : announcements;
+  const selectedItem = Array.isArray(data)
+    ? data.find((item) => item.info_id === selectedEventId)
+    : undefined;
+
+
+  const fetchData = async (action: 'display_events' | 'display_announcements') => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://192.168.1.5:8081/api/gameinfo/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action }),
+      });
+      const result = await response.json();
+      console.log('API result:', result);
+
+      let items: InfoCard[] = [];
+      if (action === 'display_events' && Array.isArray(result.events)) {
+        items = result.events;
+      } else if (action === 'display_announcements' && Array.isArray(result.announcements)) {
+        items = result.announcements;
+      }
+
+      if (action === 'display_events') {
+        setEvents(items);
+        if (items.length > 0) setSelectedEventId(String(items[0].info_id));
+      } else {
+        setAnnouncements(items);
+        if (items.length > 0) setSelectedEventId(String(items[0].info_id));
+      }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
+      if (action === 'display_events') {
+        setEvents([]);
+      } else {
+        setAnnouncements([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (data.length > 0) {
+  //     setSelectedEventId(data[0].id);
+  //   }
+  // }, [activeTab]);
 
   useEffect(() => {
-    if (data.length > 0) {
-      setSelectedEventId(data[0].id);
-    }
+    const action = activeTab === 'events' ? 'display_events' : 'display_announcements';
+    fetchData(action);
   }, [activeTab]);
 
   useEffect(() => {
@@ -142,14 +157,14 @@ const EventsAnnouncementsOverlay = () => {
         >
           {data.map((item) => (
             <TouchableOpacity
-              key={item.id}
-              onPress={() => setSelectedEventId(item.id)}
+              key={item.info_id}
+              onPress={() => setSelectedEventId(item.info_id)}
               style={[
                 styles.eventCard,
-                item.id === selectedEventId && styles.activeCard,
+                item.info_id === selectedEventId && styles.activeCard,
               ]}
             >
-              <Text style={styles.eventTitle}>{item.title}</Text>
+              <Text style={styles.eventTitle}>{item.info_title}</Text>
               <Text style={styles.eventDate}>{item.date}</Text>
             </TouchableOpacity>
           ))}
@@ -159,12 +174,12 @@ const EventsAnnouncementsOverlay = () => {
         {selectedItem && (
           <ScrollView style={styles.detailsContainer} contentContainerStyle={{ padding: normalize(3) }}>
             <Image
-              source={selectedItem.bannerUrl ? { uri: selectedItem.bannerUrl } : AvatarIcon}
+              source={selectedItem.banne ? { uri: selectedItem.banne } : AvatarIcon}
               style={styles.bannerImage}
               resizeMode="cover"
             />
-            <Text style={styles.detailsTitle}>{selectedItem.title}</Text>
-            <Text style={styles.detailsText}>{selectedItem.details}</Text>
+            <Text style={styles.detailsTitle}>{selectedItem.info_title}</Text>
+            <Text style={styles.detailsText}>{selectedItem.content}</Text>
           </ScrollView>
         )}
       </View>
