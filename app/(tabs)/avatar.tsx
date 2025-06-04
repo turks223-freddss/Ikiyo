@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: normalize(4),
+    marginBottom: "20%",
     width: '100%',
     gap: normalize(5),
   },
