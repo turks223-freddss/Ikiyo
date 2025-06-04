@@ -31,7 +31,8 @@ interface Item {
   store_image: string;
   avatar_image: string;
   price: number;
-  category: string;
+  part: string;
+  category:string;
   
 }
 interface UserData {
@@ -82,7 +83,7 @@ const ShopScreen = () => {
         } | null>(null);
     const [userData, setUserData] = useState<UserData | null>(null);
 
-  const filteredItems = items.filter(item => item.category === selectedTab);
+  const filteredItems = items.filter(item => item.part === selectedTab);
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -364,7 +365,7 @@ const fetchOwnedItems = async () => {
                     console.log(`Pressed ${item.name}`);
                     setAvatarPreview((prev) => ({
                       ...prev,
-                      [item.category]: item.avatar_image,
+                      [item.part]: item.avatar_image,
                     }));
                   }
                 }}

@@ -53,6 +53,14 @@ class Avatar(models.Model):
     right_arm = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946032/avatar-arm-right_o9hhzy.png")
     left_leg = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946098/avatar-foot-left_y1zp71.png")
     right_leg = models.URLField(default="https://res.cloudinary.com/dlz7oiktg/image/upload/v1746946088/avatar-foot-right_mtigq8.png")
+    
+    hat = models.URLField(null=True)
+    eyes = models.URLField(null=True)
+    face_accessories = models.URLField(null=True)
+    facial_expression = models.URLField(null=True)
+    upperwear = models.URLField(null=True)
+    lowerwear = models.URLField(null=True)
+    shoes = models.URLField(null=True)
 
     def __str__(self):
         return f"{self.user.username}'s Avatar"
