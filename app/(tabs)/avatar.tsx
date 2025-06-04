@@ -15,6 +15,7 @@ import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { default as AvatarDisplay } from "../assets/avatar/avatarComponent";
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get('window');
 
@@ -44,6 +45,7 @@ interface Item {
 
 const AvatarScreen = () => {
   const navigation = useNavigation();
+  const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<SelectorTabs>('Hat');
   const [currentPage, setCurrentPage] = useState(0);
   const [activeItemId, setActiveItemId] = useState<number | null>(null);
@@ -267,7 +269,7 @@ const AvatarScreen = () => {
 
                     const result = await response.json();
                     console.log('Item equipped:', result);
-
+                    router.replace("/(tabs)/avatar"); // ✅ exact path to avatar.tsx
                     setShowSaveButton(false);
                     setPreviewedItem(null);
                   } catch (error) {
