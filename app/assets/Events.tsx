@@ -13,8 +13,8 @@ import {
 import { normalize } from '../../assets/normalize';
 import {
   AvatarIcon,
-  MapsIcon,
-  HeartIcon,
+  EventsIcon,
+  AnnouncementsIcon,
 } from '../../assets/images/homeIcons';
 
 type Tab = 'events' | 'announcements';
@@ -122,7 +122,7 @@ const EventsAnnouncementsOverlay = () => {
             style={styles.tabOption}
             onPress={() => setActiveTab('events')}
           >
-            <Image source={MapsIcon} style={styles.tabIcon} />
+            <Image source={EventsIcon} style={styles.tabIcon} />
             <Text
               style={[
                 styles.tabLabel,
@@ -136,7 +136,7 @@ const EventsAnnouncementsOverlay = () => {
             style={styles.tabOption}
             onPress={() => setActiveTab('announcements')}
           >
-            <Image source={HeartIcon} style={styles.tabIcon} />
+            <Image source={AnnouncementsIcon} style={styles.tabIcon} />
             <Text
               style={[
                 styles.tabLabel,

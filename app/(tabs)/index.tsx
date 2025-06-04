@@ -8,7 +8,7 @@ import CurrencyDisplay from "../assets/CurrencyContainer";
 import OverlayWindow from "../assets/Overlay";
 import EventsContent from "../assets/Events"  
 import AdContent from "../contents/AdContent"; 
-import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon  } from "../../assets/images/homeIcons"
+import { AvatarIcon, EditRoomIcon, FriendlistIcon, HeartIcon, IkicoinIcon, MapsIcon, ShopIcon, TaskIcon, AnnouncementsIcon  } from "../../assets/images/homeIcons"
 import { DailyTaskIcon, EditTaskIcon, PartnerTaskIcon } from "../../assets/images/TaskIcons"
 import { SettingsIcon, PartnerProfileIcon, ProfileIcon } from "../../assets/images/ProfileIcons"
 import DailyTask from "../contents/TaskContent/DailyTask";
@@ -270,7 +270,7 @@ export default function Home() {
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => toggleOverlay("overlayevent")}
-                icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+                icon={<Image source={AnnouncementsIcon} style={{ width: normalize(12), height:normalize(10)}} />} 
                 size={normalize(20)}
               />
             </View>
@@ -298,14 +298,14 @@ export default function Home() {
                 size={normalize(20)}
               />
             </View>
-
+            {/*
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={handleShowReward} // Trigger overlay toggle
                 icon={<Ionicons name="cart-outline" size={normalize(10)} color="black" />}
                 size={normalize(20)}
               />
-            </View>
+            </View>*/}
           </View>
 
           {/* Main Action Buttons */}
@@ -313,7 +313,7 @@ export default function Home() {
             <View style={styles.buttonRow}>
               <FeatureButton
                 onPress={() => router.push("/tasks")}
-                icon={<Image source={EditRoomIcon} style={{ width: normalize(15), height:normalize(14)}} />} 
+                icon={<Image source={EditRoomIcon} style={{ width: normalize(15), height:normalize(14)}} />}
                 size={normalize(30)}
               />
             </View>
