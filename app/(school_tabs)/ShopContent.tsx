@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -56,10 +55,18 @@ const selectors = [
   'Shoes',
 ];
 
+const roomSelectors = [
+  'Wallpaper',
+  'Flooring',
+  'Wall Item',
+  'Floor Item',
+];
 
+type RoomSelectorTabs = 'Wallpaper' | 'Flooring' | 'Wall Item' | 'Floor Item';
 
 type SelectorTabs = 'Hat' |'Eyes' |'Face Accessories' | 'Facial Expression' | 'Upperwear' | 'Lowerwear' | 'Shoes';
-const ITEMS_PER_PAGE = 6;
+const ROOM_ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 6; // keep for avatar
 
 const selectorIcons: { [key in SelectorTabs]: any } = {
   Hat: HatsIcon,
@@ -102,6 +109,17 @@ const ShopScreen = () => {
 
   const [selectedShop, setSelectedShop] = useState<'avatar' | 'room'>('avatar');
   const shopIndicator = useRef(new Animated.Value(0)).current;
+
+  const [selectedRoomTab, setSelectedRoomTab] = useState<RoomSelectorTabs>('Wallpaper');
+  const [roomCurrentPage, setRoomCurrentPage] = useState(1);
+  const [roomActiveItemId, setRoomActiveItemId] = useState<number | null>(null);
+  const [roomItems, setRoomItems] = useState<Item[]>([]); // You may want a separate fetch for room items
+
+  const filteredRoomItems = roomItems.filter(item => item.part === selectedRoomTab);
+  const roomTotalPages = Math.ceil(filteredRoomItems.length / ROOM_ITEMS_PER_PAGE);
+  const roomStartIndex = (roomCurrentPage - 1) * ROOM_ITEMS_PER_PAGE;
+  const roomEndIndex = roomStartIndex + ROOM_ITEMS_PER_PAGE;
+  const roomItemsToDisplay = filteredRoomItems.slice(roomStartIndex, roomEndIndex);
 
   useEffect(() => {
     Animated.timing(shopIndicator, {
@@ -249,6 +267,26 @@ const fetchOwnedItems = async () => {
     fetchItems();
   }, [user]);
 
+  // Remove the temporary mock items useEffect:
+  useEffect(() => {
+    if (selectedShop === 'room') {
+      // When ready, fetch real room items here
+      fetchRoomItems();
+    }
+  }, [selectedShop]);
+
+  // Add this function to fetch real room items from your backend:
+  const fetchRoomItems = async () => {
+    try {
+      // Example endpoint, adjust as needed
+      const response = await fetch('http://10.0.2.2:8000/api/room-items/');
+      if (!response.ok) throw new Error('Failed to fetch room items');
+      const data = await response.json();
+      setRoomItems(data);
+    } catch (error) {
+      console.error('Error fetching room items:', error);
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -374,7 +412,7 @@ const fetchOwnedItems = async () => {
                 {item ? (
                   <>
                     <Text style={styles.itemText}>{item.name}</Text>
-                    <Image source={{ uri: item.store_image }} style={styles.itemImage} />
+                    <Image source={item.store_image } style={styles.itemImage} />
                     <TouchableOpacity
                       style={[
                         styles.buyButton,
@@ -461,9 +499,132 @@ const fetchOwnedItems = async () => {
       </View>
           </>
         ) : (
-          // Placeholder for Room Shop items (you can populate this later)
-          <View style={styles.roomShopPlaceholder}>
-            <Text style={styles.placeholderText}>Room Shop Coming Soon</Text>
+          <View style={styles.container}>
+            {/* Room Shop Selector Tabs */}
+            <View style={styles.outerBorder}>
+              <View style={styles.secondBorder}>
+                <View style={styles.thirdBorder}>
+                  <ScrollView
+                    style={styles.selectorPane}
+                    contentContainerStyle={[
+                      styles.selectorContent,
+                      { justifyContent: "space-between" },
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {roomSelectors.map((tab) => (
+                      <TouchableOpacity
+                        key={tab}
+                        style={[
+                          styles.selectorButton,
+                          selectedRoomTab === tab && styles.selectorButtonActive,
+                        ]}
+                        onPress={() => {
+                          setSelectedRoomTab(tab as RoomSelectorTabs);
+                          setRoomCurrentPage(1);
+                        }}
+                      >
+                        <Text style={{ fontWeight: selectedRoomTab === tab ? 'bold' : 'normal' }}>{tab}</Text>
+                      </TouchableOpacity>
+                    ))}
+                    <View style={styles.imaginaryCard} />
+                  </ScrollView>
+                </View>
+              </View>
+            </View>
+
+            {/* Room Item List */}
+            <View style={styles.leftPane}>
+              <Text style={styles.title}>{selectedRoomTab}</Text>
+              <View style={styles.gridContainer}>
+                {[...roomItemsToDisplay, ...Array(ROOM_ITEMS_PER_PAGE - roomItemsToDisplay.length).fill(null)].map((item, index) =>
+                  item ? (
+                    <TouchableOpacity
+                      key={item.item_id}
+                      style={[
+                        styles.itemCard,
+                        item.item_id === roomActiveItemId && styles.itemCardActive,
+                      ]}
+                      onPress={() => {
+                        setRoomActiveItemId(item.item_id);
+                        // Optionally preview or select room item
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.itemText}>{item.item_name}</Text>
+                      <Image
+                        source={typeof item.store_image === 'string' ? { uri: item.store_image } : item.store_image}
+                        style={styles.itemImage}
+                      />
+                      <TouchableOpacity
+                        style={[
+                          styles.buyButton,
+                          ownedItemIds.includes(item.item_id) && { backgroundColor: '#ccc' }
+                        ]}
+                        onPress={() => !ownedItemIds.includes(item.item_id) && handleBuyItem(item)}
+                        disabled={ownedItemIds.includes(item.item_id)}
+                        activeOpacity={ownedItemIds.includes(item.item_id) ? 1 : 0.7}
+                      >
+                        <View style={styles.priceContainer}>
+                          <Text style={[
+                            styles.buyButtonText,
+                            ownedItemIds.includes(item.item_id) && { color: '#888' }
+                          ]}>
+                            {ownedItemIds.includes(item.item_id) ? "Owned" : item.price}
+                          </Text>
+                          {!ownedItemIds.includes(item.item_id) && (
+                            <Image source={IkicoinIcon} style={styles.coinIcon} />
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    </TouchableOpacity>
+                  ) : (
+                    // "Coming Soon" placeholder for empty slots
+                    <View
+                      key={`placeholder-${index}`}
+                      style={[styles.itemCard, { opacity: 0.5, justifyContent: 'center', alignItems: 'center' }]}
+                    >
+                      <View style={[styles.itemImage, { justifyContent: 'center', alignItems: 'center' }]}>
+                        <Ionicons name="lock-closed" size={normalize(10)} color="#bbb" />
+                      </View>
+                      <Text style={styles.itemText}>Coming Soon</Text>
+                      <View style={[styles.buyButton, { backgroundColor: '#ddd', borderColor: '#aaa' }]}>
+                        <Text style={[styles.buyButtonText, { color: '#999' }]}>TBD</Text>
+                      </View>
+                    </View>
+                  )
+                )}
+              </View>
+
+              {/* Pagination */}
+              <View style={styles.paginationWrapper}>
+                <View style={styles.paginationContainer}>
+                  <TouchableOpacity
+                    onPress={() => setRoomCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={roomCurrentPage === 1}
+                    style={[
+                      styles.paginationButton,
+                      roomCurrentPage === 1 && styles.disabledButton,
+                    ]}
+                  >
+                    <Ionicons name="chevron-back" size={normalize(10)} color="#fff" />
+                  </TouchableOpacity>
+                  <Text style={styles.pageIndicator}>
+                    {roomCurrentPage} / {roomTotalPages}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setRoomCurrentPage((prev) => Math.min(prev + 1, roomTotalPages))}
+                    disabled={roomCurrentPage === roomTotalPages}
+                    style={[
+                      styles.paginationButton,
+                      roomCurrentPage === roomTotalPages && styles.disabledButton,
+                    ]}
+                  >
+                    <Ionicons name="chevron-forward" size={normalize(10)} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
           </View>
         )}
 
