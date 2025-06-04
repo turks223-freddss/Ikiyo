@@ -13,6 +13,7 @@ import {
     Alert
 } from 'react-native';
 import RequestCard from '../../assets/Profile/RequestCard';
+import ToastModal from '../../assets/Modals/ToastModal/ToastModal'; // Adjust path if needed
 
 interface PartnerInviteProps {
     userID: number;
@@ -53,6 +54,8 @@ const PartnerInvite: React.FC<PartnerInviteProps> = ({ userID }) => {
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
 
+    const [toastVisible, setToastVisible] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
     
     const fetchRequests = async () => {
         try {
@@ -75,7 +78,7 @@ const PartnerInvite: React.FC<PartnerInviteProps> = ({ userID }) => {
             setLoading(false);
         }
     };
-    const handleAction = async (action: "accept" | "decline"|"send_request", target_id: number) => {
+    const handleAction = async (action: "accept" | "decline" | "send_request", target_id: number) => {
         try {
             const response = await fetch("http://192.168.1.5:8081/api/buddy/", {
                 method: "POST",
@@ -89,12 +92,20 @@ const PartnerInvite: React.FC<PartnerInviteProps> = ({ userID }) => {
                 }),
             });
             const data = await response.json();
-            Alert.alert(data.message || `${action}ed successfully`);
-            
+
+            if (action === "send_request") {
+                setToastMessage(data.message ? data.message : "You already sent this user a Buddy Request.");
+            } else {
+                setToastMessage(data.message || `Request ${action}d  successfully`);
+            }
+            setToastVisible(true);
+
             fetchRequests(); // Refresh list
 
         } catch (error) {
             console.error(`Failed to ${action} request:`, error);
+            setToastMessage(`Failed to ${action} request.`);
+            setToastVisible(true);
         }
     };
 
@@ -145,7 +156,16 @@ const PartnerInvite: React.FC<PartnerInviteProps> = ({ userID }) => {
      
 
     return (
+        
         <View style={dynamicStyles.container}>
+            <ToastModal
+                visible={toastVisible}
+                title="Notice"
+                titleColor="#388e3c"
+                message={toastMessage}
+                onConfirm={() => setToastVisible(false)}
+                confirmText="OK"
+            />
             <Text style={dynamicStyles.title}>Partner Requests</Text>
 
             <View style={dynamicStyles.searchRow}>
