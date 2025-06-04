@@ -208,7 +208,9 @@ export default function ChatScreen({ onBack, userID, friendID }: Props) {
                 item.sender === userID ? styles.myMessage : styles.friendMessage,
               ]}
             >
-              <Text style={styles.myMessageText}>{item.content}</Text>
+              <Text style={item.sender === userID ? styles.myMessageText : styles.friendMessageText}>
+                {item.content}
+              </Text>
             </View>
           )}
           onContentSizeChange={() =>
@@ -253,33 +255,41 @@ export default function ChatScreen({ onBack, userID, friendID }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
-    paddingBottom: normalize(4),
-    borderRadius: normalize(6),
+    backgroundColor: "#fff7db", // Creamy background
+    borderRadius: normalize(10),
     width: "100%",
   },
   header: {
-    height: normalize(20), // increased height for profile
-    backgroundColor: "#1e1e1e",
+    height: normalize(20),
+    backgroundColor: "#a78e63", // Warm brown
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: normalize(6),
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: "#8a6e43",
+    borderTopLeftRadius: normalize(4),
+    borderTopRightRadius: normalize(4),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
   backButton: {
-    width: normalize(10),            // 10x10 circle
+    width: normalize(10),
     height: normalize(10),
     borderRadius: normalize(5),
-    backgroundColor: "#0a84ff",      // blue circle
+    backgroundColor: "#d2a679", // Lighter brown
     justifyContent: "center",
     marginLeft: normalize(3),
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#8a6e43",
   },
   backIcon: {
-    color: "#fff",                   // white arrow
-    fontSize: normalize(8),          // smaller font for 10x10 size
+    color: "#6b6463",
+    fontSize: normalize(8),
     fontWeight: "bold",
     lineHeight: normalize(8),
     textAlign: "center",
@@ -290,22 +300,16 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: normalize(8),
   },
-  profilePic: {
-    width: normalize(15),
-    height: normalize(15),
-    borderRadius: normalize(15),
-    marginRight: normalize(4),
-  },
   nameStatus: {
     justifyContent: "center",
   },
   partnerName: {
-    color: "#eee",
+    color: "#3a2e1f",
     fontSize: normalize(6),
     fontWeight: "bold",
   },
   partnerTag: {
-    color: "#999",
+    color: "#a78e63",
     fontWeight: "normal",
     fontSize: normalize(4),
   },
@@ -321,11 +325,11 @@ const styles = StyleSheet.create({
     marginRight: normalize(2),
   },
   statusText: {
-    color: "#999",
+    color: "#8a6e43",
     fontSize: normalize(4),
   },
   messageList: {
-    flexGrow:1,
+    flexGrow: 1,
     paddingBottom: normalize(8),
     marginLeft: normalize(4),
     marginRight: normalize(4),
@@ -336,32 +340,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: normalize(10),
     borderRadius: normalize(10),
     marginVertical: normalize(3),
+    borderWidth: 1,
   },
   myMessage: {
-    backgroundColor: "#0a84ff",
+    backgroundColor: "#a78e63", // Warm brown
     alignSelf: "flex-end",
     borderTopRightRadius: 0,
+    borderColor: "#8a6e43",
   },
   friendMessage: {
-    backgroundColor: "#2c2c2e",
+    backgroundColor: "#f5e6c8", // Light cream
     alignSelf: "flex-start",
     borderTopLeftRadius: 0,
+    borderColor: "#d2a679",
   },
   myMessageText: {
     color: "#fff",
     fontSize: normalize(4),
   },
   friendMessageText: {
-    color: "#ccc",
-    fontSize: normalize(5),
+    color: "#a78e63",
+    fontSize: normalize(4),
   },
   inputContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    marginTop: normalize(2),
+    alignItems: "center",      // Vertically center children
+    justifyContent: "center",  // Horizontally center children
     borderTopWidth: 1,
-    borderTopColor: "#333",
+    borderTopColor: "#a78e63",
     paddingTop: normalize(6),
+    backgroundColor: "#f5e6c8",
+    borderBottomLeftRadius: normalize(10),
+    borderBottomRightRadius: normalize(10),
   },
   imageButton: {
     width: normalize(15),
@@ -371,31 +381,41 @@ const styles = StyleSheet.create({
     marginRight: normalize(6),
     marginLeft: normalize(4),
     borderRadius: normalize(6),
-    backgroundColor: "#333",
+    backgroundColor: "#d2a679",
+    borderWidth: 1,
+    marginBottom: "2%",
+    borderColor: "#a78e63",
   },
   imageIcon: {
     width: normalize(10),
     height: normalize(10),
-    tintColor: "white",
+    tintColor: "#8a6e43",
   },
   input: {
     flex: 1,
     minHeight: normalize(5),
     maxHeight: normalize(20),
     fontSize: normalize(5),
-    color: "#fff",
-    backgroundColor: "#222",
+    color: "#3a2e1f",
+    backgroundColor: "#fff7db",
     borderRadius: normalize(10),
     paddingHorizontal: normalize(12),
     paddingVertical: normalize(4),
+    borderWidth: 1,
+    borderColor: "#d2a679",
+    marginRight: normalize(4),
+    marginBottom: "2%",
   },
   sendButton: {
+    marginBottom: "2%",
     marginLeft: normalize(5),
-    backgroundColor: "#0a84ff",
+    backgroundColor: "#a78e63",
     paddingVertical: normalize(6),
     paddingHorizontal: normalize(10),
     borderRadius: normalize(10),
     marginRight: normalize(4),
+    borderWidth: 1,
+    borderColor: "#8a6e43",
   },
   sendButtonText: {
     color: "#fff",

@@ -5,7 +5,7 @@ import { FriendListIcon } from "../../assets/images/friendlistIcons";
 import { StyleSheet } from "react-native";
 import { normalize } from '../../assets/normalize';
 import { router } from "expo-router"; // Add this import
-
+import { HomeMap, ComingSoonMap, HomeIcon} from "@/assets/images/homeIcons";
 
 interface MapsContentProps {
   location: string; 
@@ -15,20 +15,20 @@ const maps = [
   {
     key: "home",
     title: "Home",
-    icon: FriendListIcon,
-    image: FriendListIcon,
+    icon: HomeIcon,
+    image: HomeMap,
   },
   {
     key: "school",
     title: "School",
-    icon: FriendListIcon,
-    image: FriendListIcon,
+    icon: HomeIcon,
+    image: ComingSoonMap,
   },
   {
     key: "comingSoon",
     title: "Coming Soon",
     icon: FriendListIcon,
-    image: FriendListIcon,
+    image: ComingSoonMap,
   },
 ];
 

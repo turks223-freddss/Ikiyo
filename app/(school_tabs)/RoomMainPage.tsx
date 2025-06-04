@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { router } from "expo-router";
 import Room from '../assets/RoomComponents/Room';
 import FeatureButton from '../assets/FeatureButton'
 import { Ionicons } from "@expo/vector-icons";
 import { normalize } from '../../assets/normalize';
 import eventBus from '../assets/utils/eventBus';
+import { EditRoomIcon, InventoryIcon } from '@/assets/images/homeIcons';
 
 const RoomMainPage = () => {
 
@@ -38,7 +39,7 @@ const RoomMainPage = () => {
           <FeatureButton
               style={styles.button}
               onPress={() => router.push("/HomePage/school")}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+              icon={<Ionicons name="arrow-back" size={normalize(10)} color="black" />}
               size={normalize(20)}
             />
           )}
@@ -56,7 +57,7 @@ const RoomMainPage = () => {
             <FeatureButton
               style={styles.button}
               onPress={() => eventBus.emit("openInventory")}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+              icon={<Image source={InventoryIcon} style={{ width: normalize(15), height:normalize(14)}} />}
               size={normalize(20)}
             />
           )}
@@ -65,7 +66,7 @@ const RoomMainPage = () => {
             <FeatureButton
               style={styles.button}
               onPress={() => eventBus.emit("deleteItem")}
-              icon={<Ionicons name="megaphone-outline" size={normalize(10)} color="black" />}
+              icon={<Ionicons name="close" size={normalize(10)} color="black" />}
               size={normalize(20)}
             />
           )}
