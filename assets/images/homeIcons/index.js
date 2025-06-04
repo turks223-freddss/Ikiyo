@@ -10,3 +10,5 @@ export {default as InventoryIcon} from './inventoryIcon.png';
 export {default as HomeMap} from './homeDisplay.png';
 export {default as ComingSoonMap} from './comingSoonDisplay1.png';
 export {default as HomeIcon} from './homeIcon.png';
+export {default as AnnouncementsIcon} from './announcementsIcon.png';
+export {default as EventsIcon} from './eventsIcon.png';
