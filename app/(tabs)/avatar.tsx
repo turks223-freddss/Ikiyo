@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { normalize } from "../../assets/normalize";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { ShopBackground, FaceExIcon, FaceAccIcon, HatsIcon, ShoesIcon, LowerIcon, EyesIcon, UpperIcon } from "../../assets/images/shopIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { default as AvatarDisplay } from "../assets/avatar/avatarComponent";
@@ -222,9 +222,76 @@ const AvatarScreen = () => {
 
         {/* Avatar Display */}
         <View style={styles.avatarcontainer}>
-          <View style={styles.youravatartitle}>
-            <Text style={[styles.title, { color: "#3a2e1f" }]}>Your Avatar</Text>
+          <View style={styles.avatarHeaderRow}>
+            {showSaveButton && previewedItem && (
+              <TouchableOpacity
+                style={styles.avatarHeaderButton}
+                onPress={() => {
+                  setPreviewedItem(null);
+                  setShowSaveButton(false);
+                  setActiveItemId(null);
+                }}
+              >
+                <MaterialIcons
+                  name="close"
+                  size={normalize(10)}
+                  color="#b71c1c"
+                />
+              </TouchableOpacity>
+            )}
+              <Text style={[styles.title, { color: "#3a2e1f" }]}>Your Avatar</Text>
+              {showSaveButton && previewedItem && (
+                <TouchableOpacity
+                style={styles.avatarHeaderButton}
+                disabled={!(showSaveButton && previewedItem)}
+                onPress={async () => {
+                  if (!previewedItem) return;
+                  try {
+                    const requestBody = {
+                      userID,
+                      item_type: previewedItem.part.toLowerCase(),
+                      url: previewedItem.avatar_image,
+                    };
+                    console.log('Sending body to API:', requestBody);
+                    const response = await fetch('http://192.168.1.5:8081/api/retrieve-avatar/', {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(requestBody),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to equip item');
+                    }
+
+                    const result = await response.json();
+                    console.log('Item equipped:', result);
+
+                    setShowSaveButton(false);
+                    setPreviewedItem(null);
+                  } catch (error) {
+                    console.error('Equip Error:', error);
+                  }
+                }}
+              >
+                <MaterialIcons
+                  name="check"
+                  size={normalize(10)}
+                  color={showSaveButton && previewedItem ? "#388e3c" : "#bbb"}
+                />
+              </TouchableOpacity>
+            )}
           </View>
+          <View style={{
+            width: normalize(90),
+            height: normalize(90),
+            maxWidth: '100%',
+            maxHeight: '100%',
+            overflow: 'hidden',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
           <AvatarDisplay
             userID={userID!}
             overrideHat={previewedItem?.part === "Hat" ? previewedItem.avatar_image : undefined}
@@ -243,6 +310,7 @@ const AvatarScreen = () => {
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
           )}
+          </View>
         </View>
       </View>
     </View>
@@ -373,9 +441,6 @@ const styles = StyleSheet.create({
   grid: {
     justifyContent: 'center',
   },
-  youravatartitle:  {
-    marginTop: "10%"
-  },
   itemBox: {
     backgroundColor: '#3a2e1f',
     borderRadius: normalize(4),
@@ -419,5 +484,23 @@ const styles = StyleSheet.create({
     color: '#3a2e1f',
     fontWeight: 'bold',
     fontSize: normalize(5),
+  },
+  avatarHeaderButton: {
+    borderRadius: normalize(6),
+    backgroundColor: '#fff7db',
+    borderWidth: 1,
+    borderColor: '#8a6e43',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: normalize(12),
+    height: normalize(12),
+  },
+  avatarHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: normalize(4),
+    width: '100%',
+    gap: normalize(5),
   },
 });
