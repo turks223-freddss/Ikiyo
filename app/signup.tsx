@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet, TextInput, Alert,ImageBackground,TouchableOpacity } from "react-native";
+import { View, Text, Button, StyleSheet, TextInput, Alert,ImageBackground,TouchableOpacity, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { SignupSign, LoginWallpaper } from "../assets/images/authentication";
@@ -49,94 +49,102 @@ export default function SignupScreen() {
 
   };
 
-   return (
+  return (
     <View style={styles.container}>
-       <ImageBackground
-          source={LoginWallpaper}
-          style = {styles.backgroundImage}
-          resizeMode="contain"
-        >
       <ImageBackground
-        source={SignupSign}
-        style={styles.signboard}
-        resizeMode="contain"
+        source={LoginWallpaper}
+        style = {styles.backgroundImage}
       >
-        <View style={styles.arrange}>
-        <Text style={styles.title}>Create a New Account</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#5a3e2b"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#5a3e2b"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#5a3e2b"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          placeholderTextColor="#5a3e2b"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-        />
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSignup}
-            disabled={loading}
+        <View style={styles.centerContent}>
+          <ImageBackground
+            source={SignupSign}
+            style={styles.signboard}
+            resizeMode="contain"
           >
-            <Text style={styles.buttonText}>
-              {loading ? "Signing Up..." : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
+            <View style={styles.arrange}>
+            <Text style={styles.title}>Create a New Account</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              placeholderTextColor="#5a3e2b"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#5a3e2b"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#5a3e2b"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm Password"
+              placeholderTextColor="#5a3e2b"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+            />
 
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
-            onPress={() => router.push("/login")}
-          >
-            <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-              Log In
-            </Text>
-          </TouchableOpacity>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSignup}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? "Signing Up..." : "Sign Up"}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, styles.secondaryButton]}
+                onPress={() => router.push("/login")}
+              >
+                <Text style={[styles.buttonText, styles.secondaryButtonText]}>
+                  Log In
+                </Text>
+              </TouchableOpacity>
+            </View>
+            </View>
+          </ImageBackground>
         </View>
-        </View>
-      </ImageBackground>
       </ImageBackground>
     </View>
   );
 }
-
+const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-   backgroundImage: {
-    width: '100%',
+  backgroundImage: {
+    flex:1,
+    resizeMode: 'cover',
+    width: width,
+    zIndex: -1,
+    height: height,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "8%",
   },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#e7d5b7", // parchment tone
-    paddingHorizontal: 20,
   },
   signboard: {
-    marginTop: normalize(20),
     width: normalize(250),
     height: normalize(400),
     justifyContent: "center",
