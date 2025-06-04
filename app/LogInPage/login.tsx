@@ -6,6 +6,7 @@ import { Sign, LoginWallpaper } from "../../assets/images/authentication";
 import { normalize } from "../../assets/normalize";
 import styles from "./Login.styles";
 import ToastModal from "../assets/Modals/ToastModal/ToastModal"; // Adjust path if needed
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -29,7 +31,6 @@ export default function LoginScreen() {
 
       if (response.ok) {
         await AsyncStorage.setItem("user", JSON.stringify(data.user));
-        Alert.alert("Success", "Login successful");
         router.replace("/");
       } else {
         setToastMessage(data.error || "Invalid credentials");
@@ -58,14 +59,22 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#5a3e2b"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style= {styles.inputcontainer}>
+                <TextInput
+                  style={styles.passwordinput}
+                  placeholder="Password"
+                  placeholderTextColor="#5a3e2b"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity 
+                style={styles.sauron}
+                onPress={() => setShowPassword((prev) => !prev)}
+                >
+                  <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#5a3e2b" />
+                </TouchableOpacity>
+              </View>
               <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
                   <Text style={styles.buttonText}>Log In</Text>

@@ -42,7 +42,7 @@ const Settings = () => {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("user"); // Clear user data
-    router.replace("/login"); // Redirect to login screen
+    router.replace("/LogInPage/login"); // Redirect to login screen
   };
 
   const styles = getStyles(normalize, isSmallScreen);
