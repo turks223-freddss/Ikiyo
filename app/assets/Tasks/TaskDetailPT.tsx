@@ -328,15 +328,17 @@ const TaskDetailPT: React.FC<TaskDetailProps> = ({
                       <Text style={styles.buttonText}>Delete</Text>
                     </TouchableOpacity>
                   )}
-                  {selectedTask.submission && selectedTask.submission.trim() !== '' && (
-                      <TouchableOpacity
-                        style={[styles.button, { backgroundColor: '#3F51B5' }]}
-                        onPress={() => setViewSubmission(!viewSubmission)}
-                      >
-                      <Text style={styles.buttonText}>
-                        {viewSubmission ? 'Hide Submission' : 'View Submission'}
-                      </Text>
-                      </TouchableOpacity>
+                  {selectedTask.submission && selectedTask.submission.trim() !== '' &&(
+                      
+                    <TouchableOpacity
+                      style={[styles.button, { backgroundColor: '#3F51B5' }]}
+                      onPress={() => setViewSubmission(!viewSubmission)}
+                    >
+                    <Text style={styles.buttonText}>
+                      {viewSubmission ? 'Hide Submission' : 'View Submission'}
+                    </Text>
+                    </TouchableOpacity>
+                      
                   )}
                     
               </View>
