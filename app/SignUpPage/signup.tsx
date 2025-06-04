@@ -33,7 +33,7 @@ export default function SignupScreen() {
 
       if (response.ok) {
         Alert.alert("Success", "Account created successfully!", [
-          { text: "OK", onPress: () => router.push("/login") },
+          { text: "OK", onPress: () => router.push("/LogInPage/login") },
         ]);
       } else {
         Alert.alert("Signup Failed", data.error || "Something went wrong");
@@ -110,7 +110,7 @@ export default function SignupScreen() {
 
               <TouchableOpacity
                 style={[styles.button, styles.secondaryButton]}
-                onPress={() => router.push("/login")}
+                onPress={() => router.push("/LogInPage/login")}
               >
                 <Text style={[styles.buttonText, styles.secondaryButtonText]}>
                   Log In
