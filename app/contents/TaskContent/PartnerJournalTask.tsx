@@ -23,14 +23,10 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TaskDetailPT from '@/app/assets/Tasks/TaskDetailPT';
+import { normalize } from '../../../assets/normalize';
         
 const { width, height } = Dimensions.get('window');
 
-const normalize = (size: number) => {
-  const scale = Math.min(width / 375, 1);
-  const newSize = size * scale;
-  return Math.round(PixelRatio.roundToNearestPixel(newSize));
-};
 
 type TaskData = {
     id: number;
@@ -107,6 +103,12 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                     }),
                 });
 
+                if (response.status === 404) {
+                    // No tasks found, but not an error
+                    setTaskList([]);
+                    return;
+                }
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -114,15 +116,16 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                 const data = await response.json();
                 if (data && data.tasks_assigned_by_user) {
                     setTaskList(data.tasks_assigned_by_user);
-
                     if (selectedTask) {
                       const updated = data.tasks_assigned_by_user.find((t:TaskData) => t.id === selectedTask.id);
                       if (updated) {
                         setSelectedTask(updated); // this is a new object ref
                       }
                     }
-                    
-                }
+                
+                } else {
+                    setTaskList([]); // No tasks in response
+              }
             } catch (error) {
                 console.error("Error fetching tasks:", error);
                 Alert.alert("Error", "Failed to load tasks. Please try again later.");
@@ -136,52 +139,66 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
     <View key={componentReloadKey} style={styles.container}>
   
       <Text style={styles.title}>Partner Journal</Text>
-       <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
-         <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
-            <FlatList
-              data={taskList}
-              keyExtractor={(item) => item.id.toString()}
-              contentContainerStyle={styles.taskList}
-              renderItem={({ item }) => (
-                <TaskCard
-                  questImage={require('../../../assets/images/homeIcons/task.png')}
-                  titleName={item.task_title}
-                  rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
-                  status={item.status}
-                  userID={user!.userID}
-                  task_id={item.id}
-                  reward={item.reward}
-                  isSelf={0}
+        <View style={[styles.content, isSmallScreen && styles.contentColumn]}>
+          <View style={[styles.leftColumn, isSmallScreen && styles.fullWidth]}>
+            <View style={{ flex: 1, justifyContent: 'space-between' }}>
+              <View style={{ flex: 1 }}>
+                {taskList.length === 0 ? (
+                  <View style={{ padding: 20, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+                    <Text style={{ color: '#888', fontSize: normalize(8), textAlign: 'center' }}>
+                      You have yet to assign tasks to your buddy!
+                    </Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    data={taskList}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.taskList}
+                    renderItem={({ item }) => (
+                      <TaskCard
+                        questImage={require('../../../assets/images/homeIcons/task.png')}
+                        titleName={item.task_title}
+                        rewardImage={require('../../../assets/images/homeIcons/ikicoin.png')}
+                        status={item.status}
+                        userID={user!.userID}
+                        task_id={item.id}
+                        reward={item.reward}
+                        isSelf={0}
+                        onPress={() => {
+                          setSelectedTask(item);
+                          setIsEditing(false);
+                          setIsAddingTask(false);
+                        }}
+                      />
+                    )}
+                  />
+                )}
+              </View>
+              <View style={styles.addTaskWrapper}>
+                <TouchableOpacity
+                  style={styles.addTaskButton}
                   onPress={() => {
                     setSelectedTask({...item});
                     setIsEditing(false);
                     setIsAddingTask(false);
-                  }}
-                />
-              )}
-            />
-            <View style={styles.addTaskWrapper}>
-              <TouchableOpacity
-                style={styles.addTaskButton}
-                onPress={() => {
-                setSelectedTask(null);
-                setIsAddingTask(true);
-              }}
-            >
-              <Ionicons name="add" size={normalize(18)} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
-          {isAddingTask ? (
-            <AddTask
-              onClose={() => setIsAddingTask(false)}
-              onSubmit={async (submittedTask) => {
-                if (!user || !user.userID) {
-                  Alert.alert("Error", "User not found.");
-                  return;
-                }
+                  }}
+                >
+                  <Ionicons name="add" size={normalize(10)} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          <View style={[styles.rightColumn, isSmallScreen && styles.fullWidth]}>
+            {isAddingTask ? (
+              <AddTask
+                onClose={() => setIsAddingTask(false)}
+                onSubmit={async (submittedTask) => {
+                  if (!user || !user.userID) {
+                    Alert.alert("Error", "User not found.");
+                    return;
+                  }
 
                 try {
                   const response = await fetch("http://192.168.1.5:8081/api/task-action/", {
@@ -196,45 +213,45 @@ const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
                     }),
                   });
 
-                  if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                  }
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
-                  const data = await response.json();
-                  if (data.success) {
-                    Alert.alert("Success", "Task added successfully!");
-                    setIsAddingTask(false);
-                    setReloadTrigger((prev) => !prev);
-                  }
-                  setReloadTrigger(prev => !prev);
-                  setIsAddingTask(false)
+                    const data = await response.json();
+                    if (data.success) {
+                      Alert.alert("Success", "Task added successfully!");
+                      setIsAddingTask(false);
+                      setReloadTrigger((prev) => !prev);
+                    }
+                    setReloadTrigger(prev => !prev);
+                    setIsAddingTask(false)
 
-                } catch (error) {
-                  console.error("Error adding task:", error);
-                  Alert.alert("Error", "Failed to add task. Please try again.");
-                }
-              }}
-            />
-          ) : (
-            selectedTask && (
-              <TaskDetailPT
-                key={componentReloadKey}
-                selectedTask={selectedTask}
-                isEditing={isEditing}
-                submissionText={submissionText}
-                userID={user!.userID}
-                setIsEditing={setIsEditing}
-                setSubmissionText={setSubmissionText}
-                triggerReload={() => {
-                  setReloadTrigger(prev => !prev); // refetch
-                  forceRemountTaskDetail();        // force re-render
+                  } catch (error) {
+                    console.error("Error adding task:", error);
+                    Alert.alert("Error", "Failed to add task. Please try again.");
+                  }
                 }}
-                clearSelectedTask={() => setSelectedTask(null)}
               />
-            )
-          )}
+            ) : (
+              selectedTask && (
+                <TaskDetailPT
+                  key={componentReloadKey}
+                  selectedTask={selectedTask}
+                  isEditing={isEditing}
+                  submissionText={submissionText}
+                  userID={user!.userID}
+                  setIsEditing={setIsEditing}
+                  setSubmissionText={setSubmissionText}
+                  triggerReload={() => {
+                    setReloadTrigger(prev => !prev); // refetch
+                    forceRemountTaskDetail();        // force re-render
+                  }}
+                  clearSelectedTask={() => setSelectedTask(null)}
+                />
+              )
+            )}
+          </View>
         </View>
-      </View>
     </View>
   );
 };
@@ -248,7 +265,7 @@ const styles = StyleSheet.create({
     paddingBottom: height * 0.02,
   },
   title: {
-    fontSize: normalize(14),
+    fontSize: normalize(6),
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
@@ -317,8 +334,8 @@ const styles = StyleSheet.create({
     padding: normalize(6),
   },
   addTaskButton: {
-    width: normalize(28),
-    height: normalize(28),
+    width: normalize(12),
+    height: normalize(12),
     borderRadius: normalize(14),
     backgroundColor: '#4CAF50',
     justifyContent: 'center',
