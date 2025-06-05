@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Image, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
 import { HatsIcon } from "../../../assets/images/shopIcons";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,27 +25,30 @@ interface RoomItem {
 const FILTERS = [
   { label: "Wallpapers", value: "Wallpapers" },
   { label: "Flooring", value: "Flooring" },
-  { label: "Floor Items", value: "Floor Items" },
+  { label: "Floor Item", value: "Floor Item" },
   { label: "Wall Items", value: "Wall Items" },
 ];
 
 const Inventory: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedFilter, setSelectedFilter] = useState<string>("Wallpapers");
-
+  const [items, setItems] = useState<RoomItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+   const userID = 2; //for testing 
   // Placeholder items for testing (change types to test filtering)
-  const [items] = useState<RoomItem[]>([
-    { id: 1, item_name: "Classic Wallpaper", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 2, item_name: "Modern Wallpaper", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 3, item_name: "Wood Flooring", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 4, item_name: "Tile Flooring", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 5, item_name: "Sofa", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 6, item_name: "Table", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 7, item_name: "Painting", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 8, item_name: "Clock", type: "Wall Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 9, item_name: "Lamp", type: "Floor Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-    { id: 10, item_name: "Shelf", type: "Wall Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
-  ]);
+  // const [items] = useState<RoomItem[]>([
+  //   { id: 1, item_name: "Classic Wallpaper", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 2, item_name: "Modern Wallpaper", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 3, item_name: "Wood Flooring", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 4, item_name: "Tile Flooring", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 5, item_name: "Sofa", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 6, item_name: "Table", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 7, item_name: "Painting", type: "Wallpapers", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 8, item_name: "Clock", type: "Wall Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 9, item_name: "Lamp", type: "Floor Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  //   { id: 10, item_name: "Shelf", type: "Wall Items", x: 0, y: 0, width: 1, height: 1, state: "new", allowOverlap: false, placed: false, image: HatsIcon },
+  // ]);
 
   // Filter logic
   const filteredItems = items.filter(item => item.type === selectedFilter);
@@ -55,9 +58,39 @@ const Inventory: React.FC = () => {
   const itemsToDisplay = filteredItems.slice(startIndex, endIndex);
 
   // Reset to page 1 when filter changes
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [selectedFilter]);
+
+  useEffect(() => {
+    // Fetch room items from API on mount
+    const fetchRoomItems = async () => {
+      try {
+        const response = await fetch('http://192.168.1.5:8081/api/room/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'get_room_items',
+            userID: userID,  // Replace with dynamic userID as needed
+          }),
+        });
+        const data = await response.json();
+        console.log('API response:', data);
+        if (response.ok && data.room_items) {
+            setItems(data.room_items);
+        } else {
+          console.error('API Error or no room_items:', data);
+          setItems([]);
+        }
+      } catch (error) {
+        console.error('Fetch room items failed:', error);
+        setItems([]);
+      }
+    };
+    fetchRoomItems();
+  }, []);
 
   return (
     <View style={styles.inventory}>
@@ -94,15 +127,15 @@ const Inventory: React.FC = () => {
       </View>
       <View style={styles.view}>
         <View style={styles.gridContainer}>
-          {itemsToDisplay.map((item, index) => (
+          {itemsToDisplay.map((item) => (
             <TouchableOpacity
-              key={item.id + '-' + index}
+              key={item.id}
               style={styles.itemCard}
               onPress={() => eventBus.emit("newItem", item)}
               activeOpacity={0.8}
             >
               <Text style={styles.itemText}>{item.item_name}</Text>
-              <Image source={item.image} style={styles.itemImage} />
+              <Image source={{uri:item.image}} style={styles.itemImage} />
             </TouchableOpacity>
           ))}
         </View>

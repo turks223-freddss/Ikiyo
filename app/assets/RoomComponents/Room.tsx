@@ -10,19 +10,18 @@ interface Item {
   id: number;
   x: number;
   y: number;
-  itemDimensions: {
-    width: number;
-    height: number;
-  };
+  width: number;
+  height: number;
   state?: string;
   allowOverlap?: boolean;
+  image:string
 }
 
 const initialItems: Item[] = [
-  { id: 1, x: screenWidth / 20 * 3, y: screenHeight / 10 * 4, itemDimensions: { width: 1, height: 1 }, state: 'floor' },
-  { id: 2, x: screenWidth / 20 * 4, y: screenHeight / 10 * 5, itemDimensions: { width: 1, height: 1 }, state: 'wall' },
-  { id: 3, x: screenWidth / 20 * 5, y: screenHeight / 10 * 6, itemDimensions: { width: 1, height: 1 } },
-  { id: 4, x: screenWidth / 20 * 6, y: screenHeight / 10 * 7, itemDimensions: { width: 1, height: 1 }, allowOverlap: true },
+  { id: 69, x: screenWidth / 20 * 3, y: screenHeight / 10 * 4,   width: 1, height: 1 , state: 'floor', image: "https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
+  { id: 65, x: screenWidth / 20 * 4, y: screenHeight / 10 * 5,   width: 1, height: 1 , state: 'wall', image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
+  { id: 63, x: screenWidth / 20 * 5, y: screenHeight / 10 * 6,   width: 1, height: 1 ,image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png" },
+  { id: 66, x: screenWidth / 20 * 6, y: screenHeight / 10 * 7,   width: 1, height: 1 , allowOverlap: true ,image:"https://res.cloudinary.com/dlz7oiktg/image/upload/v1749070958/coin-ico_ilmlxc.png"},
 ];
 
 const Grid: React.FC = () => {
@@ -31,6 +30,7 @@ const Grid: React.FC = () => {
   const gridDimensions = { width: screenWidth, height: screenHeight };
 
   const [items, setItems] = useState<Item[]>(initialItems);
+  
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Set<number>>(new Set());
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
@@ -65,8 +65,8 @@ const Grid: React.FC = () => {
       const cellSize = getCellSizeForItem(item);
       const { col: startCol, row: startRow } = positionToGridCell({ x: item.x, y: item.y }, cellSize, item.state);
 
-      for (let dx = 0; dx < item.itemDimensions.width; dx++) {
-        for (let dy = 0; dy < item.itemDimensions.height; dy++) {
+      for (let dx = 0; dx < item.width; dx++) {
+        for (let dy = 0; dy < item.height; dy++) {
           occupied.push({ col: startCol + dx, row: startRow + dy });
         }
       }
@@ -153,10 +153,11 @@ const Grid: React.FC = () => {
         return (
           <Draggable
             key={`${item.id}-${item.x}-${item.y}-${version}`}
-            imageSource={require('../../../assets/images/homeIcons/ikicoin.png')}
+            imageSource={item.image}
             currentPosition={{ x: item.x, y: item.y }}
             cellSize={cellSize}
-            itemDimensions={item.itemDimensions}
+            width={item.width}
+            height={item.height}
             gridSize={gridSize}
             gridDimensions={gridDimensions}
             state={item.state ?? ''}
