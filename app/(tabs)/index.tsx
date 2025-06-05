@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
+import { View, Image, Text, TouchableOpacity, Dimensions, StyleSheet, ImageBackground } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import ProfileCard from "../assets/ProfileCard";
@@ -27,6 +27,8 @@ import RewardPopup from '../assets/Modals/RewardModal/Reward';
 import ToastModal from "../assets/Modals/ToastModal/ToastModal";
 import { FriendRequestIcon } from "@/assets/images/friendlistIcons";
 import MapsContent from "../contents/MapsContent";
+import RoomMainPage from "../(school_tabs)/RoomMainPage";
+import { HomeMap, ComingSoonMap, HomeIcon} from "@/assets/images/homeIcons";
 
 interface UserData {
   userID: number;
@@ -158,12 +160,13 @@ export default function Home() {
     setRefreshKey(prev => prev + 1);
   };
 
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       width: width,
       height: height,
-      backgroundColor: "black",
+      // backgroundColor: "black",
       justifyContent: "flex-start",
       alignItems: "flex-start",
       paddingLeft: normalize(2),
@@ -216,7 +219,24 @@ export default function Home() {
       marginTop: 20,
       color: "blue",
       textDecorationLine: "underline",
+    
     },
+
+    room: {
+      position: 'absolute',
+      height: "100%",
+      width: "100%",
+      bottom: 0,
+      flex: 1,
+      zIndex:1,
+    },
+
+    background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+  },
   });
 
   console.log("Inside render, test =", test);
@@ -227,7 +247,11 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <View key={refreshKey} style={styles.container}>
+      {/* <View style={styles.room} pointerEvents="none">
+        <RoomMainPage/>
+      </View> */}
+      <ImageBackground source={HomeMap} resizeMode="cover" style = {{flex:1, width:width, height:height, zIndex:-1}}>
+        <View key={refreshKey} style={styles.container}>
         {/* Profile Card Container */}
         <View style={{ 
           flexDirection: "row", 
@@ -452,7 +476,9 @@ export default function Home() {
         )}
         
 
-      </View>
+        </View>
+      </ImageBackground>
+      
     </View>
   );
 }
